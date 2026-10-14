@@ -1,11 +1,10 @@
 # ONE DROP — Reggae Pinball
 
-### ▶ **[Play the live demo](https://YOUR-USERNAME.github.io/onedrop/)**
+### ▶ **[Play the live demo](https://Eric-Lautanen.github.io/onedrop/)**
 
-> The demo above is hosted on GitHub Pages. Replace `YOUR-USERNAME` with your  
-> GitHub account once Pages is enabled for this repo (Settings → Pages →  
-> Deploy from branch `main`, folder `/ (root)`). Everything is static, so no  
-> build step is needed.
+> The demo above is hosted on GitHub Pages. Enable it for this repo once  
+> (Settings → Pages → Deploy from branch `main`, folder `/ (root)`).  
+> Everything is static, so no build step is needed.
 
 ---
 
