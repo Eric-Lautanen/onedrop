@@ -141,6 +141,9 @@ import './audio.js';
     var dotSprite = document.createElement('canvas');
     var unlitGrid = document.createElement('canvas');
     var DOT_KEYS = null;      /* "cw,ch" the caches were built for */
+    /* the two bloom radii, in CANVAS pixels: set per raster in cell terms
+       below, so the halo keeps its proportion at any dot size */
+    var BLUR_CORE = 1.6, BLUR_HALO = 7;
 
     function rrPath(x, ctx2, X, Y, W, H, R) {
       /* rounded rect, hand-rolled (ctx.roundRect is not everywhere) */
@@ -159,6 +162,11 @@ import './audio.js';
 
     function buildDotAssets(col) {
       DOT_KEYS = cw + ',' + ch;
+      /* 1.6px and 7px were tuned on a 5.66-pixel cell, so they are kept in
+         cell terms: at a 7-pixel cell they come back as ~2 and ~8.7px, the
+         same halo over a slightly bigger dot */
+      BLUR_CORE = Math.max(1, ch * 0.283);
+      BLUR_HALO = Math.max(2, ch * 1.237);
       var gap = Math.max(1, Math.min(cw, ch) * 0.30);
       var dw = cw - gap, dh = ch - gap;
       var SW = Math.ceil(cw) + 2, SH = Math.ceil(ch) + 2;
@@ -549,7 +557,12 @@ import './audio.js';
       /* maxW stops at the end of 'BALL n' (about column 52) so the two
          never touch on a fat score */
       textR(Math.floor(S.score).toLocaleString('en-US'), COLS - 2, 2, 12, BIG, 68);
-      var label = S.charge > 0.02 ? 'PLUNGE!' : 'HOLD SPACE';
+      /* the draw has to reach the stop before the spring will throw the
+         ball, so the callout walks the player up to it instead of saying
+         "plunge" at any old charge */
+      var full = S.chargeFull || 0.999;
+      var label = S.charge >= full ? 'LET GO!'
+        : (S.charge > 0.02 ? 'KEEP PULLING' : 'PULL IT BACK');
       textC(label, COLS / 2, 12, 13, BIG);
       bar(16, 25, COLS - 32, 5, S.charge || 0, true);
       sprite('drop', 4, 10, 1);
@@ -585,13 +598,13 @@ import './audio.js';
       if (v.filter !== undefined) {
         v.globalCompositeOperation = 'lighter';
         bx.clearRect(0, 0, DW, DH);
-        bx.filter = 'blur(1.6px)';
+        bx.filter = 'blur(' + BLUR_CORE.toFixed(2) + 'px)';
         bx.drawImage(canvas, 0, 0);
         bx.filter = 'none';
         v.globalAlpha = 0.55;
         v.drawImage(bloom, 0, 0);
         bx.clearRect(0, 0, DW, DH);
-        bx.filter = 'blur(7px)';
+        bx.filter = 'blur(' + BLUR_HALO.toFixed(2) + 'px)';
         bx.drawImage(canvas, 0, 0);
         bx.filter = 'none';
         v.globalAlpha = 0.30;

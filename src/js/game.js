@@ -1233,7 +1233,8 @@ import './guard.js';
     skillLive = false; skillTimer = 0;
     syncLamps();
     PF.setPlunger(0); PF.snapPlunger();
-    setMessage('BALL ' + ballNum + '  \u2014  PULL ALL THE WAY BACK', false, 3, 'gold');
+    setMessage('BALL ' + ballNum + '  \u2014  HOLD ' + keyLabel(keys.plunge) + ' ALL THE WAY BACK',
+      false, 3, 'gold');
   }
 
   function startGame() {
@@ -1625,12 +1626,13 @@ import './guard.js';
      gives each shot a quick stab rather than a held bat, and misses the odd
      ball. A demo that never missed would never come off the table.
 
-     Any other key or touch stops it and hands over the live game, ball
-     still in the lane, so the player's own press is their own plunge. */
+     It is an EASTER EGG: Ctrl+D (Cmd+D on a Mac) hands the machine over,
+     and Ctrl+D again takes it back. Nothing announces it, the attract
+     screen sits as it always did, and any other key or touch stops it and
+     hands over the live game with the ball still in the lane, so the
+     player's own press is their own plunge. */
   var demo = {
     on: false,
-    idle: 0,          /* seconds of attract before it takes the machine */
-    wait: 6,
     hold: [0, 0],     /* seconds left on each flipper's stab */
     nudgeCool: 0,
     still: 0,         /* seconds the ball has been sitting motionless */
@@ -1644,13 +1646,24 @@ import './guard.js';
     demo.hold[0] = demo.hold[1] = 0;
     pressLeft(false); pressRight(false);
   }
+  /* the egg's key, and the console: PB.game.demo.toggle() */
+  function toggleDemo() {
+    if (demo.on) demoStop();
+    else {
+      demoStart();
+      if (demo.on) setMessage('DEMO PLAYER ON', false, 1.6, 'gold');
+    }
+  }
   function demoStart() {
-    if (demo.on || state !== 'attract') return;
+    if (demo.on) return;
+    /* from attract or a finished game it deals itself one to play; on a
+       live ball it simply takes the game the player is in */
+    if (state === 'attract' || state === 'gameover') startGame();
+    else if (!(state === 'ready' || state === 'play' || state === 'ballover')) return;
     /* never take the machine over with a bat already up: a raised flipper
        left over from the last hand would hold the new ball where it sits */
     pressLeft(false); pressRight(false);
     demo.on = true;
-    demo.idle = 0;
     demo.hold[0] = demo.hold[1] = 0;
     demo.nudgeCool = 0;
     demo.still = 0;
@@ -1673,7 +1686,6 @@ import './guard.js';
       demo.overHold += raw;
       if (demo.overHold < 3) return;      /* let the final score sit a beat */
       demoStop();                         /* hands off the bats as it goes */
-      demo.idle = 0;
       charge = 0; charging = false;
       PF.setPlunger(0); PF.snapPlunger();
       attractTimer = 0;
@@ -1908,6 +1920,14 @@ import './guard.js';
      and by nothing else. */
   global.addEventListener('keydown', function (e) {
     if (e.repeat) return;
+    /* EASTER EGG: Ctrl+D (Cmd+D) hands the machine to the demo player, and
+       takes it back. It is checked before the catch-all below, or the same
+       press would stop the demo it is trying to start. */
+    if ((e.ctrlKey || e.metaKey) && e.code === 'KeyD') {
+      e.preventDefault();
+      toggleDemo();
+      return;
+    }
     demoStop();     /* a hand on the machine: the demo is over, the game is theirs */
     /* capture mode: the next key becomes the binding being listened for.
        Escape cancels without changing anything. Return before the gameplay
@@ -2390,12 +2410,8 @@ import './guard.js';
         hints.push('COMPLETE ALL FIVE MISSIONS FOR WIZARD MODE');
         attractMsg = (attractMsg + 1) % hints.length;
       }
-      /* the demo player takes the machine over after a beat of attract, so
-         the screen is readable first and the cabinet is never left cold */
-      demo.idle += raw;
-      if (!demo.on && demo.idle >= demo.wait) demoStart();
     }
-    /* the demo's hands, on the same inputs a player's would be */
+    /* the demo's hands, on the same inputs a player's would be (Ctrl+D) */
     if (demo.on) demoPlay(raw);
 
     /* ---- charge plunger ----
@@ -2602,6 +2618,7 @@ import './guard.js';
       dmdPatch.jackpot = jackpotArmed;
       dmdPatch.tilt = tilted;
       dmdPatch.charge = charge;
+      dmdPatch.chargeFull = FULL_DRAW;      /* the draw the spring needs */
       dmdPatch.skill = skillLive;
       dmdPatch.mbShots = multiballShots;
       dmdPatch.bonus = bonusTotal;
@@ -2946,10 +2963,8 @@ import './guard.js';
     /* the attract-screen demo player: `on` is whether it is driving, and
        `wait` is how many seconds of attract it gives the screen first */
     demo: {
-      start: demoStart, stop: demoStop,
-      get on() { return demo.on; },
-      get wait() { return demo.wait; },
-      set wait(v) { demo.wait = Math.max(0, v); }
+      start: demoStart, stop: demoStop, toggle: toggleDemo,
+      get on() { return demo.on; }
     },
     multiball: startMultiball, wizard: startWizard
   };

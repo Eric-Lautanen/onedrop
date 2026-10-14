@@ -35,10 +35,11 @@ the physics layout and the artwork can never drift apart.
   screen, showing scores, missions and callouts.
 - **A living riddim.** All music and sound effects are generated in the browser  
   with the Web Audio API — no audio files to download.
-- **A demo that plays.** After a few seconds on the attract screen the machine  
-  takes itself on — plunger, flippers and all — and any key or touch hands it  
-  back with the ball still in the lane. `PB.game.demo` in the console drives it  
-  (`demo.start()`, `demo.stop()`, `demo.wait`).
+- **A demo that plays** *(easter egg)*. **Ctrl+D** hands the machine to a  
+  demo player — plunger, flippers and all — either on the attract screen or on  
+  the live ball you are playing, and Ctrl+D again takes it back. Any other key  
+  or touch hands it over as well, ball still in the lane.  
+  `PB.game.demo.toggle()` does the same from the console.
 - **Made to be watched.** A hand-built 3D cabinet, backbox and legs, an  
   orbit/zoom camera, and hit effects (particles, trails, flashes, floating  
   scores) that can be toggled.

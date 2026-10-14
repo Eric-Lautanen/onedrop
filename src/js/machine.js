@@ -157,6 +157,14 @@ import * as THREE from './vendor/three.module.js';
   var BAND_W = 4.08;
   var BAND_WIN = { x: 0.2875, y: 0.2831, w: 0.425, h: 0.4338 };   /* fallback */
   var PLATE_ASPECT = 2.8333;            /* 136 x 48 px sheet panel */
+
+  /* The DMD raster: 128x32 dots, and this many canvas pixels per dot. BOTH
+     integers, because a fractional pitch puts every dot row on a different
+     sub-pixel phase: the rows then rasterise 5 and then 6 pixels apart,
+     unevenly lit, and that is what the banding across the panel was --
+     horizontal lines head on, angled ones with the backbox at an angle.
+     5x7 px cells land on a 640x224 canvas, 0.8% off the plate's aspect. */
+  var DMD_CELL_W = 5, DMD_CELL_H = 7;
   function makeScoreBand() {
     var c = newCanvas(1024, Math.round(1024 / BAND_W));
     var x = c.getContext('2d', { willReadFrequently: true });
@@ -1465,20 +1473,32 @@ import * as THREE from './vendor/three.module.js';
     band.position.set(0, bandY, 0.46);
     head.add(band);
 
-    /* live dot-matrix screen, covering the plate exactly. The canvas is
-       squared up to the plate's own aspect first, so the 128x32 dot grid
-       lands on the glass with round dots and no letterboxing -- and the
-       plate's paint behind it shows nowhere. */
+    /* live dot-matrix screen, covering the plate exactly -- the plate's
+       paint behind it shows nowhere. The canvas is the RASTER of the
+       128x32 grid, so it is sized in whole cells (see DMD_CELL_W/H) rather
+       than squared to the plate's aspect: a fractional cell is what made
+       the rows uneven. */
     var dmdSrc = document.getElementById('dmd');
     var dmdPlane = null;
     if (dmdSrc) {
-      dmdSrc.width = 512;
-      dmdSrc.height = Math.max(96, Math.round(512 / PLATE_ASPECT));
+      dmdSrc.width = 128 * DMD_CELL_W;
+      dmdSrc.height = 32 * DMD_CELL_H;
       var dmdTex = ownTex(new THREE.CanvasTexture(dmdSrc));
-      dmdTex.minFilter = THREE.LinearFilter;
+      /* Mipmaps + anisotropy. In the player's pose the panel is drawn about
+         a third of the canvas' width, and plain bilinear sampling at that
+         minification only touches some of the dots: the GAPS between the
+         rows come back as hard black lines across the screen. With the
+         chain each output pixel averages the dots it covers, and with
+         anisotropy that average follows the panel's slant. */
+      dmdTex.minFilter = THREE.LinearMipmapLinearFilter;
+      dmdTex.generateMipmaps = true;
+      dmdTex.anisotropy = 8;
       if ('colorSpace' in dmdTex) dmdTex.colorSpace = THREE.SRGBColorSpace;
       var winW = bandW * BAND_WIN.w;
-      var winH = winW * dmdSrc.height / dmdSrc.width;
+      /* the plane takes its size from the PLATE's aspect, not the canvas':
+         the raster is 0.8% off it, so the dots stretch by that much (which
+         nobody can see) instead of the screen moving on the glass */
+      var winH = winW / PLATE_ASPECT;
       var winY = bandY + bandH / 2 - bandH * (BAND_WIN.y + BAND_WIN.h / 2);
       dmdPlane = new THREE.Mesh(planeGeo(winW, winH), new THREE.MeshBasicMaterial({ map: dmdTex }));
       owned.mat.push(dmdPlane.material);
