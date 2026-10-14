@@ -49,7 +49,10 @@
 
      `secBars` defaults to 4; the fastest riddims use 8 so a song is still
      minutes rather than seconds. The set is laid out in tempo order, so a
-     long game walks up from 78 to 138 and back down again. */
+     long game walks up from 88 to 138 and back down again. The title
+     riddim leads, and its 88 bpm is the set's FLOOR: the floor of every
+     song after it stays above 96, so no handover ever sounds like a
+     comedown. */
   function sec(o) {
     return {
       name: o.n || '', d: o.d !== 0, k: o.k !== 0, o: o.o !== 0, b: o.b !== 0,
@@ -61,7 +64,13 @@
 
   var SONGS = [
     {
-      name: 'ONE DROP', bpm: 78, feel: 'onedrop', lead: 'melodica', secBars: 4,
+      /* the title riddim LEADS the set, and the set never sags below it:
+         every song after is at or above 96 bpm, so a handover can not
+         sound like the band fell asleep. It sat at 78 bpm, which read as
+         a drag behind the rest of the set, so it is up at 88: one drop
+         likes a WALKING tempo, not a ballad -- the rest on beat 1 still
+         lands, but now it moves. */
+      name: 'ONE DROP', bpm: 88, feel: 'onedrop', lead: 'melodica', secBars: 4,
       /* Am7 | Fmaj7 | C | G */
       prog: [
         { root: 110.00, chord: [220.00, 261.63, 329.63, 392.00], name: 'Am' },
@@ -78,8 +87,11 @@
         [0, 440.0, 3], [4, 523.25, 2], [6, 587.33, 2], [10, 440.0, 2], [12, 392.0, 4],
         [18, 523.25, 2], [20, 659.25, 3], [24, 587.33, 2], [27, 523.25, 2], [30, 392.0, 2]
       ],
-      /* bass and skank alone, the drums falling in on the second section and
-         the break taking everything but the bass away */
+      /* bass and skank alone, the drums falling in on the second section
+         and the break keeping the kit -- a break with BOTH drums and
+         chop out read as the band stopping dead, the "end of song one
+         sagged" move, so the break only drops the guitar and the outro
+         keeps everything */
       arrange: [
         sec({ n: 'intro', d: 0, w: 0.6 }),
         sec({ n: 'verse', w: 0.8 }),
@@ -93,9 +105,10 @@
     {
       /* dub chamber. This one used to sit at 66 bpm, which read as a drag
          rather than as dub: the space has to be framed by MOTION, not by
-         slowness. It is up at 86, the open hat and the shaker run through
-         it, and the bass walks into the bar line instead of waiting. */
-      name: 'DUB CHAMBER', bpm: 86, feel: 'dub', lead: 'melodica', secBars: 4,
+         slowness. At 102 it stays dub but holds the set's floor -- the
+         rest of the playlist keeps every handover ABOVE it, so the set
+         never sags after ONE DROP's groove. */
+      name: 'DUB CHAMBER', bpm: 102, feel: 'dub', lead: 'melodica', secBars: 4,
       prog: [
         { root: 73.42, chord: [220.00, 261.63, 293.66, 349.23], name: 'Dm' },
         { root: 58.27, chord: [174.61, 220.00, 261.63, 349.23], name: 'Bb' },
@@ -111,7 +124,10 @@
         [36, 587.33, 2], [42, 698.46, 2], [48, 659.25, 5]
       ],
       arrange: [
-        sec({ n: 'intro', k: 0, w: 1.5 }),
+        /* the intro keeps the skank chop: the opening bars of a dub track
+           are exactly where a listener's ear is deciding "is this slow?",
+           so the pulse has to be there from step one */
+        sec({ n: 'intro', d: 1, w: 1.2 }),
         sec({ n: 'verse', w: 1.2 }),
         sec({ n: 'chant', l: 1, w: 1.2 }),
         sec({ n: 'pressure', p: 1, w: 1.4 }),
@@ -1075,22 +1091,30 @@
   };
 
   /* DUB: the space is the arrangement, but the space needs a frame -- the
-     open hat and the shaker run through it, and this riddim sits at 86
-     rather than the 66 it used to drag at. */
+     open hat and the shaker run through it. PULSE counts here: with only
+     one kick-snare hit a bar, the ear reconstructs the tempo at HALF its
+     real rate and the song drags no matter what the clock says (fresh
+     players hear this first, because dub now opens the set). So the riddim
+     pulses twice a bar, hats run every eighth, and the chop lands every
+     bar -- the space still breathes, but on a moving floor. */
   AudioEngine.prototype._schedDub = function (song, ch, k, when, sec, cycle) {
     var rel = when - this.ctx.currentTime;
     if (sec.d) {
+      if (k === 0) this.kick(rel, 0.85);
       if (k === 8) { this.kick(rel, 1.0); this.snare(rel, 0.42, -0.15, 0.3); }
       if (k === 4) this.snare(rel, 0.16, 0.2, 0.2);            /* drenched */
       if (k === 14) this.snare(rel, 0.1, 0.3, 0.16);
+      if (k % 2 === 0) this.hat(when, k === 6 || k === 14);    /* eighths */
       if (k % 4 === 2) this.hat(when, true);                   /* open */
       this.shaker(when - this.ctx.currentTime, k % 2 ? 0.045 : 0.03, (k % 4 - 1.5) * 0.3);
     }
-    /* one chop a bar, and only every other bar: this is the dub of the
-       song, the space is the arrangement */
+    /* one chop a bar, ALTERNATING SIDES BAR TO BAR: two pulse anchors per
+       bar instead of one. A single chop a bar lets the ear half the tempo
+       again no matter what the clock says -- this is the fix that keeps a
+       dub track truthful to its bpm. */
     if (sec.k) {
-      if (k === 12 && cycle % 2 === 0) this.riddimGuitar(ch.chord, rel, 0.2, 0.8);
-      if (k === 6 && cycle % 2 === 1) this.riddimGuitar(ch.chord, rel, -0.25, 0.6);
+      if (k === 12) this.riddimGuitar(ch.chord, rel, cycle % 2 ? -0.25 : 0.2, 0.8);
+      if (k === 6) this.riddimGuitar(ch.chord, rel, cycle % 2 ? 0.2 : -0.25, 0.6);
     }
     if (sec.b) this._bassLine(song, ch, k, when, { sub: 1.1 });
   };
