@@ -288,10 +288,11 @@ launcher servers:
 **A note on what could not be measured here:** the desktop `.bat` ->
 `launch-app.ps1` -> `serve.ps1` chain (its own Edge `--app` window and its
 `--user-data-dir` profile) is where the 304 win is biggest, because that
-profile persists a cache between launches. The fix is verified at the
-protocol level (a 304 with a matching `Last-Modified` is what a browser
-revalidates against) and in `serve.py` end to end, but the Edge app-window
-launch itself was not driven in this pass.
+profile persists a cache between launches. `serve.ps1` itself was driven on
+a scratch port and is verified on the wire -- `/ping` 200, `.webp` as
+`image/webp`, `Last-Modified` sent, and a conditional GET answering `304`
+with `0` bytes -- so what remains undriven is the Edge app window and its
+profile's cache behaviour across launches, not the server side.
 
 ## Remaining / not done
 
