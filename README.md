@@ -43,7 +43,11 @@ the physics layout and the artwork can never drift apart.
 - **Made to be watched.** A hand-built 3D cabinet, backbox and legs, an  
   orbit/zoom camera, and hit effects (particles, trails, flashes, floating  
   scores) that can be toggled.
-- **Plays anywhere.** Keyboard on desktop, on-screen buttons on touch devices.
+- **Plays anywhere.** Keyboard on desktop, on-screen buttons on touch devices —  
+  and a **CAMERA LOCK** for tablets, so a thumb reaching for a flipper can land  
+  on the glass without swinging the table.
+- **Remembers your setup.** Volume, sound, FX, key bindings, fullscreen and the  
+  camera lock are all kept in `localStorage` and come back on the next visit.
 
 ## Controls
 
@@ -57,7 +61,7 @@ the physics layout and the artwork can never drift apart.
 | `M`                      | Sound on/off                          |
 | `P`                      | Pause                                 |
 | `F`                      | Fullscreen                            |
-| Mouse / touch            | Drag to orbit; wheel or two-finger pinch to zoom |
+| Mouse / touch            | Drag to orbit; wheel or two-finger pinch to zoom (both dead while LOCK CAMERA is on) |
 
 The plunger has to come **all the way back**: let go early and the spring simply  
 returns, the ball stays in the lane and the panel says so. The same is true of  
@@ -68,6 +72,18 @@ back to the hero pose the machine boots in, whether the camera was down at
 the flippers or out on an orbit you dragged to. The camera *tweens* there on  
 the same rig the game-start fly-in uses, so the machine squares up rather  
 than jumping.
+
+**LOCK CAMERA** freezes the view: with it on, taps, drags, pinches and the  
+wheel do nothing to the camera, which is what you want on a tablet, where the  
+thumb reaching for a flipper lands on the glass beside it. The flippers, the  
+plunger knob and RESET GAME all keep working — the lock is about the finger  
+on the glass, not about the machine itself.
+
+Everything the menu sets is remembered: the volume fader, SOUND, FX, the key  
+bindings, FULLSCREEN and the camera lock. Fullscreen is the one the browser  
+will not hand back on its own (it needs a gesture), so a stored *on* is spent  
+on your first click or keypress rather than failing silently — and leaving  
+fullscreen with `Esc` or `F11` clears it, so it never drags you back in.
 
 Keys are rebindable from the side menu — click a keycap, then press the key  
 you want. The menu also has volume, FX, fullscreen and reset controls. Opening  

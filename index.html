@@ -93,9 +93,10 @@
   <button id="playBtn" type="button">PLAY</button>
   <div class="m-row"><span>HIGH SCORE</span><b id="menuHigh">0</b></div>
   <div class="m-status" id="menuStatus">PRESS PLAY</div>
-  <div class="m-hint">the view is yours &mdash; drag to orbit, wheel or pinch to zoom</div>
-  <button id="resetBtn" type="button">RESET VIEW</button>
   <button id="resetGameBtn" type="button">RESET GAME</button>
+  <!-- for tablets: with the view locked, a thumb reaching for a flipper can
+       land on the glass without swinging the table. Persisted. -->
+  <button id="lockCamBtn" type="button" title="stop taps and drags on the table moving the camera">LOCK CAMERA</button>
   <div class="m-quick">
     <button id="soundBtn" type="button">SOUND ON</button>
     <button id="fxBtn" type="button" title="fancy hit effects: particles, trails, flashes, floating scores">FX ON</button>

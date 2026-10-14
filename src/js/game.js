@@ -52,7 +52,8 @@ import './guard.js';
   /* ================= DOM ================= */
   var D = {};
   ['score', 'highscore', 'ball', 'mult', 'message', 'lamps', 'spins', 'fps',
-    'menu', 'menuTab', 'menuStatus', 'menuHigh', 'playBtn', 'resetBtn', 'resetGameBtn',
+    'menu', 'menuTab', 'menuStatus', 'menuHigh', 'playBtn', 'resetGameBtn',
+    'lockCamBtn',
     'keyLeft', 'keyRight', 'keyPlunge', 'keyNudgeL', 'keyNudgeR', 'keyReset',
     'soundBtn', 'pauseBtn', 'fsBtn', 'fxBtn', 'vol', 'volVal',
     'touchLeft', 'touchRight', 'touchLaunch', 'touchNudgeL', 'touchNudgeR',
@@ -834,6 +835,37 @@ import './guard.js';
   }
 
   /* ============ orbit inspection camera ============ */
+  /* ---- THE CAMERA LOCK ------------------------------------------------
+     On a tablet the thumb reaching for a flipper lands on the glass beside
+     it often enough that fat-finger taps were swinging the table mid-ball.
+     With the lock on, the canvas takes no camera input at all: no drag, no
+     pinch, no wheel. It is about the finger on the glass, not about the
+     machine -- RESET VIEW and RESET GAME still move the camera on purpose,
+     and the flipper buttons, the plunger knob and every other control keep
+     working. `camRelease` is handed back by bindOrbit() below, so locking
+     the view mid-gesture lets go of the fingers already on the glass.
+     The setting lives in localStorage like the fader and the FX switch, so
+     a locked cabinet is still locked after a reload. */
+  var CAM_KEY = 'onedrop.lock';
+  var camLocked = false;
+  var camRelease = null;
+  function showCamLock() {
+    if (!D.lockCamBtn) return;
+    D.lockCamBtn.textContent = camLocked ? 'CAMERA LOCKED' : 'LOCK CAMERA';
+    D.lockCamBtn.classList.toggle('on', camLocked);
+  }
+  function setCamLock(on, quiet) {
+    camLocked = !!on;
+    store(CAM_KEY, camLocked ? '1' : '0');
+    if (camLocked && camRelease) camRelease();
+    showCamLock();
+    if (!quiet) setMessage(camLocked ? 'CAMERA LOCKED' : 'CAMERA FREE', false, 1.4);
+    return camLocked;
+  }
+  /* boot: apply what was stored, silently -- the machine is still loading
+     and the player has not asked for anything yet */
+  setCamLock(stored(CAM_KEY) === '1', true);
+
   var orbit = { on: false, yaw: 0, pitch: CAM_PITCH, dist: 90,
     pivot: new THREE.Vector3(), drag: false, px: 0, py: 0 };
 
@@ -866,7 +898,7 @@ import './guard.js';
 
     /* ---- PINCH: two fingers on the glass pull the camera in and out
        A touch player has no wheel, so before this the only way to change
-       the distance was to leave the table and press RESET VIEW. Pointer
+       the distance was to leave the table and reset the game. Pointer
        events already deliver every finger as its own pointer, so the ones
        that are down are kept in a map: while exactly two are, the change
        in their separation drives the SAME orbit.dist the wheel does
@@ -892,7 +924,15 @@ import './guard.js';
       orbit.dist = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, orbit.dist * scale));
     }
 
+    /* locking the view lets go of any fingers already on the glass: the
+       alternative is a lock that only takes effect once the player happens
+       to lift their hand */
+    camRelease = function () {
+      down = {}; downCount = 0; pinchGap = 0; orbit.drag = false;
+    };
+
     dom.addEventListener('pointerdown', function (e) {
+      if (camLocked) return;   /* the locked view takes no camera input */
       if (paused) return;   /* a paused table must not swallow the camera:
                                clicks while frozen would otherwise grab the
                                orbit rig and the resume would land tilted */
@@ -911,6 +951,7 @@ import './guard.js';
     });
 
     dom.addEventListener('pointermove', function (e) {
+      if (camLocked) return;
       var p = down[e.pointerId];
       if (p) { p.x = e.clientX; p.y = e.clientY; }
       if (downCount >= 2) {
@@ -961,8 +1002,9 @@ import './guard.js';
       down = {}; downCount = 0; pinchGap = 0; orbit.drag = false;
     });
     dom.addEventListener('wheel', function (e) {
-      e.preventDefault();
-      if (paused) return;
+      e.preventDefault();       /* before the locks: a locked view still must
+                                   not let the wheel scroll the page */
+      if (camLocked || paused) return;
       enterOrbit();
       zoomBy(Math.exp(e.deltaY * 0.0012));
     }, { passive: false });
@@ -1080,6 +1122,39 @@ import './guard.js';
     setText(D.volVal, pct + '%');
   }
   showVolume();
+
+  /* ---- the switches that outlive the tab ------------------------------
+     EVERY menu setting is remembered: the high score and the fader above,
+     and the sound, the FX switch, the key bindings and the camera lock
+     below. One pair of helpers does the storage so the private-mode
+     exceptions (some browsers throw on localStorage even for a read, and
+     an unguarded throw at boot would take the whole machine with it) stay
+     in one place instead of at every call site. */
+  function store(key, val) {
+    try { global.localStorage.setItem(key, val); } catch (e) { /* private mode */ }
+  }
+  function stored(key) {
+    try { return global.localStorage.getItem(key); } catch (e) { return null; }
+  }
+
+  /* SOUND. The engine has to be told the stored state, not toggled into it:
+     a machine left muted must come back muted, and the button's label and
+     its red 'off' styling have to say so from the first frame. */
+  var MUTE_KEY = 'onedrop.mute';
+  var muted = stored(MUTE_KEY) === '1';
+  audio.setMuted(muted);
+  function showMute() {
+    if (!D.soundBtn) return;
+    D.soundBtn.textContent = muted ? 'SOUND OFF' : 'SOUND ON';
+    D.soundBtn.classList.toggle('off', muted);
+  }
+  showMute();
+  function setMute(on) {
+    muted = audio.setMuted(on);
+    store(MUTE_KEY, muted ? '1' : '0');
+    showMute();
+    return muted;
+  }
 
   /* ---------------- HUD ---------------- */
   function setText(node, txt) { if (node && node.textContent !== txt) node.textContent = txt; }
@@ -2044,11 +2119,14 @@ import './guard.js';
      THE KEYBOARD IS FOR GAMEPLAY ONLY. It never touches the camera.
      That is deliberate: a player who has dragged the table round to a
      view they like must be able to plunge, flip and nudge without the
-     view snapping back under them. The camera is moved by the MOUSE
-     (drag to orbit, wheel or pinch to zoom) and reset by RESET VIEW,
-     and by nothing else. */
+     view snapping back under them. The camera is moved by the MOUSE or a
+     FINGER (drag to orbit, wheel or pinch to zoom, with LOCK CAMERA to
+     stop both) and squared up again by RESET GAME, and by nothing else. */
   global.addEventListener('keydown', function (e) {
     if (e.repeat) return;
+    restoreFullOnGesture();     /* the keyboard is a gesture too, so a player
+                                   who never touches the glass still gets
+                                   their fullscreen back */
     /* EASTER EGG: Ctrl+D (Cmd+D) hands the machine to the demo player, and
        takes it back. It is checked before the catch-all below, or the same
        press would stop the demo it is trying to start. */
@@ -2085,12 +2163,10 @@ import './guard.js';
         bound.indexOf(e.code) >= 0) e.preventDefault();
 
     if (e.code === 'KeyM') {
-      var m = audio.toggleMute();
+      var m = setMute(!muted);    /* the button label follows the key, and
+                                     the setting is written like the
+                                     button's -- one path for both */
       setMessage(m ? 'SOUND OFF' : 'SOUND ON', false, 1.2);
-      if (D.soundBtn) {           /* the button label follows the key too */
-        D.soundBtn.textContent = m ? 'SOUND OFF' : 'SOUND ON';
-        D.soundBtn.classList.toggle('off', m);
-      }
       return;
     }
     if (e.code === 'KeyP') { menuPause(!paused); return; }   /* menuPause also stops/restarts the riddim */
@@ -2165,12 +2241,35 @@ import './guard.js';
     setMessage('SKILL SHOT  \u2014  HIT THE DUB SPINNER', false, 2.6, 'gold');
   }
 
+  /* FULLSCREEN is the one menu setting the browser will not restore on its
+     own: requestFullscreen needs a user gesture, so a stored 'on' is kept
+     and spent on the player's FIRST interaction with the page rather than
+     failing silently at load. And the state is read from the document, not
+     from what we asked for -- Esc, F11 and the browser's own chrome all
+     leave fullscreen without going through this button, and a preference
+     that ignored that would drag the player back in on every reload. */
+  var FULL_KEY = 'onedrop.full';
+  var restoreFull = stored(FULL_KEY) === '1';
   function toggleFull() {
     if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen && document.documentElement.requestFullscreen();
-    } else {
-      document.exitFullscreen && document.exitFullscreen();
+      if (!document.documentElement.requestFullscreen) return;
+      var p = document.documentElement.requestFullscreen();
+      /* the promise rejects when the browser refuses (no gesture, an iframe
+         without allowfullscreen): that is a refusal, not a crash */
+      if (p && p.catch) p.catch(function () {});
+    } else if (document.exitFullscreen) {
+      document.exitFullscreen();
     }
+  }
+  document.addEventListener('fullscreenchange', function () {
+    var on = !!document.fullscreenElement;
+    restoreFull = on;                 /* an exit is a decision too */
+    store(FULL_KEY, on ? '1' : '0');
+  });
+  function restoreFullOnGesture() {
+    if (!restoreFull) return;
+    restoreFull = false;              /* one attempt, on the first gesture */
+    if (!document.fullscreenElement) toggleFull();
   }
 
   if (D.playBtn) {
@@ -2188,7 +2287,6 @@ import './guard.js';
       D.playBtn.blur();  /* a focused PLAY would eat Space as a click */
     });
   }
-  if (D.resetBtn) D.resetBtn.addEventListener('click', function () { exitOrbit(); });
 
   /* the MENU handle that peeks over the top edge while playing: tap it
      and the panel slides back down to the dropped spot -- a plain slide,
@@ -2348,6 +2446,9 @@ import './guard.js';
     dropCharge();        /* a lost window must not leave it drawn back */
   }
   global.addEventListener('pointerdown', function (e) {
+    /* the player's first touch is also the gesture a stored FULLSCREEN
+       setting has been waiting for since load */
+    restoreFullOnGesture();
     /* any touch or click means a person is here: the demo hands the machine
        over at once, and lets go of whatever it was holding */
     demoStop();
@@ -2451,11 +2552,16 @@ import './guard.js';
   if (D.soundBtn) {
     D.soundBtn.addEventListener('click', function () {
       audio.resume();
-      var m = audio.toggleMute();
-      D.soundBtn.textContent = m ? 'SOUND OFF' : 'SOUND ON';
-      D.soundBtn.classList.toggle('off', m);
+      var m = setMute(!muted);      /* persists: see setMute */
       setMessage(m ? 'SOUND OFF' : 'SOUND ON', false, 1.2);
       D.soundBtn.blur();
+    });
+  }
+  if (D.lockCamBtn) {
+    D.lockCamBtn.addEventListener('click', function () {
+      audio.resume();
+      setCamLock(!camLocked);
+      D.lockCamBtn.blur();      /* a focused button would eat Space as a click */
     });
   }
   if (D.pauseBtn) {
@@ -3071,6 +3177,10 @@ import './guard.js';
     renderer: renderer, scene: scene, camera: camera, group: group, audio: audio,
     get machine() { return machine; },
     exitOrbit: exitOrbit, fitCamera: fitCamera,
+    setCamLock: setCamLock,
+    get camLocked() { return camLocked; },
+    setMute: setMute,
+    get muted() { return muted; },
     /* true while the player is holding a view they set with the mouse */
     get orbiting() { return orbit.on; },
     fitPlayfield: fitPlayfield,

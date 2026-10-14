@@ -653,10 +653,17 @@ import './vibrance.js';
   AudioEngine.prototype.getVolume = function () { return this.volume; };
   AudioEngine.prototype.isMuted = function () { return this.muted; };
 
-  AudioEngine.prototype.toggleMute = function () {
-    this.muted = !this.muted;
+  /* The same switch toggleMute flips, but set to a KNOWN state: the menu
+     remembers the mute across reloads, so boot has to apply what was
+     stored rather than toggle whatever the engine happened to start as. */
+  AudioEngine.prototype.setMuted = function (on) {
+    this.muted = !!on;
     if (this.master) this.master.gain.value = this.muted ? 0 : this.volume;
     return this.muted;
+  };
+
+  AudioEngine.prototype.toggleMute = function () {
+    return this.setMuted(!this.muted);
   };
 
   /* dip the music for a moment so a big game sound owns the room */

@@ -211,16 +211,9 @@ html, body {
   min-height: 15px; margin: 2px 0 8px; font-size: 9px; letter-spacing: 1.5px;
   color: #b6ffcf; text-transform: uppercase;
 }
-#resetBtn {
-  width: 100%; margin-bottom: 6px; padding: 6px 0; cursor: pointer;
-  font-family: "Consolas", monospace; font-size: 10px; letter-spacing: 2px;
-  color: var(--gold); background: rgba(13,27,21,.85);
-  border: 1px solid rgba(246,196,69,.4); border-radius: 7px;
-}
-#resetBtn:hover { background: rgba(29,154,78,.35); }
-#resetBtn:active { transform: translateY(1px); }
 /* the destructive one: RESET GAME wipes the ball in play, so it gets the
-   warning red and its own confirm state -- two clicks to actually fire */
+   warning red -- one press, no confirm, but it must not look like the
+   harmless view buttons beside it */
 #resetGameBtn {
   width: 100%; margin-bottom: 6px; padding: 6px 0; cursor: pointer;
   font-family: "Consolas", monospace; font-size: 10px; letter-spacing: 2px;
@@ -229,6 +222,22 @@ html, body {
 }
 #resetGameBtn:hover { background: rgba(215,38,61,.4); color: #fff; }
 #resetGameBtn:active { transform: translateY(1px); }
+/* the camera lock: a toggle, so it reads as engaged when it is on -- the
+   gold of the view buttons turns solid so a locked cabinet is obvious at a
+   glance from across the room */
+#lockCamBtn {
+  width: 100%; margin-bottom: 6px; padding: 6px 0; cursor: pointer;
+  font-family: "Consolas", monospace; font-size: 10px; letter-spacing: 2px;
+  color: var(--gold); background: rgba(13,27,21,.85);
+  border: 1px solid rgba(246,196,69,.4); border-radius: 7px;
+}
+#lockCamBtn:hover { background: rgba(246,196,69,.18); }
+#lockCamBtn:active { transform: translateY(1px); }
+#lockCamBtn.on {
+  color: #1a1206; background: linear-gradient(180deg, #ffd95e, #e0a92c);
+  border-color: #ffe9a3;
+  box-shadow: 0 0 12px rgba(246,196,69,.5), inset 0 1px 0 rgba(255,255,255,.5);
+}
 
 /* the M / P / F row, as tappable buttons -- touch players have no keys,
    so sound, pause and fullscreen live here too */
@@ -506,7 +515,7 @@ html, body {
 /* ---------- touch ---------- */
 /* every tappable control: no long-press callout, no double-tap zoom --
    a held FLIP is a legal hold, not a context menu */
-#touch button, .keycap, .m-quick button, #playBtn, #resetBtn, #resetGameBtn {
+#touch button, .keycap, .m-quick button, #playBtn, #resetGameBtn, #lockCamBtn {
   touch-action: manipulation;
   -webkit-touch-callout: none;
 }
