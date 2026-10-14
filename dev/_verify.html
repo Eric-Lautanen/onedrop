@@ -3,10 +3,16 @@
 <style>html,body{margin:0;background:#0d0f11;color:#cfe;font:12px/1.45 monospace}
 #o{padding:8px;white-space:pre-wrap}</style>
 </head><body><div id="o">running…</div>
-<script src="src/js/vendor/three.min.js"></script>
-<script src="src/js/table.js"></script>
-<script src="src/js/physics.js"></script>
-<script>
+<!-- the game is ES modules now (three.js dropped its global build in
+     r161): import the chain rather than stacking classic tags, since a
+     classic tag cannot parse a file that starts with import. table.js is
+     what puts THREE and PB on the window for the block below. -->
+<script type="module">
+import * as THREE from '/src/js/vendor/three.module.js';
+import '/src/js/physics.js';   /* pulls table.js, which puts PB up */
+window.THREE = THREE;
+</script>
+<script type="module">
 /* Containment battery for the playfield boundary.
    A ball is OUT when its centre leaves the artwork box by more than 0.4 u
    while it is not riding a wireform. Every start point below is INSIDE the

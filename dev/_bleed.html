@@ -12,10 +12,16 @@ canvas{display:block;image-rendering:pixelated;background:#111}
   <span style="color:#3f6">green = gate</span>.
   x0..x60, y0..y34, 2.6x.</div>
 <canvas id="c"></canvas>
-<script src="src/js/vendor/three.min.js"></script>
-<script src="src/js/assets.js"></script>
-<script src="src/js/table.js"></script>
-<script>
+<!-- the game is ES modules now (three.js dropped its global build in
+     r161), so the probe imports the chain instead of stacking script
+     tags; assets.js pulls art.js, physics.js and table.js with it, and
+     table.js is what puts THREE and PB on the window for the block below. -->
+<script type="module">
+import * as THREE from '/src/js/vendor/three.module.js';
+import '/src/js/assets.js';   /* pulls art.js, physics.js, table.js */
+window.THREE = THREE;
+</script>
+<script type="module">
 var Q = location.hash.slice(1).split(',').map(Number);
 var PX0 = Q[0] || 0, PX1 = Q[1] || 60, PY0 = Q[2] || 0, PY1 = Q[3] || 34;
 var ZOOM = Q[4] || 2.6;                         /* _bleed.html#x0,x1,y0,y1,zoom */

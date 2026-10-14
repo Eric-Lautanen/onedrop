@@ -1,8 +1,14 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"><title>bevel probe</title></head>
 <body><pre id="out">…</pre>
-<script src="../src/js/vendor/three.min.js"></script>
-<script>
+<!-- three.js ships no global build from r161 on, so the probe pulls the
+     ES modules in and puts THREE back on the window for the code below;
+     an inline module is deferred, so this runs before the second block. -->
+<script type="module">
+import * as THREE from '../src/js/vendor/three.module.js';
+window.THREE = THREE;
+</script>
+<script type="module">
 var s = new THREE.Shape();
 var w = 10, h = 4, r = 1;
 s.moveTo(-w / 2 + r, -h / 2);
