@@ -12,7 +12,9 @@
 param(
   [int]$Port = 8080,
   [string]$Root = "",
-  [switch]$NoBrowser
+  [switch]$NoBrowser,
+  # when the app window closes, the server exits too
+  [switch]$WaitWindow
 )
 
 $ErrorActionPreference = "Continue"
@@ -66,17 +68,35 @@ $mime = @{
   '.map'  = 'application/json'
 }
 
-function Send-Response($stream, [int]$code, [string]$text, [string]$ctype, [byte[]]$body, [bool]$headOnly) {
+function Send-Response($stream, [int]$code, [string]$text, [string]$ctype, [byte[]]$body, [bool]$headOnly, [string]$lastMod = '') {
   $sb = New-Object System.Text.StringBuilder
   [void]$sb.Append("HTTP/1.1 $code $text`r`n")
   [void]$sb.Append("Content-Type: $ctype`r`n")
   [void]$sb.Append("Content-Length: $($body.Length)`r`n")
-  [void]$sb.Append("Cache-Control: no-store, no-cache, must-revalidate, max-age=0`r`n")
+  # Revalidate, don't forbid: `no-store` here meant every launch of the game
+  # re-sent all of it (1.35 MB of scripts + the 264 KB sheet) over a fresh
+  # connection, even though the app window keeps a profile (and so a cache)
+  # between runs. With Last-Modified in play, an unchanged file answers
+  # 304 and an edited one still shows up on the next launch.
+  [void]$sb.Append("Cache-Control: no-cache, must-revalidate, max-age=0`r`n")
+  if ($lastMod) { [void]$sb.Append("Last-Modified: $lastMod`r`n") }
   [void]$sb.Append("Access-Control-Allow-Origin: *`r`n")
   [void]$sb.Append("Connection: close`r`n`r`n")
   $head = [System.Text.Encoding]::ASCII.GetBytes($sb.ToString())
   $stream.Write($head, 0, $head.Length)
   if (-not $headOnly -and $body.Length -gt 0) { $stream.Write($body, 0, $body.Length) }
+  $stream.Flush()
+}
+
+function Send-NotModified($stream, [string]$lastMod) {
+  $sb = New-Object System.Text.StringBuilder
+  [void]$sb.Append("HTTP/1.1 304 Not Modified`r`n")
+  [void]$sb.Append("Cache-Control: no-cache, must-revalidate, max-age=0`r`n")
+  [void]$sb.Append("Last-Modified: $lastMod`r`n")
+  [void]$sb.Append("Access-Control-Allow-Origin: *`r`n")
+  [void]$sb.Append("Connection: close`r`n`r`n")
+  $head = [System.Text.Encoding]::ASCII.GetBytes($sb.ToString())
+  $stream.Write($head, 0, $head.Length)
   $stream.Flush()
 }
 
@@ -94,14 +114,23 @@ function Handle-Client($client, [string]$root) {
     $method = $parts[0].ToUpper()
     $rawPath = $parts[1]
 
+    $headers = @{}
     while ($true) {
       $h = $reader.ReadLine()
       if ($null -eq $h -or $h -eq '') { break }
+      $i = $h.IndexOf(':')
+      if ($i -gt 0) { $headers[$h.Substring(0, $i).Trim().ToLower()] = $h.Substring($i + 1).Trim() }
     }
 
     $path = $rawPath.Split('?')[0]
     if ($path -eq '/favicon.ico') {
       Send-Response $stream 204 'No Content' 'image/x-icon' ([byte[]]@()) $false
+      return
+    }
+    # the game's heartbeat: the page pings while it lives, so the idle
+    # watchdog can tell "window closed" from "quiet game"
+    if ($path -eq '/ping') {
+      Send-Response $stream 200 'OK' 'text/plain' ([System.Text.Encoding]::ASCII.GetBytes('ok')) $false
       return
     }
     $path = [System.Uri]::UnescapeDataString($path)
@@ -121,9 +150,24 @@ function Handle-Client($client, [string]$root) {
 
     $ext = [System.IO.Path]::GetExtension($full).ToLower()
     $ctype = if ($mime.ContainsKey($ext)) { $mime[$ext] } else { 'application/octet-stream' }
+
+    # conditional GET: the browser revalidates with the Last-Modified we sent
+    $lastWrite = [System.IO.File]::GetLastWriteTimeUtc($full)
+    $lastMod = $lastWrite.ToString('r')
+    if ($headers.ContainsKey('if-modified-since')) {
+      try {
+        $ims = [System.DateTime]::Parse($headers['if-modified-since']).ToUniversalTime()
+        if ($lastWrite -le $ims.AddSeconds(1)) {
+          Send-NotModified $stream $lastMod
+          Write-Host ("  304  $rel")
+          return
+        }
+      } catch { }
+    }
+
     $bytes = [System.IO.File]::ReadAllBytes($full)
     $headOnly = ($method -eq 'HEAD')
-    Send-Response $stream 200 'OK' $ctype $bytes $headOnly
+    Send-Response $stream 200 'OK' $ctype $bytes $headOnly $lastMod
     Write-Host ("  200  {0,-34} {1,9:N0} bytes" -f $rel, $bytes.Length)
   } catch {
     # a browser hanging up is normal; never let it kill the server
@@ -173,12 +217,36 @@ if (-not $NoBrowser) {
   Start-Process $url | Out-Null
 }
 
+# -WaitWindow: the FIRST visitor to load the page is presumed to be the
+# app window. When no connection has arrived for the grace period, the
+# server exits -- closing the game window tears the server down with
+# it, since the closed browser stops making requests.
+
+$waitWindowEnabled = [bool]$WaitWindow
+$graceSecs = 20
+$lastSeen = $null
+
 try {
   while ($true) {
-    $client = $listener.AcceptTcpClient()
-    Handle-Client $client $root
+    if ($waitWindowEnabled -and $lastSeen) {
+      $idle = ((Get-Date) - $lastSeen).TotalSeconds
+      if ($idle -gt $graceSecs) {
+        Write-Host ("`n  window closed -- server shutting down (idle {0:N0}s)" -f $idle) -ForegroundColor Green
+        break
+      }
+    }
+    # AcceptTcpClient blocks; poll with a timeout so the idle check runs
+    $poll = $listener.Server.Poll(1000000, [System.Net.Sockets.SelectMode]::SelectRead)
+    if ($poll) {
+      $client = $listener.AcceptTcpClient()
+      $lastSeen = Get-Date
+      Handle-Client $client $root
+    } else {
+      # idle tick: either watchdog counting down or plain waiting loop
+      Start-Sleep -Milliseconds 250
+    }
   }
 } finally {
   $listener.Stop()
-  Write-Host "`n  later, dread. one love." -ForegroundColor Green
+  Write-Host "`r`n  later, dread. one love." -ForegroundColor Green
 }

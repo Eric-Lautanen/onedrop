@@ -285,6 +285,16 @@
      missing above is skipped, never fatal. */
   var machine = null;
   var machineFloorY = 0;
+
+  /* ---- the boot sequence's state ----
+     The loader is dismissed by the reveal gate at the bottom of this file,
+     which wants both facts below true AND a frame drawn after the later one
+     landed, so the fade never uncovers a canvas that predates the cabinet.
+     `framesDrawn`/`framesAtStage` are the frame half of that and the frame
+     loop owns them. */
+  var bootSheetDone = false, bootCabinetDone = false;
+  var bootRevealPending = false;
+  var framesDrawn = 0, framesAtStage = 0;
   function pfWarn(msg) {
     if (global.console && global.console.warn) {
       global.console.warn('[playfield] ' + msg);
@@ -351,6 +361,11 @@
     pfWarn('boot marks: ' + performance.getEntriesByType('mark').map(function (m) {
       return m.name + '@' + Math.round(m.startTime);
     }).join(' '));
+
+    /* ---- sequence: the cabinet is the last thing the loader waits on ---- */
+    bootCabinetDone = true;
+    ldStage(88);
+    bootMaybeReveal();
   }
   /* ---- does the playfield still fit the cabinet it was handed? ----
      The cabinet is rebuilt on its own schedule, so the two can drift
@@ -1958,9 +1973,12 @@
   var fpsAcc = 0, fpsFrames = 0;
   var prevT = 0;
   var rollTimer = 0;            /* the rolling-ball noise clock */
+  var pingTimer = 0;            /* the desktop-icon keepalive clock */
+  var pingsOff = false;         /* a 404 kills the heartbeat for this session */
 
   function frame(now) {
     requestAnimationFrame(frame);
+    framesDrawn++;
     now /= 1000;
     var raw = now - last;
     last = now;
@@ -2010,6 +2028,11 @@
       if (state === 'play' || state === 'ready' || state === 'ballover') {
         world.step(FIXED);
         world.pollZones();
+      } else {
+        /* idle table (attract / game over): the flippers still answer the
+           buttons -- the bats move so people can play with the cabinet
+           before a ball exists. No balls, no scoring, no physics. */
+        world.updateFlippers(FIXED);
       }
       acc -= FIXED;
       steps++;
@@ -2135,6 +2158,24 @@
       moodLights[mi].intensity = 0.5 + 0.5 * (0.5 + 0.5 * Math.sin(t * (1.1 + mi * 0.3) + mi));
     }
 
+    /* heartbeat: when served by scripts\serve.ps1 -WaitWindow (the desktop
+       icon), the page pings once a 5 s so the server's idle watchdog can
+       tell "window closed" from "quiet game". Fetch failures (file://,
+       plain browser use) are silently ignored. */
+    if (!pingsOff) {
+      if (pingTimer > 0) pingTimer -= raw;
+      else {
+        pingTimer = 5;
+        try {
+          fetch('/ping', { cache: 'no-store' }).then(function (r) {
+            /* 404 = not the desktop server (plain dev/browser serve):
+               give up pinging instead of spamming a dead endpoint */
+            if (!r.ok) pingsOff = true;
+          }).catch(function () { /* offline: keep trying */ });
+        } catch (e) { /* file:// */ }
+      }
+    }
+
     particles.update(raw);
     if (shake > 0) {
       shake = Math.max(0, shake - raw * 2.2);
@@ -2185,6 +2226,10 @@
 
     updateHUD();
     renderer.render(scene, camera);
+
+    /* the gate's frame half: a frame that POST-DATES the last boot stage is
+       now in the canvas, so the loader can fade onto a real machine */
+    if (bootRevealPending) { bootRevealPending = false; bootMaybeReveal(); }
   }
 
   /* ================= resize =================
@@ -2319,13 +2364,20 @@
      happens, then advances when an actual stage lands. The safety timer
      bounds the wait either way. */
   if (D.menu) D.menu.classList.add('above');
-  ldStage(60);              /* scripts in: first real milestone */
   var ldPct = 0, ldCap = 40, ldTick = 0;
-  var LD_MSGS = { 40: 'warming up the riddim', 60: 'building the machine', 80: 'painting the table', 100: 'ready' };
-  function ldCreep(now) {
-    /* ease the current bar toward its cap at a perceptible crawl */
+  /* the bar's milestones are the boot's own stages, in order: scripts
+     evaluated, the sheet's art painted on, the cabinet up */
+  var LD_MSGS = { 40: 'warming up the riddim', 60: 'painting the table',
+                  78: 'laying the artwork', 88: 'raising the cabinet',
+                  100: 'ready' };
+  function ldCreep() {
+    /* ease the current bar toward its cap at a perceptible crawl. The floor
+       in that max() is what the bar moves at when its next stage is still
+       far away: the whole boot now fits in about a second on a fast
+       machine, and a bar that has not visibly moved before it snaps to 100
+       reads as broken. */
     if (ldPct < ldCap) {
-      ldPct = Math.min(ldCap, ldPct + Math.max(0.35, (ldCap - ldPct) * 0.012));
+      ldPct = Math.min(ldCap, ldPct + Math.max(0.9, (ldCap - ldPct) * 0.04));
       if (D.ldFill) D.ldFill.style.width = ldPct.toFixed(1) + '%';
       var msg = LD_MSGS[ldCap];
       if (D.ldMsg && msg) D.ldMsg.textContent = msg;
@@ -2337,15 +2389,37 @@
     ldTick = setTimeout(ldLoop, 48);
   })();
   function ldStage(cap) {
-    /* raise the milestone: called as real stages land (scripts in,
-       cabinet built, sheet settled) */
+    /* raise the milestone: called as real stages land (scripts in, sheet
+       settled, cabinet built). The bar creeps toward this, so a stage
+       landing is what makes it visibly move. */
     if (revealed) return;
     ldCap = cap;
+    framesAtStage = framesDrawn;
   }
   var revealed = false;
-  function revealMachine() {
+  /* ---- the reveal gate ----
+     "There is a machine to look at" is two facts plus a frame:
+
+       sheet settled   the sheet's consumers have run (its art is on)
+       cabinet built   the cabinet exists, built off that sheet
+       one frame since a frame has been drawn AFTER the later of those two,
+                       so the fade uncovers a canvas that has the machine
+                       in it. Fading over a canvas with no frame in it is a
+                       black screen with the game's name on it.
+
+     The timer below is only the panic button for an asset that never
+     arrives. It used to be the ONLY path that ever dismissed the loader,
+     so every launch sat on the loading bar for a flat 9 s however fast the
+     machine came up -- measured on this machine: cabinet done at 0.9 s,
+     screen held to 9.3 s. */
+  function bootMaybeReveal() {
+    if (bootSheetDone && bootCabinetDone) revealMachine(false);
+  }
+  function revealMachine(force) {
     if (revealed) return;
+    if (!force && framesDrawn <= framesAtStage) { bootRevealPending = true; return; }
     revealed = true;
+    bootRevealPending = false;
     clearTimeout(ldTick);
     ldCap = 100;
     /* snap the fill to 100 first so the bar reads complete as it fades */
@@ -2360,7 +2434,17 @@
       menuSlide('down');
     }
   }
-  setTimeout(revealMachine, 9000);   /* keep going even if an asset hangs */
+  ldStage(60);              /* scripts in: first real milestone */
+  /* the sheet settling is the first half of the gate. On FAILURE the queued
+     consumers -- including the cabinet's -- are dropped by design (the
+     playfield still comes up on its procedural art), so this never fires and
+     the panic timer reveals that case. */
+  assets.load(function () {
+    bootSheetDone = true;
+    ldStage(78);
+    bootMaybeReveal();
+  });
+  setTimeout(function () { revealMachine(true); }, 9000);   /* keep going even if an asset hangs */
   bigMessage('ONE DROP', 'PRESS PLAY');
   syncLamps();
   setText(D.menuHigh, highScore.toLocaleString('en-US'));

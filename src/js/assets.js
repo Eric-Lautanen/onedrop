@@ -145,18 +145,36 @@
     image = new Image();
     image.decoding = 'async';
     image.onload = function () {
-      texture = new THREE.Texture(image);
-      texture.wrapS = texture.wrapT = THREE.ClampToEdgeWrapping;
-      texture.minFilter = THREE.LinearMipmapLinearFilter;
-      texture.magFilter = THREE.LinearFilter;
-      /* The playfield panel is 318 px wide and lands on roughly 600 px of
-         screen, so it is magnified about 2x. Anisotropy is the only
-         sampler knob that buys anything back on the oblique hero view;
-         three.js clamps it to whatever the GPU actually supports. */
-      texture.anisotropy = 16;
-      if ('encoding' in texture) texture.encoding = THREE.sRGBEncoding;
-      texture.needsUpdate = true;
-      settle(true);
+      /* Decode BEFORE settling, and off the main thread.
+         `decoding = 'async'` only hints; without this the decode lands
+         inside the first drawImage, which is inside the boot's burst of
+         sheet consumers -- on the main thread, loader animation frozen
+         behind it. Awaiting decode() lets the rasterisation overlap the
+         tail of the script eval, and the burst then starts with a bitmap
+         it can blit straight away. A decode that REJECTS settles exactly
+         the way onload did before (a texture is built either way; the
+         encoding ladder is only for a fetch that failed). */
+      function build() {
+        if (global.PB && global.PB.mark) global.PB.mark('assets:decoded');
+        texture = new THREE.Texture(image);
+        texture.wrapS = texture.wrapT = THREE.ClampToEdgeWrapping;
+        texture.minFilter = THREE.LinearMipmapLinearFilter;
+        texture.magFilter = THREE.LinearFilter;
+        /* The playfield panel is 318 px wide and lands on roughly 600 px of
+           screen, so it is magnified about 2x. Anisotropy is the only
+           sampler knob that buys anything back on the oblique hero view;
+           three.js clamps it to whatever the GPU actually supports. */
+        texture.anisotropy = 16;
+        if ('encoding' in texture) texture.encoding = THREE.sRGBEncoding;
+        texture.needsUpdate = true;
+        settle(true);
+      }
+      if (image.decode) {
+        if (global.PB && global.PB.mark) global.PB.mark('assets:fetch-done');
+        image.decode().then(build, build);
+      } else {
+        build();
+      }
     };
     image.onerror = function () {
       /* not the last encoding in the ladder: move down it and try again.
