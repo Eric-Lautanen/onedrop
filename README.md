@@ -20,6 +20,9 @@ the physics layout and the artwork can never drift apart.
 
 **Roots • Dub • Skank.**
 
+> **Special thanks: Tony "The Advisor" Barriera** — every table needs an  
+> advisor; this one got the best. (See [below](#special-thanks).)
+
 ## The game
 
 - **A real table.** Inclined ~6.5° like a cabinet, with flippers, slingshots,  
@@ -142,6 +145,11 @@ The JavaScript, in load order:
 | `audio.js`                           | the riddim engine                                     |
 | `game.js`                            | renderer, camera, rules, input, HUD and the main loop |
 | `art.js`, `assets.js`, `vibrance.js` | texture/art helpers and post-processing               |
+
+## Special thanks
+
+To **Tony "The Advisor" Barriera** — for the counsel, the patience and the  
+good ear. This machine is better for it.
 
 ## License
 
