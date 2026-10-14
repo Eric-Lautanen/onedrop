@@ -17,6 +17,7 @@
    ============================================================ */
 import './dmd.js';
 import * as THREE from './vendor/three.module.js';
+import './batch.js';
 
 (function (global) {
   'use strict';
@@ -2253,6 +2254,9 @@ import * as THREE from './vendor/three.module.js';
     }
 
     updateHUD();
+    /* fold any hardware that moved since the last frame into its batch (a
+       flipper, a bumper mid-flash, the knob being pulled) -- see batch.js */
+    if (global.PB.batch) global.PB.batch.update();
     renderer.render(scene, camera);
 
     /* the gate's frame half: a frame that POST-DATES the last boot stage is
@@ -2283,6 +2287,22 @@ import * as THREE from './vendor/three.module.js';
 
      Both accept a plain { W, H } too, if the cabinet is being driven
      from somewhere else. */
+  /* ---- draw-call folding -------------------------------------------
+     Once the geometry is built and in place, fold it into one
+     THREE.BatchedMesh per material: the cabinet and playfield are ~360
+     meshes, and the frame is submitted four times over (the main pass plus
+     a pass per live mirror panel), so unbatched they cost ~1450 draw calls
+     a frame. See batch.js for what is folded, what is deliberately left
+     alone, and how a part that moves after the fold keeps moving.
+
+     Called after the boot's build, and again after a rebuild, because a
+     resize throws the hardware away and builds it fresh. */
+  function foldBatches() {
+    if (!global.PB.batch) return;
+    try { global.PB.batch.fold(scene); }
+    catch (e) { /* worst case the machine draws unbatched, as it did before */ }
+  }
+
   function fitPlayfield(W, H, centerX, centerY) {
     W = +W; H = +H;
     if (!(W > 0) || !(H > 0)) return table;
@@ -2363,6 +2383,9 @@ import * as THREE from './vendor/three.module.js';
       mark('boot:newball-done');
       computeFitCorners();
       fitCamera();
+      /* the hardware is new geometry in new places: fold it again (batch.js
+         releases the old batches as part of folding) */
+      foldBatches();
       mark('boot:refit-done');
       /* the sprite sheet has settled: bring the machine and the menu in.
          The loader fades, the panel above the screen drops back in with
@@ -2509,6 +2532,10 @@ import * as THREE from './vendor/three.module.js';
   assets.load(function () {
     bootSheetDone = true;
     ldStage(78);
+    /* last stage: the cabinet is built and swept, so every part is in its
+       final place and the whole scene can be folded (see batch.js) before
+       the first revealed frame is drawn */
+    foldBatches();
     bootMaybeReveal();
   });
   setTimeout(function () { revealMachine(true); }, 9000);   /* keep going even if an asset hangs */

@@ -144,6 +144,7 @@ The JavaScript, in load order:
 | `dmd.js`                             | the dot-matrix display                                |
 | `audio.js`                           | the riddim engine                                     |
 | `game.js`                            | renderer, camera, rules, input, HUD and the main loop |
+| `batch.js`                           | draw-call folding: one `BatchedMesh` per material      |
 | `art.js`, `assets.js`, `vibrance.js` | texture/art helpers and post-processing               |
 | `vendor/three.module.js`, `vendor/three.core.js` | three.js **r186**, unmodified           |
 
