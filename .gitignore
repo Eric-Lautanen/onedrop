@@ -10,3 +10,6 @@ dev/.venv-playfield/
 # bytecode caches (rebuild instantly)
 **/__pycache__/
 *.pyc
+
+# Freebuff agent's local project metadata — machine-local, must never be committed
+.freebuff/
