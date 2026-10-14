@@ -1266,9 +1266,29 @@
     if (this.dwet) this.dwet.gain.value = 0.5 + v * 0.2;
   };
 
+  /* ---------- the scheduler's tolerance for the main thread ---- */
+  /* How far ahead of the audio clock the sequencer stays queued. This is the
+     engine's whole margin for the main thread going away: the notes are
+     scheduled by a 25 ms timer on the main thread, so any stall longer than
+     the queue drains it and the music stops dead until that timer next runs.
+     0.20 s was not enough for a WebGL game whose frame alone costs ~30 ms on
+     a good GPU (and many times that under software rendering): the set
+     drifted into silence and then burst back -- heard as "starts lagging,
+     then it stops playing". Half a second rides out the hitches that no
+     amount of scheduling discipline can avoid. */
+  var SCHED_LOOKAHEAD = 0.45;
+  /* A stall longer than this is not a hitch, it is a hole. Replaying every
+     missed step would stack them on the present -- past-due notes all fire at
+     once with their envelopes collapsed, which is the burst heard after a
+     freeze -- so the clock is moved to now instead and the sequencer rejoins
+     on the next step, the way a band does when it loses the click. */
+  var SCHED_RESYNC = 0.30;
+
   AudioEngine.prototype._pump = function () {
     if (!this.ready || !this.musicOn) return;
-    var horizon = this.ctx.currentTime + 0.20;
+    var now = this.ctx.currentTime;
+    if (this.nextNoteTime < now - SCHED_RESYNC) this.nextNoteTime = now + 0.05;
+    var horizon = now + SCHED_LOOKAHEAD;
     var guard = 0;
     while (this.nextNoteTime < horizon && guard++ < 64) {
       /* a queued insert waits for the next bar line of whatever is playing */
