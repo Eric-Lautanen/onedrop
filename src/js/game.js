@@ -263,7 +263,6 @@
     setTimeout(function () { el.remove(); }, 1100);
   }
 
-  /* ================= cabinet ================= */
   /* ================= cabinet =================
      machine.js is owned by whoever is building the cabinet, and it gets
      rewritten on its own schedule. So this seam is deliberately
@@ -1950,6 +1949,10 @@
   }
 
   /* ================= main loop ================= */
+  /* the panel's patch object and its mission-step list are built once and
+     written in place every frame -- see the frame loop's dmd.set */
+  var dmdPatch = {};
+  var dmdSteps = new Array(missions.length);
   var last = performance.now() / 1000;
   var acc = 0;
   var fpsAcc = 0, fpsFrames = 0;
@@ -2145,32 +2148,37 @@
     /* ---- dot-matrix display ---- */
     if (dmd) {
       dmd.tick(raw);
-      dmd.set({
-        mode: state === 'attract' ? 'attract' : (state === 'gameover' ? 'gameover' : (state === 'ready' ? 'ready' : 'play')),
-        score: displayScore,
-        high: highScore,
-        ball: ballNum,
-        balls: ballsLeft,
-        mult: mult,
-        combo: combo,
-        lanes: irieOn,
-        missions: missions.map(function (m) { return m.step; }),
-        missionNames: missionNames,
-        multiball: multiballActive,
-        /* wizard runs on top of multiball, so the DMD needs to be told
-           about it separately or it shows the multiball screen */
-        wizard: wizardActive,
-        wizardTimer: wizardTimer,
-        jackpot: jackpotArmed,
-        tilt: tilted,
-        charge: charge,
-        skill: skillLive,
-        mbShots: multiballShots,
-        bonus: bonusTotal,
-        /* the attract how-to-play screen follows the live bindings */
-        keyLeft: keyLabel(keys.left),
-        keyRight: keyLabel(keys.right)
-      });
+      /* One reused patch object and one reused step array: the panel is
+         fed every frame, so a fresh object and a fresh array per frame were
+         ~120 allocations a second for content that is then thrown away the
+         same frame (dmd.set only copies fields, so a reused object is
+         exactly as correct). Set in place, then hand over. */
+      dmdPatch.mode = state === 'attract' ? 'attract' : (state === 'gameover' ? 'gameover' : (state === 'ready' ? 'ready' : 'play'));
+      dmdPatch.score = displayScore;
+      dmdPatch.high = highScore;
+      dmdPatch.ball = ballNum;
+      dmdPatch.balls = ballsLeft;
+      dmdPatch.mult = mult;
+      dmdPatch.combo = combo;
+      dmdPatch.lanes = irieOn;
+      for (var mi = 0; mi < missions.length; mi++) dmdSteps[mi] = missions[mi].step;
+      dmdPatch.missions = dmdSteps;
+      dmdPatch.missionNames = missionNames;
+      dmdPatch.multiball = multiballActive;
+      /* wizard runs on top of multiball, so the DMD needs to be told
+         about it separately or it shows the multiball screen */
+      dmdPatch.wizard = wizardActive;
+      dmdPatch.wizardTimer = wizardTimer;
+      dmdPatch.jackpot = jackpotArmed;
+      dmdPatch.tilt = tilted;
+      dmdPatch.charge = charge;
+      dmdPatch.skill = skillLive;
+      dmdPatch.mbShots = multiballShots;
+      dmdPatch.bonus = bonusTotal;
+      /* the attract how-to-play screen follows the live bindings */
+      dmdPatch.keyLeft = keyLabel(keys.left);
+      dmdPatch.keyRight = keyLabel(keys.right);
+      dmd.set(dmdPatch);
       dmd.render(t);
       if (dmdTex) dmdTex.needsUpdate = true;
     }
