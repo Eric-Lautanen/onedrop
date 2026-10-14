@@ -2308,6 +2308,44 @@ import './guard.js';
     if (!document.fullscreenElement) toggleFull();
   }
 
+  /* ---- a tab that goes away -------------------------------------------
+     THE BAND CANNOT SURVIVE A HIDDEN TAB. The sequencer is pumped by a
+     25 ms timer and keeps 0.45 s of music queued ahead of the audio clock;
+     a hidden tab's timers are clamped to about one a second (and to about
+     one a MINUTE once it has been hidden for a while), so the queue drains
+     between ticks: the riddim stutters, and then it runs out and is gone.
+     That is the "it plays for a long time and then the music just stops",
+     and no amount of scheduling can fix it -- the player is not looking, so
+     the honest move is the one PAUSE already makes: stop the band on the
+     beat it is at (the set picks up exactly there) and bring it back when
+     the tab does. The stop waits a beat first, because a glance at another
+     tab should not cost the player their music. */
+  var hideStopTimer = null, musicHeldByHide = false;
+  if (document.addEventListener) {
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) {
+        if (hideStopTimer) clearTimeout(hideStopTimer);
+        hideStopTimer = setTimeout(function () {
+          hideStopTimer = null;
+          if (!document.hidden) return;      /* it came back in time */
+          musicHeldByHide = audio.musicOn;   /* only what WE stopped */
+          if (musicHeldByHide) audio.stopMusic();
+        }, 1200);
+        return;
+      }
+      if (hideStopTimer) { clearTimeout(hideStopTimer); hideStopTimer = null; }
+      /* back in view: the output itself may have gone to sleep while the
+         tab was away (the engine's watchdog asks for it too, but a user
+         gesture-free resume is worth taking the moment one is allowed) */
+      audio.resume();
+      if (musicHeldByHide) {
+        musicHeldByHide = false;
+        /* a game the player paused stays paused: the pause owns the band */
+        if (!paused && state !== 'attract' && state !== 'gameover') audio.startMusic();
+      }
+    });
+  }
+
   if (D.playBtn) {
     D.playBtn.addEventListener('click', function () {
       audio.resume();

@@ -451,6 +451,10 @@ import './vibrance.js';
     this._duckUntil = 0;
     this._timer = null;
     this._rollTimer = null;
+    /* the output watchdog's own state (see _pump): when it last asked the
+       browser for the output back, and whether it has said so yet */
+    this._wakeTried = 0;
+    this._wakeLogged = false;
     /* the cue currently being voiced scales its layers by this, so the
        mixer page above can rebalance the kit without rewriting a recipe */
     this._trim = 1;
@@ -473,7 +477,23 @@ import './vibrance.js';
     if (this.ctx) return;
     var Ctx = global.AudioContext || global.webkitAudioContext;
     if (!Ctx) return;
-    var ctx = this.ctx = new Ctx();
+    /* PLAYBACK, not the default. The default hint asks the device for its
+       INTERACTIVE buffer -- the smallest it will give, 10 ms on the Windows
+       machine this was measured on -- because it assumes the page is an
+       instrument waiting on a keypress. This page is not: it is a game with
+       a soundtrack, where a few extra milliseconds behind the beat are
+       invisible and the buffer in front of it is everything. At 10 ms every
+       hiccup in the audio service (a device change, a busy system, a
+       Bluetooth endpoint) reaches the speakers as a click before anything
+       can absorb it; asked for playback the same machine returns 20 ms.
+       Older engines that reject the options object still get a context. */
+    var ctx;
+    try {
+      ctx = new Ctx({ latencyHint: 'playback' });
+    } catch (e) {
+      ctx = new Ctx();
+    }
+    this.ctx = ctx;
 
     /* ---- master: the fader, into the glue compressor. The compressor
        keeps layered chords and a pile of simultaneous hits from clipping
@@ -638,7 +658,14 @@ import './vibrance.js';
 
   AudioEngine.prototype.resume = function () {
     this.init();
-    if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
+    if (this.ctx && this.ctx.state === 'suspended') {
+      /* a browser that wants a gesture it does not have rejects this, and
+         that is a normal answer rather than a crash: swallow it (an
+         unhandled rejection would land in the console as a bug in the
+         game) and ask again on the next gesture */
+      var p = this.ctx.resume();
+      if (p && p.catch) p.catch(function () { });
+    }
   };
 
   /* ---------- the fader --------------------------------------- */
@@ -672,10 +699,14 @@ import './vibrance.js';
     var g = this.musicBus.gain;
     var now = this.ctx.currentTime;
     var base = this._musicBase;
+    var until = now + 0.10 + (secs || 0.9);
     g.cancelScheduledValues(now);
     g.setValueAtTime(g.value, now);
     g.linearRampToValueAtTime(base * 0.45, now + 0.05);
-    g.linearRampToValueAtTime(base, now + 0.10 + (secs || 0.9));
+    g.linearRampToValueAtTime(base, until);
+    /* the duck is remembered, not just played: setIntensity has to know a
+       ramp is in flight or its new level lands on top of this one */
+    this._duckUntil = until;
   };
 
   var MAXPAN = 0.85;
@@ -1251,6 +1282,11 @@ import './vibrance.js';
   AudioEngine.prototype.startMusic = function () {
     this.init();
     if (!this.ready || this.musicOn) return;
+    /* an output that is asleep accepts every note and plays none of them,
+       so the band would be "playing" into a silent room forever -- and
+       starting the set is always a player gesture, which is the one moment
+       a browser will let this through. Wake it before the first note. */
+    this.resume();
     this.musicOn = true;
     this.nextNoteTime = this.ctx.currentTime + 0.15;
     var self = this;
@@ -1271,8 +1307,26 @@ import './vibrance.js';
   AudioEngine.prototype.setIntensity = function (v) {
     this.intensity = v;
     this._musicBase = MUSIC_LEVEL * (1 + v * 0.35);
-    if (this.musicBus) this.musicBus.gain.value = this._musicBase;
-    if (this.dwet) this.dwet.gain.value = 0.5 + v * 0.2;
+    if (!this.ready) return;
+    var now = this.ctx.currentTime;
+    /* This used to write `gain.value` straight through, and that lost a
+       duck that was still in flight: the cue that dipped the band hands the
+       level back on ITS ramp, which ends at the base it started from, so
+       the new one was silently overwritten (hot mode did not arrive) -- and
+       a step on a live gain is the one move this engine never makes anyway.
+       A short ramp and the duck's own window give both what they want. */
+    var ducked = this._duckUntil > now;
+    var g = this.musicBus.gain;
+    g.cancelScheduledValues(now);
+    g.setValueAtTime(g.value, now);
+    g.linearRampToValueAtTime(this._musicBase * (ducked ? 0.45 : 1), now + 0.06);
+    if (ducked) g.linearRampToValueAtTime(this._musicBase, this._duckUntil);
+    if (this.dwet) {
+      var w = this.dwet.gain;
+      w.cancelScheduledValues(now);
+      w.setValueAtTime(w.value, now);
+      w.linearRampToValueAtTime(0.5 + v * 0.2, now + 0.06);
+    }
   };
 
   /* ---------- the scheduler's tolerance for the main thread ---- */
@@ -1295,6 +1349,35 @@ import './vibrance.js';
 
   AudioEngine.prototype._pump = function () {
     if (!this.ready || !this.musicOn) return;
+    /* THE WATCHDOG. If the output is not running nothing queued here will
+       ever be heard, and the reason is never ours: the browser suspends it
+       on a device change, when the OS sleeps the audio path, or after a
+       long spell in the background. The player's answer to that used to be
+       "the music just stopped after a while" with nothing in the console to
+       explain it, so: ask for the output back (a no-op while it is awake),
+       say so ONCE if it ever happens, and hold the clock where it is --
+       queueing into a frozen clock would hand every held note back at once
+       the moment it resumes. */
+    if (this.ctx.state !== 'running') {
+      var wall = (global.performance && global.performance.now) ?
+        global.performance.now() : Date.now();
+      /* wall time, not the audio clock: that one is frozen while it is
+         asleep, so it can not time its own retry */
+      if (wall - (this._wakeTried || 0) > 500) {
+        this._wakeTried = wall;
+        if (!this._wakeLogged) {
+          this._wakeLogged = true;
+          if (global.console && global.console.warn) {
+            global.console.warn('[audio] the output was not running (' +
+              this.ctx.state + '); asking the browser for it back');
+          }
+        }
+        this.resume();
+      }
+      this.nextNoteTime = this.ctx.currentTime + 0.05;
+      return;
+    }
+    this._wakeLogged = false;
     var now = this.ctx.currentTime;
     if (this.nextNoteTime < now - SCHED_RESYNC) this.nextNoteTime = now + 0.05;
     var horizon = now + SCHED_LOOKAHEAD;
