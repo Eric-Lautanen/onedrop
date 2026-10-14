@@ -3,7 +3,7 @@
 ONE DROP PINBALL  --  launch server
 ===================================
 A zero-dependency static server for the game. Run it from the "Games"
-folder (or anywhere) and it will locate the Pinball folder next to it,
+folder (or anywhere) and it will locate the game root next to it
 serve it on a free port and open your browser.
 
     python serve.py
@@ -60,9 +60,9 @@ def pick_root(explicit):
         return root
 
     candidates = [
-        os.path.join(HERE, "Pinball"),
+        os.path.join(HERE, ".."),
+        os.path.join(HERE, "..", "onedrop"),
         HERE,
-        os.path.join(HERE, "..", "Pinball"),
     ]
     for c in candidates:
         c = os.path.abspath(c)
@@ -70,7 +70,7 @@ def pick_root(explicit):
             return c
     sys.exit(
         "Could not find index.html near %s.\n"
-        "Point at it explicitly:  python serve.py --root path/to/Pinball" % HERE
+        "Point at it explicitly:  python serve.py --root path/to/onedrop" % HERE
     )
 
 

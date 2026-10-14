@@ -7,7 +7,7 @@
       powershell -ExecutionPolicy Bypass -File serve.ps1
       powershell -ExecutionPolicy Bypass -File serve.ps1 -Port 9000
       powershell -ExecutionPolicy Bypass -File serve.ps1 -NoBrowser
-      powershell -ExecutionPolicy Bypass -File serve.ps1 -Root ..\Pinball
+      powershell -ExecutionPolicy Bypass -File serve.ps1 -Root ..\onedrop
 #>
 param(
   [int]$Port = 8080,
@@ -25,9 +25,8 @@ function Find-Root([string]$explicit) {
     return (Resolve-Path $explicit).Path
   }
   $cands = @(
-    (Join-Path $here 'Pinball'),
-    $here,
-    (Join-Path (Split-Path -Parent $here) 'Pinball')
+    (Join-Path (Split-Path -Parent $here) 'onedrop'),
+    $here
   )
   foreach ($c in $cands) {
     if (Test-Path (Join-Path $c 'index.html')) { return (Resolve-Path $c).Path }
@@ -180,7 +179,7 @@ function Handle-Client($client, [string]$root) {
 $root = Find-Root $Root
 if (-not $root) {
   Write-Host "Could not find index.html next to this script." -ForegroundColor Red
-  Write-Host "Try:  powershell -File serve.ps1 -Root path\to\Pinball"
+  Write-Host "Try:  powershell -File serve.ps1 -Root path\to\onedrop"
   exit 1
 }
 
