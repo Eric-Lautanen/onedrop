@@ -14,8 +14,8 @@
     "handleNubAtRestUnits": 1.9252911284402394
   },
   "face": {
-    "ferruleOffRodUnits": 2.4279387088187486e-15,
-    "ferruleOffPanelUnits": 0.002235121951210395,
+    "ferruleOffRodUnits": 2.5918417478740246e-15,
+    "ferruleOffPanelUnits": 0.002235121951210284,
     "ferruleTravels": false,
     "paintedPlungerPixelsLeft": 0
   },

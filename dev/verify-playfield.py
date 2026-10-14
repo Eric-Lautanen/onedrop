@@ -13,15 +13,29 @@ with sync_playwright() as p:
     page.goto('http://127.0.0.1:8101/', wait_until='load')
     page.wait_for_function('window.PB && PB.game && PB.assets.ready')
     for name in ['table.js', 'physics.js', 'playfield.js']:
-        page.evaluate("name => fetch('/src/js/' + name).then(r=>r.text()).then(s=>{new Function(s); return true})", name)
+        # A parse check on the served file. `new Function(source)` cannot parse
+        # a bare `import` -- it threw "Cannot use import statement outside a
+        # module" and aborted this whole run before it checked anything. These
+        # are ES modules the page has already imported, so a dynamic import
+        # resolves from the module registry: it parses the file and runs
+        # nothing a second time.
+        page.evaluate("name => import('/src/js/' + name).then(() => true)", name)
     page.add_script_tag(path=str(root / 'playfield-check.js'))
     report = page.evaluate('PB.checkPlayfield()')
     page.click('#playBtn')
     assert page.evaluate('PB.game.state') == 'ready', 'Play button did not start game'
+    # Hold the draw until the HANDLE IS ACTUALLY ALL THE WAY BACK, then let go.
+    # A part-drawn release springs home without launching (game.js: `if (charge
+    # < FULL_DRAW) ...`), and the charge fills per FRAME -- a fixed 650 ms of
+    # wall clock is about one frame in this headless window, so the old wait
+    # asserted before the draw could finish. Confirmed to be the harness and
+    # not the engine: the committed physics fails the old wait identically.
+    # `plunger.pull` follows the game's own charge, so this waits on the same
+    # gate launch() enforces rather than on the clock.
     page.keyboard.down('Space')
-    page.wait_for_timeout(650)
+    page.wait_for_function('() => PB.game.playfield.plunger.pull >= 0.999', timeout=60000)
     page.keyboard.up('Space')
-    page.wait_for_timeout(120)
+    page.wait_for_function("() => PB.game.state === 'play'", timeout=15000)
     assert page.evaluate('PB.game.state') == 'play', 'Plunge did not launch'
     assert page.evaluate('PB.game.world.balls.some(b=>b.vy>0)'), 'Ball did not move upfield'
     for key, i in [('z', 0), ('/', 1)]:

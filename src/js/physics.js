@@ -24,7 +24,7 @@ import './table.js';
   function clamp(v, a, b) { return v < a ? a : (v > b ? b : v); }
   function len(x, y) { return Math.sqrt(x * x + y * y); }
 
-  function hitSegment(ball, ax, ay, bx, by, e, f, dt, continuous) {
+  function hitSegment(ball, ax, ay, bx, by, e, f, dt, continuous, out) {
     var dx = bx - ax, dy = by - ay;
     var l2 = dx * dx + dy * dy;
     var t = l2 > EPS ? ((ball.x - ax) * dx + (ball.y - ay) * dy) / l2 : 0;
@@ -52,6 +52,16 @@ import './table.js';
     ball.x += nx * (ball.r - d);
     ball.y += ny * (ball.r - d);
     var vn = ball.vx * nx + ball.vy * ny;
+    /* CONTACT IS NOT IMPACT. The `true` this returns only says an overlap was
+       resolved, and that is true on EVERY substep of a sustained contact:
+       the push-out above leaves the ball at exact contact, and gravity -- or
+       the piece beside it -- puts it straight back in. `vn` is the ball's
+       speed ALONG the normal, so it is negative only while the ball is
+       genuinely moving into the surface, and that is the only thing an
+       impact cue may be keyed to. Keyed to the return value, one ball
+       trapped against a bumper emitted 180 hits a second, every one of them
+       a fresh 34-node sound (dev/bumper-flood.py is the measurement). */
+    if (out) out.approach = vn < 0 ? -vn : 0;
     if (vn < 0) {
       var tx = -ny, ty = nx;
       var vt = ball.vx * tx + ball.vy * ty;
@@ -90,7 +100,7 @@ import './table.js';
       ball.vy = ny * (-vn * e) + ty * vt;
     }
     if (kick) { ball.vx += nx * kick; ball.vy += ny * kick; }
-    if (out) { out.nx = nx; out.ny = ny; out.speed = Math.abs(vn); }
+    if (out) { out.nx = nx; out.ny = ny; out.speed = Math.abs(vn); out.approach = vn < 0 ? -vn : 0; }
     return true;
   }
 
@@ -322,9 +332,34 @@ import './table.js';
     b.spin += b.rampSpeed * dt / b.r;
   };
 
+  /* How long a piece of hardware stays "just struck". A pop bumper's own
+     kick throws the ball clear in a small fraction of this, so no real
+     play lives under it; it is here for the ball that CANNOT leave -- wedged
+     between two pieces, or pressed by gravity -- which is otherwise free to
+     fire a cue on every one of the 180 substeps in a second. */
+  var STRIKE_COOL = 0.08;
+
+  /* Was this a STRIKE, or is the solver merely still resolving a contact?
+     `out.approach` is the closing speed the primitive just measured, and it
+     is 0 for a ball that is resting against the piece or sliding along it.
+     Both halves of this are load-bearing, and the measurement says so: the
+     approach threshold alone still leaves a ball that gravity is pressing
+     into a bumper closing at a fifth of a unit per substep (fired 180/s),
+     and a cooldown alone still leaves a ball at exact zero closing speed
+     firing on every substep. */
+  World.prototype._strike = function (feature, out) {
+    if (!(out && out.approach > 0.5 * this.table.K)) return false;
+    if (this.time - (feature.last || -1e9) < STRIKE_COOL) return false;
+    feature.last = this.time;
+    return true;
+  };
+
   World.prototype._collide = function (b, dt) {
     if (b.rampI !== undefined || b.airborne) return;   /* above surface hardware */
     var T = this.table, i;
+    /* one scratch object for every primitive call in this function: each
+       caller reads it immediately, and each primitive sets `approach` */
+    var out = {};
 
     /* static walls */
     var segs = T.segments;
@@ -344,7 +379,8 @@ import './table.js';
       var s = segs[i];
       if (s.chain && nearest[s.chain].index !== i) continue;
       if (s.gate && b.vx * s.gate <= 0) continue;
-      if (hitSegment(b, s.ax, s.ay, s.bx, s.by, s.e, s.f, dt, !!s.chain)) {
+      if (hitSegment(b, s.ax, s.ay, s.bx, s.by, s.e, s.f, dt, !!s.chain, out) &&
+          this._strike(s, out)) {
         var spd = len(b.vx, b.vy);
         if (s.kind === 'tiki') this._emit('bash', { x: b.x, y: b.y, speed: spd });
         else if (spd > 6) this._emit('wall', { x: b.x, y: b.y, speed: spd });
@@ -356,12 +392,18 @@ import './table.js';
     for (i = 0; i < tgs.length; i++) {
       var t = tgs[i];
       if (!t.up) continue;
-      if (hitSegment(b, t.ax, t.ay, t.bx, t.by, t.e, t.f, dt)) {
+      if (hitSegment(b, t.ax, t.ay, t.bx, t.by, t.e, t.f, dt, false, out)) {
+        var struck = this._strike(t, out);
         t.flash = 1;
         if (t.drop) {
+          /* DROPPING IS MOTION, NOT A CUE, and it stays on contact. Gated on
+             the strike, a ball that merely leaned on a raised target left it
+             standing -- which is a new surface to rest on, and the flow
+             check caught exactly that: persistent traps appeared at 11-28
+             seed balls per field size where there had been none. */
           t.up = false;
-          this._emit('target', { i: i, x: b.x, y: b.y });
-        } else {
+          if (struck) this._emit('target', { i: i, x: b.x, y: b.y });
+        } else if (struck) {
           this._emit('standup', { i: i, x: b.x, y: b.y });
         }
       }
@@ -371,25 +413,29 @@ import './table.js';
     var sl = T.slings;
     for (i = 0; i < sl.length; i++) {
       var k = sl[i];
-      if (hitSegment(b, k.ax, k.ay, k.bx, k.by, 0.35, 0.05, dt)) {
+      if (hitSegment(b, k.ax, k.ay, k.bx, k.by, 0.35, 0.05, dt, false, out)) {
+        /* The KICK stays on every substep that the ball is in the rubber --
+           that is the rubber's force, and it is what throws the ball off.
+           The CUE is a strike like every other one. */
         b.vx += k.nx * k.kick;
         b.vy += k.ny * k.kick;
-        this._emit('sling', { i: i, x: b.x, y: b.y });
+        if (this._strike(k, out)) this._emit('sling', { i: i, x: b.x, y: b.y });
       }
     }
 
     /* pop bumpers, posts and the shack bash toy */
     var cs = T.circles;
-    var out = {};
     for (i = 0; i < cs.length; i++) {
       var c = cs[i];
       if (hitCircle(b, c.x, c.y, c.r, c.e, c.kick, out)) {
         /* A round post has the same perfectly balanced crown equilibrium
            as a segment tip. Break it gently, only on passive round posts. */
         if (c.type === 'post' && out.ny > 0.96 && Math.abs(b.vx) < 0.1) b.vx = (c.x < T.centerX ? 1 : -1) * 1.2 * T.K;
-        if (c.type === 'bumper') this._emit('bumper', { i: i, x: b.x, y: b.y, speed: out.speed });
-        else if (c.type === 'toy') this._emit('bash', { i: i, x: b.x, y: b.y, speed: out.speed });
-        else this._emit('post', { i: i, x: b.x, y: b.y });
+        if (this._strike(c, out)) {
+          if (c.type === 'bumper') this._emit('bumper', { i: i, x: b.x, y: b.y, speed: out.speed });
+          else if (c.type === 'toy') this._emit('bash', { i: i, x: b.x, y: b.y, speed: out.speed });
+          else this._emit('post', { i: i, x: b.x, y: b.y });
+        }
       }
     }
 

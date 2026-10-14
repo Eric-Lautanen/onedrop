@@ -12,10 +12,14 @@ with sync_playwright() as p:
     page.goto('http://127.0.0.1:8101/', wait_until='load')
     page.wait_for_function('window.PB && PB.game && PB.assets.ready')
     page.click('#playBtn')
+    # The draw fills per frame and a part-drawn release springs home without
+    # launching, so a fixed 400 ms hold is under one frame in this headless
+    # window and the state never arrives. Wait on the handle itself (the same
+    # gate launch() uses) before letting go.
     page.keyboard.down('Space')
-    page.wait_for_timeout(400)
+    page.wait_for_function('() => PB.game.playfield.plunger.pull >= 0.999', timeout=60000)
     page.keyboard.up('Space')
-    page.wait_for_function("PB.game.state === 'play'")
+    page.wait_for_function("PB.game.state === 'play'", timeout=15000)
     page.keyboard.press('p')
     report = {'repeatedDrains': 10}
     for batch in range(2):
