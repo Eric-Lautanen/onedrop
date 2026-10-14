@@ -145,6 +145,7 @@ The JavaScript, in load order:
 | `audio.js`                           | the riddim engine                                     |
 | `game.js`                            | renderer, camera, rules, input, HUD and the main loop |
 | `batch.js`                           | draw-call folding: one `BatchedMesh` per material      |
+| `guard.js`                           | frame-time governor: trades quality to hold 60 fps    |
 | `art.js`, `assets.js`, `vibrance.js` | texture/art helpers and post-processing               |
 | `vendor/three.module.js`, `vendor/three.core.js` | three.js **r186**, unmodified           |
 
@@ -154,6 +155,28 @@ parallel while evaluating it in the original document order — so there is stil
 no build step and no bundler. The vendored files are the official `build/`
 output of `three@0.186.0`: since r161 three.js ships no UMD/global build, which
 is why the old stack of `<script defer>` tags sharing one `THREE` global is gone.
+
+### Frame time, and what the picture costs
+
+`guard.js` is a governor, not a benchmark. It watches the interval between
+frames, and on a machine that cannot hold 60 fps it trades quality for frame
+time in a fixed order: the live mirror panels' render targets first (they are
+seen edge-on through the glass), then the drawing buffer itself. It is
+deliberately sceptical — every change is an experiment, and if the frame time
+does not improve the quality is handed straight back and the governor stops
+trying, so a machine that is short of CPU never gets a softer picture for
+nothing. The HUD always shows the current frame time, and which trade is in
+force when there is one: `60 FPS   16.7 ms   [mirror 50% · render 78%]`.
+
+The governor also caps the drawing buffer at ~4.2 MPix however large the window
+and the device pixel ratio are. An uncapped retina buffer is *several* 4K
+frames' worth of samples once MSAA and the four passes a frame are counted,
+which is how a GPU that shares system RAM with the CPU gets pushed into a
+driver reset. And if the graphics device does go away under the game — a
+Windows GPU hang, which takes every WebGL context in the browser with it — the
+page says so and restarts itself, because three.js can re-initialize GL state
+but cannot rebuild the buffers, textures and programs that died with the old
+context.
 
 ## Special thanks
 

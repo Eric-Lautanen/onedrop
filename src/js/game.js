@@ -18,6 +18,7 @@
 import './dmd.js';
 import * as THREE from './vendor/three.module.js';
 import './batch.js';
+import './guard.js';
 
 (function (global) {
   'use strict';
@@ -61,6 +62,8 @@ import './batch.js';
 
   /* ================= renderer ================= */
   var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
+  /* the full-quality ratio; the governor's ceiling and its tiers scale it
+     from here (see guard.js -- it also caps the buffer at PIX_BUDGET) */
   renderer.setPixelRatio(Math.min(global.devicePixelRatio || 1, 2));
   renderer.setSize(global.innerWidth, global.innerHeight);
   if ('outputColorSpace' in renderer) renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -70,6 +73,56 @@ import './batch.js';
 
   var scene = new THREE.Scene();
   scene.background = new THREE.Color(0x05070a);
+
+  /* the frame-rate governor owns two knobs from here on: the drawing
+     buffer's scale and the mirror panels' render targets. It is told the
+     full-quality pixel ratio so it can always find its way back to it. */
+  if (global.PB.guard) {
+    global.PB.guard.attach({ renderer: renderer, root: scene,
+      baseDpr: Math.min(global.devicePixelRatio || 1, 2) });
+  }
+  /* ---- a graphics device that went away -------------------------------
+     Windows resets a hung GPU (the "live kernel" watchdog): the driver is
+     reloaded, and every WebGL context in every browser on the machine dies
+     with it. three.js notices -- it preventDefaults the lost event, stops
+     drawing (render() returns while the context is lost) and logs Context
+     Lost -- but its restore path only re-initialises GL STATE. The buffers,
+     textures, programs and render targets it cached for this scene are dead
+     handles by then, so a restored context draws garbage, and the page has
+     no way back on its own.
+
+     So this page restarts. The machine is rebuilt from source and the atlas
+     re-decoded in a couple of seconds, which is the only honest recovery
+     available: a scene rebuilt on a fresh context is correct, whereas a
+     scene patched onto a restored one is hopeful. Say what happened first
+     -- a black screen with no explanation is the thing players read as
+     "the game broke my computer" -- then reload. */
+  (function bindContextLoss() {
+    var dom = renderer.domElement;
+    var handling = false;
+    function lost(ev) {
+      if (ev && ev.preventDefault) ev.preventDefault();   /* ask for a restore */
+      if (handling) return;
+      handling = true;
+      pfWarn('WebGL context lost -- the graphics driver reset under the game. ' +
+             'Restarting the page: three.js cannot rebuild the buffers and ' +
+             'textures that died with the old context.');
+      paused = true;
+      if (D.loader) {
+        D.loader.classList.remove('gone');
+        if (D.ldFill) D.ldFill.style.width = '0%';
+      }
+      if (D.ldMsg) D.ldMsg.textContent = 'graphics device reset \u2014 restarting\u2026';
+      setText(D.fps, 'GRAPHICS DEVICE RESET');
+      global.setTimeout(function () { location.reload(); }, 2000);
+    }
+    dom.addEventListener('webglcontextlost', lost, false);
+    dom.addEventListener('webglcontextrestored', function () {
+      /* the context is back, but not this scene's GPU objects with it */
+      pfWarn('WebGL context restored; restarting the page to rebuild the scene');
+    }, false);
+  })();
+
   scene.fog = new THREE.FogExp2(0x05070a, 0.0032);
 
   var camera = new THREE.PerspectiveCamera(45, global.innerWidth / global.innerHeight, 0.5, 400);
@@ -697,6 +750,9 @@ import './batch.js';
     renderer.setSize(w, h);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
+    /* the new size is at full scale, and a rebuild has just made fresh
+       mirror targets: put the governor's current tier back on top */
+    if (global.PB.guard) global.PB.guard.apply();
     fitCamera();
     /* the standing view frames DMD + flippers against the FOV, so a new
        aspect needs a new pose -- recomputed live even mid-game */
@@ -2018,10 +2074,20 @@ import './batch.js';
     var dt = now - prevT;
     prevT = now;
 
+    /* hand the governor the interval it judges (it ignores stalls itself) */
+    if (global.PB.guard) global.PB.guard.sample(raw);
+
     fpsAcc += raw; fpsFrames++;
     if (fpsAcc > 0.5) {
       var info = renderer.info;
-      setText(D.fps, Math.round(fpsFrames / fpsAcc) + ' FPS   ' +
+      /* frame time in the readout, and whatever quality the governor is
+         trading for it -- see guard.js */
+      var gov = global.PB.guard, govTxt = '';
+      if (gov) {
+        var gs = gov.state();
+        govTxt = '   ' + gs.emaMs.toFixed(1) + ' ms' + (gs.label ? '   [' + gs.label + ']' : '');
+      }
+      setText(D.fps, Math.round(fpsFrames / fpsAcc) + ' FPS' + govTxt + '   ' +
         info.render.calls + ' calls   ' + (info.render.triangles / 1000).toFixed(1) + 'k tri   ' +
         info.memory.geometries + ' geo   ' + info.memory.textures + ' tex');
       fpsAcc = 0; fpsFrames = 0;
@@ -2520,6 +2586,11 @@ import './batch.js';
     if (D.ldFill) D.ldFill.style.width = '100%';
     if (D.ldMsg) D.ldMsg.textContent = 'ready';
     if (D.loader) D.loader.classList.add('gone');
+    /* the boot is over: the frame-rate governor may start judging frames
+       now (before this it only measures -- see guard.js). A fresh load's
+       decode storm is not a frame rate, and a governor that took it for one
+       would trim quality on every launch and hand it back a moment later. */
+    if (global.PB.guard) global.PB.guard.start();
     if (D.menu) {
       D.menu.classList.remove('above');
       /* the drop itself: from fully parked above the screen */
