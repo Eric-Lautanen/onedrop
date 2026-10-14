@@ -94,7 +94,26 @@ pausing is `P`, or the menu's own PAUSE button.
 
 The game is a static site, so you only need a modern browser and *some* way  
 to serve the folder over `http://localhost` (loading `index.html` straight  
-from disk can block the sprite sheet and the audio engine in some browsers).
+from disk can block the sprite sheet and the audio engine in some browsers).  
+The loading screen animates from the very first paint — it is driven by an  
+inline script, not by the app, so the bar moves while the module graph (which  
+is what a cold cache is really waiting on) is still downloading, and it names  
+the bytes it has when it can measure them.
+
+### Serving notes
+
+The page loads three.js from [`src/js/vendor/three.module.min.js`](src/js/vendor/three.module.min.js)  
+— a locally minified **r186** bundle (748 KB, one request) instead of the  
+2.07 MB of unminified `three.core.js` + `three.module.js` that upstream  
+ships, since upstream publishes no minified ES module for this revision.  
+[`src/js/vendor/README.md`](src/js/vendor/README.md) has the one-line `bun`  
+command that regenerates it and the checks that back the swap.
+
+The bundled server deliberately sends `Cache-Control: no-cache` and no  
+compression — right for development, wrong for a real host. Over the network  
+turn on gzip/brotli (the JS drops to roughly a third of its size) and let the  
+hashed-once vendor file cache; the loading bar reports real download bytes, so  
+a slow connection is visible rather than looking hung.
 
 ### Requirements
 

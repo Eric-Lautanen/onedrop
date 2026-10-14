@@ -16,7 +16,7 @@
      - input, HUD and the main loop
    ============================================================ */
 import './dmd.js';
-import * as THREE from './vendor/three.module.js';
+import * as THREE from './vendor/three.module.min.js';
 import './batch.js';
 import './guard.js';
 
@@ -3090,8 +3090,18 @@ import './guard.js';
      `shown` eases toward `target` and never decreases; the fill also carries
      a CSS transition, so the bar keeps gliding between our updates. */
   var LD_LO = 6, LD_HI = 60;              /* the byte band */
-  var ldShown = 0, ldTarget = LD_LO, ldTick = 0, ldMsgKey = '';
+  var ldShown = 0, ldTarget = LD_LO, ldTick = 0, ldMsgKey = '', ldMsgText = '';
   var ldStart = ldClock();
+  /* ---- take the bar over from index.html's inline driver ----------------
+     That driver has been moving the bar since the first paint, which is the
+     whole cold-cache download before this file even executes (see the note
+     in index.html). Adopt its percentage and stop it, or the handover would
+     snap the bar back down to 6% and read as a restart. */
+  var ldHead = global.__PB_LOADER;
+  if (ldHead) {
+    ldShown = ldTarget = Math.max(ldTarget, ldHead.shown() || 0);
+    ldHead.stop();
+  }
   function ldClock() {
     return (global.performance && global.performance.now) ? global.performance.now() / 1000 : 0;
   }
@@ -3105,8 +3115,22 @@ import './guard.js';
       if (D.ldFill) D.ldFill.style.width = ldShown.toFixed(1) + '%';
     }
   }
+  /* Written when the TEXT changes, not when the key does: the artwork
+     message carries a byte count, which ticks up several times per second
+     during the download and has to be allowed to say so. */
   function ldSay(msg, key) {
-    if (D.ldMsg && key !== ldMsgKey) { D.ldMsg.textContent = msg; ldMsgKey = key; }
+    ldMsgKey = key;
+    if (D.ldMsg && msg !== ldMsgText) { D.ldMsg.textContent = msg; ldMsgText = msg; }
+  }
+  /* what the sheet's download is actually doing, in bytes when the inline
+     script managed to stream it and just a phrase when it could not */
+  function ldSheetLabel() {
+    var h = global.__PB_SHEET;
+    if (h && !h.done && !h.failed && h.total > 0) {
+      return 'loading the artwork  ' + Math.max(1, Math.round(h.loaded / 1024)) +
+             ' / ' + Math.round(h.total / 1024) + ' KB';
+    }
+    return 'loading the artwork';
   }
   /* The honest ceiling while the sheet is in flight: the byte count when we
      have one, and a slow expectation under it so a browser that cannot
@@ -3128,7 +3152,7 @@ import './guard.js';
          boot on to the procedural-art path instead of waiting for the
          panic timer. */
       if (assets.failed) bootSheetDone = true;
-      else { ldSetTarget(ldSheetTarget()); ldSay('loading the artwork', 'sheet'); }
+      else { ldSetTarget(ldSheetTarget()); ldSay(ldSheetLabel(), 'sheet'); }
     }
     if (bootSheetDone) { ldSetTarget(78); ldSay('painting the table', 'paint'); }
     ldCreep();

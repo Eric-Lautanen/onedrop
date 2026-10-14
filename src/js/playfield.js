@@ -26,7 +26,7 @@
    children are positioned relative to (centerX, centerY).
    ============================================================ */
 import './assets.js';
-import * as THREE from './vendor/three.module.js';
+import * as THREE from './vendor/three.module.min.js';
 
 (function (global) {
   'use strict';

@@ -34,7 +34,7 @@
      x  3 .. 20      left slingshot      (mirror 80 .. 97)
      x 30 / 70       flipper pivots
    ============================================================ */
-import * as THREE from './vendor/three.module.js';
+import * as THREE from './vendor/three.module.min.js';
 
 (function (global) {
   'use strict';

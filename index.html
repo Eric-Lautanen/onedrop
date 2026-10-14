@@ -19,7 +19,7 @@
 <script>
 (function () {
   var SOURCES = ['assets/sprite2.webp', 'assets/sprite2.png'];
-  var st = { pct: 0, done: false, failed: false, blob: null };
+  var st = { pct: 0, done: false, failed: false, blob: null, loaded: 0, total: 0 };
   var settleHead;
   st.promise = new Promise(function (res) { settleHead = res; });
   window.__PB_SHEET = st;
@@ -41,6 +41,7 @@
             return;
           }
           chunks.push(r.value); got += r.value.length;
+          st.loaded = got; st.total = total;
           if (total > 0) st.pct = Math.min(100, Math.round(got / total * 100));
           return read();
         });
@@ -49,6 +50,58 @@
     }).catch(function () { attempt(i + 1); });
   }
   try { attempt(0); } catch (e) { giveUp(); }
+
+  /* ---- THE LOADING BAR HAS TO MOVE BEFORE THE APP EXISTS ---------------
+     The boot's real cost on a cold cache is the module graph -- three.js
+     alone is about a megabyte -- and the game's own loader animation lives
+     at the END of that graph. So for the whole download the bar sat at 0%,
+     saying "loading...", which is indistinguishable from a hang: the report
+     that started this was "it takes a bit before the bar does anything, it
+     seems to be hanging".
+     The animation therefore lives HERE, in the only script that runs before
+     any module: it creeps the same band the game does (6% -> 60% for the
+     sheet) using the byte count this script is already streaming, and names
+     what it is doing. game.js adopts the percentage on the way up (see
+     takeLoader) so the handover is invisible, and stops this loop. */
+  var fill = null, msg = null, shown = 0, stopped = false;
+  var t0 = (window.performance && performance.now) ? performance.now() : Date.now();
+  var firstMove = 0;
+  function now() {
+    return ((window.performance && performance.now) ? performance.now() : Date.now()) - t0;
+  }
+  function kb(bytes) { return Math.max(1, Math.round(bytes / 1024)) + ' KB'; }
+  function label() {
+    if (st.done) return 'starting the machine';
+    if (st.total > 0) return 'downloading the artwork  ' + kb(st.loaded) + ' / ' + kb(st.total);
+    return 'downloading the artwork';
+  }
+  function tick() {
+    if (stopped) return;
+    /* the loader markup is in the BODY, this script is in the HEAD: look the
+       nodes up lazily rather than at parse time, when they do not exist */
+    if (!fill) fill = document.getElementById('ldFill');
+    if (!msg) msg = document.getElementById('ldMsg');
+    var t = now() / 1000;
+    var byBytes = st.done ? 1 : (st.total > 0 ? st.loaded / st.total : 0);
+    /* the game's bands and easing, so the two drivers agree at the handover:
+       6% floor, 60% cap for the sheet, plus a slow time term so a browser
+       that cannot measure bytes still sees movement rather than a freeze */
+    var target = 6 + (60 - 6) * Math.max(byBytes, 1 - Math.exp(-t / 4));
+    if (target > shown) shown = Math.min(target, shown + Math.max(1.5, (target - shown) * 0.18));
+    if (shown > 0 && !firstMove) firstMove = now();
+    if (fill) fill.style.width = shown.toFixed(1) + '%';
+    if (msg) {
+      var text = label();
+      if (msg.textContent !== text) msg.textContent = text;
+    }
+    window.setTimeout(tick, 40);
+  }
+  window.__PB_LOADER = {
+    shown: function () { return shown; },
+    firstMoveMs: function () { return Math.round(firstMove); },
+    stop: function () { stopped = true; }
+  };
+  tick();
 })();
 </script>
 <link rel="stylesheet" href="src/css/style.css">

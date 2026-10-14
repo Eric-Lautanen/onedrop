@@ -44,7 +44,7 @@
    a late texture load, a hot resize, or a rebuild.
    ============================================================ */
 import './machine.js';
-import * as THREE from './vendor/three.module.js';
+import * as THREE from './vendor/three.module.min.js';
 
 (function (global) {
   'use strict';
