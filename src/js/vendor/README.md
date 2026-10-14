@@ -12,10 +12,11 @@ is how the file was produced, should it ever need reproducing:
 ## Why we minify it ourselves
 
 Upstream ships **no minified ES module** for r186. The published package's
-`build/` holds only `three.core.js`, `three.module.js`, `three.tsl.js`,
-`three.webgpu.js` and `three.webgpu.nodes.js` (checked against `three@0.186.0`
-on unpkg, and the two files here are byte-identical to those), so there is
-nothing to download.
+`build/` holds only `three.cjs`, `three.core.js`, `three.module.js`,
+`three.tsl.js`, `three.webgpu.js` and `three.webgpu.nodes.js` (checked against
+`three@0.186.0` on unpkg, and the two files here are byte-identical to those),
+so there is nothing to download: r185 was the last revision to publish
+`three.module.min.js` and `three.core.min.js`, and r186 dropped them.
 
 `three.core.js` (1.46 MB) + `three.module.js` (0.66 MB) are 2.07 MB of source;
 the bundle above is **748 KB in one file** — 64% less, and one request instead

@@ -2,9 +2,8 @@
 
 ### ▶ **[Play the live demo](https://Eric-Lautanen.github.io/onedrop/)**
 
-> The demo above is hosted on GitHub Pages. Enable it for this repo once  
-> (Settings → Pages → Deploy from branch `main`, folder `/ (root)`).  
-> Everything is static, so no build step is needed.
+> The demo is served from GitHub Pages (`main`, `/ (root)`). Everything is  
+> static, so there is no build step between a commit and that URL.
 
 ---
 
@@ -44,8 +43,8 @@ the physics layout and the artwork can never drift apart.
   orbit/zoom camera, and hit effects (particles, trails, flashes, floating  
   scores) that can be toggled.
 - **Plays anywhere.** Keyboard on desktop, on-screen buttons on touch devices —  
-  and a **CAMERA LOCK** for tablets, so a thumb reaching for a flipper can land  
-  on the glass without swinging the table.
+  and a **LOCK CAMERA** switch for tablets, so a thumb reaching for a flipper can  
+  land on the glass without swinging the table.
 - **Remembers your setup.** Volume, sound, FX, key bindings, fullscreen and the  
   camera lock are all kept in `localStorage` and come back on the next visit.
 
@@ -53,8 +52,8 @@ the physics layout and the artwork can never drift apart.
 
 | Input                    | Action                                |
 | ------------------------ | ------------------------------------- |
-| `Z` / left arrow         | Left flipper                          |
-| `/` / right arrow        | Right flipper                         |
+| `Z`                      | Left flipper                          |
+| `/`                      | Right flipper                         |
 | `Space` (hold to the stop, release) | Plunge (the draw must be full) |
 | `A` / `D`                | Nudge left / right                    |
 | `R`                      | Reset game (one press)                |
@@ -62,6 +61,10 @@ the physics layout and the artwork can never drift apart.
 | `P`                      | Pause                                 |
 | `F`                      | Fullscreen                            |
 | Mouse / touch            | Drag to orbit; wheel or two-finger pinch to zoom (both dead while LOCK CAMERA is on) |
+
+The arrow keys are deliberately **not** game keys: the game swallows them so  
+that the volume fader can use them while the menu holds focus. Flippers are  
+`Z` and `/` (or the on-screen buttons), and both are rebindable.
 
 The plunger has to come **all the way back**: let go early and the spring simply  
 returns, the ball stays in the lane and the panel says so. The same is true of  
@@ -104,16 +107,17 @@ the bytes it has when it can measure them.
 
 The page loads three.js from [`src/js/vendor/three.module.min.js`](src/js/vendor/three.module.min.js)  
 — a locally minified **r186** bundle (748 KB, one request) instead of the  
-2.07 MB of unminified `three.core.js` + `three.module.js` that upstream  
-ships, since upstream publishes no minified ES module for this revision.  
-[`src/js/vendor/README.md`](src/js/vendor/README.md) has the one-line `bun`  
-command that regenerates it and the checks that back the swap.
+2.07 MB of unminified `three.core.js` + `three.module.js` upstream ships.  
+Upstream's own minified builds stop at r185, so for this revision there is  
+nothing to download; [`src/js/vendor/README.md`](src/js/vendor/README.md) has  
+the one-line `bun` command that regenerates it and the checks that back the  
+swap.
 
 The bundled server deliberately sends `Cache-Control: no-cache` and no  
 compression — right for development, wrong for a real host. Over the network  
-turn on gzip/brotli (the JS drops to roughly a third of its size) and let the  
-hashed-once vendor file cache; the loading bar reports real download bytes, so  
-a slow connection is visible rather than looking hung.
+turn on gzip/brotli (measured: 748 KB → 191 KB, a quarter of it) and let the  
+vendor file cache for as long as you like; the loading bar reports real  
+download bytes, so a slow connection is visible rather than looking hung.
 
 ### Requirements
 
@@ -180,33 +184,38 @@ This puts **ONE DROP Pinball** on your Desktop, pointed at
 index.html          the page: loader, menu, DMD canvas, module entry
 src/css/style.css   all styling
 src/js/             the game (see below)
-assets/             the sprite sheet + artwork (sprite2.webp with .png fallback)
+assets/             the sprite sheet (sprite2.webp, .png fallback) and the
+                    reference art the machine was measured from
 server/             local servers + desktop launcher (no dependencies)
 dev/                development and verification scratch (not needed to play)
 ```
 
-The JavaScript, in load order:
+The JavaScript, deepest dependency first — `game.js` is the entry point:
 
 | file                                 | role                                                  |
 | ------------------------------------ | ----------------------------------------------------- |
 | `table.js`                           | the measured layout — pure data                       |
 | `physics.js`                         | the solver                                            |
+| `art.js`                             | all artwork painted at runtime on a 2D canvas          |
+| `assets.js`                          | the sprite sheet and its measured regions, sampled by UV |
 | `playfield.js`                       | every piece of hardware, built and animated           |
 | `machine.js`                         | the cabinet, backbox and legs                         |
-| `dmd.js`                             | the dot-matrix display                                |
+| `vibrance.js`                        | colour-faithful materials for the painted surfaces     |
 | `audio.js`                           | the riddim engine                                     |
-| `game.js`                            | renderer, camera, rules, input, HUD and the main loop |
+| `dmd.js`                             | the dot-matrix display                                |
 | `batch.js`                           | draw-call folding: one `BatchedMesh` per material      |
 | `guard.js`                           | frame-time governor: trades quality to hold 60 fps    |
-| `art.js`, `assets.js`, `vibrance.js` | texture/art helpers and post-processing               |
-| `vendor/three.module.js`, `vendor/three.core.js` | three.js **r186**, unmodified           |
+| `game.js`                            | renderer, camera, rules, input, HUD and the main loop |
+| `vendor/three.module.min.js`         | three.js **r186**, the one file the page loads         |
+| `vendor/three.core.js`, `vendor/three.module.js` | those same revision's upstream files, untouched — the dev probes in `dev/` import these, and they are what the bundle above is built from |
 
-The game is one ES module. `game.js` imports the file before it, that chain
-ends at the two vendored three.js modules, and the browser fetches the graph in
-parallel while evaluating it in the original document order — so there is still
-no build step and no bundler. The vendored files are the official `build/`
-output of `three@0.186.0`: since r161 three.js ships no UMD/global build, which
-is why the old stack of `<script defer>` tags sharing one `THREE` global is gone.
+The game is a plain graph of ES modules. `game.js` imports the file before it,
+that chain ends at the single vendored three.js bundle, and the browser fetches
+the graph in parallel while evaluating it in the original document order — so
+there is still no build step and no bundler. Those vendored originals are the
+official `build/` output of `three@0.186.0`: since r161 three.js ships no
+UMD/global build, which is why the old stack of `<script defer>` tags sharing
+one `THREE` global is gone.
 
 ### Frame time, and what the picture costs
 
