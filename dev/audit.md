@@ -266,12 +266,30 @@ launcher servers:
 
 ### Verification
 
+* **The committed tree is what was tested, not just the working tree.** A
+  fresh `git archive HEAD` export was served from a scratch port and loaded
+  cold: no page errors, the sheet settling as webp, the cabinet built, the
+  loader dismissed at 7.7 s (cold Edge profile + shader cache -- well under
+  the 9 s panic timer, i.e. on readiness), 407 draw calls and the game in
+  attract at the reveal and still there 2.5 s later.
+* **That check found a real defect in the first attempt at this commit.**
+  Taking `game.js` whole pulled in another session's idle-table hunk, which
+  calls `world.updateFlippers()` -- a method added in THEIR uncommitted
+  `physics.js` -- so `HEAD` shipped a caller with no callee: the committed
+  snapshot threw `world.updateFlippers is not a function` every frame and
+  only the panic timer brought the machine up. Committing that 7-line
+  addition (`9359b76`) made the tree self-consistent and the check pass. Two
+  things worth keeping from it: the panic path behaves as designed (a broken
+  frame loop still dismisses the loader instead of hanging on it), and
+  "verify the export, not the worktree" is the check that catches a commit
+  made of parts.
+* All six physics/input suites **exit 0** on the working tree (which is the
+  same content, plus the other session's uncommitted `audio.js`):
+  `verify-playfield`, `verify-drains`, `verify-plunger`,
+  `verify-buttons-sling`, `verify-mirrors`, `verify-flow`.
 * **No page errors** in any of the timed runs (both rasterisers), and the
   live browser panel's console after a fresh load shows the boot-marks
   warning and nothing else; its network log shows only `/ping` 200s.
-* All six physics/input suites **exit 0** on the final tree:
-  `verify-playfield`, `verify-drains`, `verify-plunger`,
-  `verify-buttons-sling`, `verify-mirrors`, `verify-flow`.
 * The reveal lands on a real machine: the frame captured the moment the
   loader is dismissed measures mean RGB (13, 19, 17) with 244 colour
   buckets, against (18, 23, 20) / 220 for the known-good cabinet shot --
