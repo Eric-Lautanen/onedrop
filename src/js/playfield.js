@@ -980,17 +980,34 @@ import * as THREE from './vendor/three.module.min.js';
 
       /* dark smoked lens rims: always visible, so the playfield still
          reads as a machine when everything is unlit */
+      /* Everything in this block sits FLAT ON the painting -- the rims are
+         0.055 up and the lenses and their halos 0.063 -- and at a grazing
+         view a gap that small loses to the depth buffer: the lens and the
+         artwork under it trade the test pixel by pixel, which reads as the
+         inserts sparkling at low angles. A depth bias settles it. Measured
+         at the grazing view: a token -1/-1 does essentially nothing there
+         (the layer and the field are still within one depth step of each
+         other over most of the pane), while -2/-16 takes three quarters of
+         the sparkle off. The lens and the halo BLEND and never write depth,
+         so biasing them hard cannot hide anything behind them -- they can
+         only add light, and the painting keeps every pixel it had.
+
+         The rim is the one that DOES write depth, so it stays at a token
+         bias: it must not be able to beat a ball that has rolled up to it.
+         Its own gap (0.055, the widest of the three) is what carries it. */
       var rim = new T.InstancedMesh(whiteGeo(new T.RingGeometry(0.96, 1.02, 32)),
         ownM(new T.MeshStandardMaterial({
           color: srgb(0x665430), metalness: 0.65, roughness: 0.40,
-          side: T.DoubleSide
+          side: T.DoubleSide,
+          polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -2
         })), n);
       rim.frustumCulled = false;
 
       var lensMat = ownM(new T.MeshBasicMaterial({
         color: 0xffffff, vertexColors: true, toneMapped: false,
         transparent: true, opacity: 0.42, depthWrite: false,
-        blending: T.AdditiveBlending
+        blending: T.AdditiveBlending,
+        polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -16
       }));
       var lens = new T.InstancedMesh(whiteGeo(new T.CircleGeometry(0.94, 32)), lensMat, n);
       lens.frustumCulled = false;
@@ -999,7 +1016,8 @@ import * as THREE from './vendor/three.module.min.js';
       var haloMat = ownM(new T.MeshBasicMaterial({
         color: 0xffffff, vertexColors: true, toneMapped: false,
         transparent: true, opacity: 0.12, depthWrite: false,
-        blending: T.AdditiveBlending
+        blending: T.AdditiveBlending,
+        polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -16
       }));
       var haloGeo = whiteGeo(new T.PlaneGeometry(2, 2));
       haloMat.map = glowTex;

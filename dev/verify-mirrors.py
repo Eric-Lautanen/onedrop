@@ -116,7 +116,12 @@ with sync_playwright() as p:
          laid over the pane itself, each projected to the screen for the
          current camera, so the sampling is the pane's own surface and not
          the whole viewport. */
-      const box=glass.geometry.parameters;
+      /* The pane is an extruded crystal profile now, and an extruded
+         geometry has no width/height/depth in `parameters`, so its own
+         dimensions are read from userData -- falling back to parameters for
+         a plain box. Without this every pane sample below would be NaN and
+         the glass assertions would pass vacuously. */
+      const box=glass.userData.pane||glass.geometry.parameters;
       const up=new T.Vector3(0,0,1).applyQuaternion(g.group.quaternion).normalize();
       const north=new T.Vector3(0,1,0).applyQuaternion(g.group.quaternion).normalize();
       const fb=new Uint8Array(w*h*4);

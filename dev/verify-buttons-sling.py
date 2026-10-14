@@ -14,7 +14,12 @@ with sync_playwright() as p:
       ['left','right'].forEach((side,i)=>{
         const grp=m.root.getObjectByName(side+' flipper button');
         if(!grp)throw Error('Missing button');
-        const oldZ=4.1-2.75,glassZ=4.1+2.9*Math.tan(12.3*Math.PI/180)-.52+.045;
+        /* the glass line is the PANE'S OWN top, read off the pane rather
+           than hard-coded, so a change to the sheet's thickness cannot
+           silently invalidate this (the sheet is a crystal profile now,
+           not the 0.09 film this used to assume) */
+        const pane=m.root.getObjectByName('clear playfield glass').userData.pane;
+        const oldZ=4.1-2.75,glassZ=4.1+2.9*Math.tan(12.3*Math.PI/180)-.52+pane.depth/2;
         if(Math.abs(grp.position.z-(oldZ+glassZ)/2)>1e-8)throw Error('Button not raised halfway');
         const btn=grp.children.find(o=>o.geometry.parameters.radiusTop===.54),col=btn.material.color;
         if(!(col.r>col.g*20 && col.r>col.b*20))throw Error('Button material not saturated red');

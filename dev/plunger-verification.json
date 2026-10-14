@@ -3,15 +3,15 @@
     "pullFraction": 0.945,
     "travelUnits": 3.213,
     "springScale": 0.6031,
-    "handleOutOfFrontUnits": 6.506753220165738,
-    "glassFrontZ": 24.755427480012337,
+    "handleOutOfFrontUnits": 6.346981194593159,
+    "glassFrontZ": 24.915199505584916,
     "travelK": 3.4
   },
   "release": "Release snapped the handle home",
   "settled": {
     "restOffsetUnits": 0,
     "springScale": 1,
-    "handleNubAtRestUnits": 1.9252911284402394
+    "handleNubAtRestUnits": 1.7655191028676605
   },
   "face": {
     "ferruleOffRodUnits": 2.5918417478740246e-15,

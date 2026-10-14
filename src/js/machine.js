@@ -375,6 +375,36 @@ import * as THREE from './vendor/three.module.min.js';
          readable glint in the player's view. */
       lamp(x, N * 0.26, N * 0.07, N * 0.44, 4, 0.06);
       lamp(x, N * 0.74, N * 0.15, N * 0.30, 3, -0.10);
+
+      /* THE SOFTBOX. This is the change that lets the pane read as a watch
+         crystal rather than as a hole: every piece of watch photography has
+         one long, broad, bright panel, and the crystal's whole job is to
+         reflect it as a single clear band with a hard glow round it. The
+         strips above are the room's fittings and they are far too thin to
+         survive being reflected off a surface at a grazing angle -- when
+         the chamfer leans the normal they miss it entirely, which is why
+         the rim used to come out as nothing. A big shape cannot be missed.
+         Rectangular with soft ends on purpose: a WASH reflects as milk and
+         is the thing this whole approach avoids, and a SHAPE swept by the
+         leaning rim is exactly the band a bevel is supposed to catch. It is
+         most of a wall -- a pane in a room with a window has a window in
+         it -- and the gain is set so it lifts the painting without hiding
+         it. */
+      var sbx = x.createLinearGradient(0, N * 0.30, 0, N * 0.66);
+      sbx.addColorStop(0.00, 'rgba(255,250,238,0)');
+      sbx.addColorStop(0.18, 'rgba(255,250,238,0.70)');
+      sbx.addColorStop(0.82, 'rgba(255,250,238,0.70)');
+      sbx.addColorStop(1.00, 'rgba(255,250,238,0)');
+      x.fillStyle = sbx;
+      x.fillRect(N * 0.06, N * 0.30, N * 0.88, N * 0.36);
+      /* and a bright core inside it, so there is a defined edge to catch */
+      var core = x.createLinearGradient(0, N * 0.38, 0, N * 0.58);
+      core.addColorStop(0.00, 'rgba(255,255,252,0)');
+      core.addColorStop(0.30, 'rgba(255,255,252,0.80)');
+      core.addColorStop(0.70, 'rgba(255,255,252,0.80)');
+      core.addColorStop(1.00, 'rgba(255,255,252,0)');
+      x.fillStyle = core;
+      x.fillRect(N * 0.12, N * 0.38, N * 0.76, N * 0.20);
       return b.c;
     }
     var t = new THREE.CubeTexture([wall(), wall(), ceiling(), floor(), wall(), wall()]);
@@ -475,9 +505,19 @@ import * as THREE from './vendor/three.module.min.js';
      Each wall has a projective render target and an oblique near plane;
      objects behind the wall are clipped rather than ghosted through it. */
   function installMirror(mesh, mirrors, targets) {
+    /* MSAA ON THE REFLECTION ITSELF. The canvas asks the renderer for
+       antialias, but that only covers the DEFAULT framebuffer: a render
+       target is its own unsampled surface unless it asks for samples of
+       its own, and this one never did. So the reflected machinery kept its
+       hard staircase edges while everything around it was smoothed, which
+       is what made the contents of the blades look jagged next to the rest
+       of the machine. samples:4 gives the mirror pass the same coverage as
+       the canvas, and the governor's setSize() leaves the sample count
+       alone -- only the width and height move. The depth buffer stays the
+       pass's own, because the oblique near plane clips against it. */
     var target = new THREE.WebGLRenderTarget(768, 768, {
       minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter,
-      format: THREE.RGBAFormat, depthBuffer: true
+      format: THREE.RGBAFormat, depthBuffer: true, samples: 4
     });
     targets.push(target);
     var textureMatrix = new THREE.Matrix4();
@@ -675,18 +715,45 @@ import * as THREE from './vendor/three.module.min.js';
          stretch along the wipes and the dust softens a few pixels of them.
          depthWrite stays off so the glass can never cut the playfield out
          of the depth buffer, and it is tone mapped with the rest of the
-         scene so the reflection sits in the same grade as the cabinet. */
+         scene so the reflection sits in the same grade as the cabinet.
+
+         AND THE CRYSTAL, because a pane that only reflects reads as a hole
+         in the scene. What makes a watch crystal a watch crystal is the
+         SHAPED, POLISHED OPTICAL SURFACE around a clear centre:
+
+           THE CHAMFER is GEOMETRY -- see glassGeo above, which builds the
+           pane as an extruded rectangle with a 45-degree bevel round its
+           rim. This was tried the other way first and the measurement is
+           worth recording: leaning the normal inside a painted border band
+           moves the reflected value by about two units out of 255 and is
+           invisible, because a chamfer catches light through its FACET
+           ANGLES -- the near facet turns away from the eye, so its Fresnel
+           goes to the top of Schlick's curve and it comes back as nearly a
+           full mirror, where the flat face returns four percent. That is
+           the bright rim, and no amount of shader can fake it on a plane.
+
+           THE COATING. Anti-reflective sapphire is not reflectionless: it
+           leaves a faint blue-violet residual at the angles it cannot
+           cancel, which are the grazing ones where F is already rising.
+           glassAR tints the REFLECTION by F, so it can only ever reshape
+           light the room sent back, and can never lay a colour of its own
+           on the painting -- which is the one rule this shader has.
+
+         The pane's own UVs are a plain 0..1 rectangle over its footprint
+         (glassGeo rewrites ExtrudeGeometry's shape-unit UVs), so the scuff
+         map still reads corner to corner. */
       glass: new THREE.ShaderMaterial({
         name: 'clear glass reflection', transparent: true,
         depthWrite: false, side: THREE.FrontSide, toneMapped: true,
         uniforms: {
           glassEnv: { value: glassEnv },
           glassScuffs: { value: glassScuffs },
-          glassGain: { value: 3.4 },
-          glassF0: { value: 0.04 }
+          glassGain: { value: 5.0 },
+          glassF0: { value: 0.04 },
+          glassAR: { value: 0.45 }        /* residual coating, at grazing */
         },
         vertexShader: 'varying vec2 paneUV; varying vec3 paneNormal; varying vec3 paneView; void main(){paneUV=uv; vec4 world=modelMatrix*vec4(position,1.0); paneNormal=normalize(mat3(modelMatrix)*normal); paneView=cameraPosition-world.xyz; gl_Position=projectionMatrix*viewMatrix*world;}',
-        fragmentShader: 'uniform samplerCube glassEnv; uniform sampler2D glassScuffs; uniform float glassGain; uniform float glassF0; varying vec2 paneUV; varying vec3 paneNormal; varying vec3 paneView; void main(){ vec3 n=normalize(paneNormal); vec3 v=normalize(paneView); float NoV=clamp(dot(n,v),0.0,1.0); float F=glassF0+(1.0-glassF0)*pow(1.0-NoV,5.0); vec3 r=reflect(-v,n); float scuff=texture2D(glassScuffs,paneUV).r; vec3 smear=normalize(r+vec3(scuff*0.045,scuff*0.030,scuff*0.018)); vec3 refl=mix(textureCube(glassEnv,r).rgb,textureCube(glassEnv,smear).rgb,scuff); gl_FragColor=vec4(refl*glassGain,F);\n#include <tonemapping_fragment>\n#include <colorspace_fragment>\n}'
+        fragmentShader: 'uniform samplerCube glassEnv; uniform sampler2D glassScuffs; uniform float glassGain; uniform float glassF0; uniform float glassAR; varying vec2 paneUV; varying vec3 paneNormal; varying vec3 paneView; void main(){ vec3 n=normalize(paneNormal); vec3 v=normalize(paneView); float NoV=clamp(dot(n,v),0.0,1.0); float F=glassF0+(1.0-glassF0)*pow(1.0-NoV,5.0); vec3 r=reflect(-v,n); float scuff=texture2D(glassScuffs,paneUV).r; vec3 smear=normalize(r+vec3(scuff*0.045,scuff*0.030,scuff*0.018)); vec3 refl=mix(textureCube(glassEnv,r).rgb,textureCube(glassEnv,smear).rgb,scuff); vec3 coat=mix(vec3(1.0),vec3(0.66,0.76,1.06),glassAR*clamp(F*3.0,0.0,1.0)); gl_FragColor=vec4(refl*glassGain*coat,F);\n#include <tonemapping_fragment>\n#include <colorspace_fragment>\n}'
       })
     };
     for (var mk in M) if (M.hasOwnProperty(mk)) owned.mat.push(M[mk]);
@@ -719,6 +786,53 @@ import * as THREE from './vendor/three.module.min.js';
        exactly w x h x d with the rounding baked in -- one draw call instead
        of the six or eight slabs it takes to fake a bull nose by hand. Used
        for the lockdown bar, which the reference draws bull-nosed. */
+    /* THE PANE'S OWN PROFILE -- a plate with a CHAMFER around its rim.
+
+       This is the one thing about watch-crystal glass that cannot be faked
+       in a shader, and it was tried both ways here. Tuning the normal
+       inside a painted border band changes the reflection by a couple of
+       units out of 255 and cannot be measured at all, because a Fresnel
+       term highlights a surface as it TURNS AWAY -- it knows nothing about
+       where the glass ENDS. What makes a crystal read is the ground and
+       polished bevel at its perimeter: real facets, with real normals, that
+       reflect the room from a different angle than the flat sheet does.
+
+       So the pane is an EXTRUDED RECTANGLE WITH A BEVEL: the flat area is
+       inset by `chamfer` and the bevel runs from there out to the pane's
+       full footprint at 45 degrees (bevelSize = bevelThickness), which is
+       the profile of a polished crystal. Nothing about the footprint
+       changes, so the sheet still laps into the cabinet's grooves exactly
+       as before, and the UVs are rewritten to be a plain 0..1 rectangle
+       over the pane -- ExtrudeGeometry's own UVs are in shape units, which
+       would smear the scuff map.
+
+       The dimensions are ALSO kept on userData.pane, because the dev
+       harnesses measure the pane by its `parameters` and an extruded
+       geometry has no width/height/depth of its own to read. */
+    function glassGeo(w, h, t, chamfer, seg) {
+      var k = 'gl' + w + '_' + h + '_' + t + '_' + chamfer;
+      if (geoCache[k]) return geoCache[k];
+      var iw = Math.max(0.02, w / 2 - chamfer), ih = Math.max(0.02, h / 2 - chamfer);
+      var s = new THREE.Shape();
+      s.moveTo(-iw, -ih); s.lineTo(iw, -ih); s.lineTo(iw, ih); s.lineTo(-iw, ih);
+      s.closePath();
+      var core = Math.max(0.005, t - 2 * chamfer);
+      var g = new THREE.ExtrudeGeometry(s, {
+        depth: core, bevelEnabled: true, bevelSize: chamfer, bevelThickness: chamfer,
+        bevelSegments: seg || 2, curveSegments: 1, steps: 1
+      });
+      g.translate(0, 0, -core / 2);                    /* centre on the pane */
+      var pos = g.attributes.position, uv = new Float32Array(pos.count * 2);
+      for (var i = 0; i < pos.count; i++) {
+        uv[i * 2] = (pos.getX(i) + w / 2) / w;
+        uv[i * 2 + 1] = (pos.getY(i) + h / 2) / h;
+      }
+      g.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+      g.userData = { pane: { width: w, height: h, depth: t } };
+      geoCache[k] = own(g);
+      return g;
+    }
+
     function roundGeo(w, h, d, r, seg) {
       var k = 'rnd' + w + '_' + h + '_' + d + '_' + r + '_' + seg;
       if (geoCache[k]) return geoCache[k];
@@ -849,10 +963,19 @@ import * as THREE from './vendor/three.module.min.js';
       geoCache[k] = own(g);
       return geoCache[k];
     }
+    /* Every one of these panels is a PRINT laid on a flat board, so it is
+       biased a hair toward the eye in DEPTH ONLY (polygonOffset moves the
+       fragment's depth, never its geometry). Without it a print that sits
+       a couple of hundredths of a unit proud of its board -- the flanks are
+       +-0.02 -- is close enough to the board's own face that the two trade
+       the depth test along their shared edge as the view sweeps, which is
+       the stippled seam that shows up along the cabinet's edges. The span
+       is one depth unit, so a panel cannot steal a neighbour's pixels. */
     function bodyMat(tex, rough, metal) {
       var m = new THREE.MeshStandardMaterial({
         map: tex, roughness: rough === undefined ? 0.62 : rough,
-        metalness: metal === undefined ? 0.06 : metal
+        metalness: metal === undefined ? 0.06 : metal,
+        polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1
       });
       owned.mat.push(m);
       return m;
@@ -979,7 +1102,19 @@ import * as THREE from './vendor/three.module.min.js';
        finish on at this end, and its width runs 0.01 INTO each blade so the
        three meet without a seam. */
     var inFoot = FOOT_Y + WALL, inHead = HEAD_Y - WALL;
-    var inLen = inHead - inFoot, inBase = BOT + 0.5;
+    var inLen = inHead - inFoot;
+    /* The blades run down to the FLOOR PAN's own underside, not to its top
+       face. Ending them on the top face put the panel's bottom edge exactly
+       on a surface, and an edge that lies in a plane is the worst case for
+       the depth buffer: the pixels along the seam sit within a depth unit
+       of each other and trade the test as the camera moves, which is the
+       stipple that was showing along the bottom of the interior. Run to the
+       pan's floor and the last half unit of steel is simply inside the pan
+       and occluded by it, so no two coplanar surfaces survive. The tops are
+       unchanged: the heights are still measured from the base, so the panel
+       finishes on the same line it always did, and the mirror's own plane
+       (a vertical plane at a fixed x) does not move at all. */
+    var inBase = BOT;
     var inHF = topAt(inFoot) - inBase, inHH = topAt(inHead) - inBase;
     mirrors.push(addTrap(null, inLen, inHF, inHH, OUT_L + WALL + 0.03, MID_Y, inBase, AY, AZ, M.mirror));
     mirrors.push(addTrap(null, inLen, inHH, inHF, OUT_R - WALL - 0.03, MID_Y, inBase, NEG_Y, AZ, M.mirror));
@@ -1001,16 +1136,39 @@ import * as THREE from './vendor/three.module.min.js';
        That closes the strip of bare playfield that used to show in front of the
        glass, and it puts the glass's front edge exactly where the lockdown bar
        clamps it -- see the reseated bar below. */
-    var gY0 = FOOT_Y + WALL, gY1 = HEAD_Y - WALL - 0.35;
+    /* The pane's FRONT edge is buried 0.12 into the front board rather than
+       stopping on its inner face. "The glass starts where the board ends"
+       put the pane's front edge plane exactly on the board's own inner face
+       -- two planes at the same depth along the width of the machine, which
+       is a guaranteed fight, and the one the flicker along the front edge
+       of the glass came from. The board is 0.93 thick, so a twelfth of a
+       unit of pane inside it is invisible; the front edge is still where
+       the lockdown bar clamps the sheet. */
+    var gY0 = FOOT_Y + WALL - 0.12, gY1 = HEAD_Y - WALL - 0.35;
+    /* THE SHEET'S THICKNESS IS PART OF THE LOOK. 0.09 was a film -- right
+       for a pane whose only job was to reflect, and far too thin to grind a
+       bevel into, because a chamfer has to be SHALLOWER than half the
+       thickness or the bevel swallows the plate (at 0.09 thick, a 0.45
+       chamfer produces a 0.9-unit wedge, ten times the sheet). A real 3/16"
+       pane is about 0.23 units, and a crystal is drawn with its bevel
+       reading clearly, so this is 0.5 thick with a single 0.18 facet at 45
+       degrees: a 0.14 core, a real edge you can see in the groove, and its
+       top at glassZ + 0.25, still well under the lid moulding's underside
+       at glassZ + 0.425 so nothing pokes through the trim. */
+    var GLASS_W = OUT_W - WALL, GLASS_T = 0.36;
+    var GLASS_L = (gY1 - gY0) / Math.cos(LID_PITCH);
+    var GLASS_CHAMFER = 0.13;      /* the polished bevel, in image units */
     var glass = new THREE.Mesh(
-      boxGeo(OUT_W - WALL, (gY1 - gY0) / Math.cos(LID_PITCH), 0.09), M.glass);
+      glassGeo(GLASS_W, GLASS_L, GLASS_T, GLASS_CHAMFER, 1), M.glass);
+    glass.userData.chamfer = GLASS_CHAMFER;
+    glass.userData.pane = glass.geometry.userData.pane;
     glass.position.set(MID_X - CX, (gY0 + gY1) / 2 - CY, glassZ((gY0 + gY1) / 2));
     glass.rotation.x = LID_PITCH;
     glass.userData.noVibrance = true;
     glass.name = 'clear playfield glass';
     root.add(glass);
     /* The polished pane edge is drawn by the glass shader itself (the
-       `edge` term along its own UV border). A separate outline object used
+       `bev` chamfer term along its own UV border). A separate outline object used
        to sit here and, because it is depth-tested against the field, it
        read as a stray dark line lying ON the playfield rather than as the
        rim of a sheet of glass -- so the shader's border is the only one. */
@@ -1117,7 +1275,10 @@ import * as THREE from './vendor/three.module.min.js';
       var grp = new THREE.Group();
       var buttonY = FOOT_Y + 2.9;
       var oldButtonZ = TOP_FOOT - 2.75;
-      var glassTopZ = glassZ(buttonY) + 0.045;
+      /* the pane's OWN top line, not the 0.045 the sheet used to be: the
+         button is seated "just under the glass" and the glass is thicker
+         now, so this reads half its actual thickness */
+      var glassTopZ = glassZ(buttonY) + GLASS_T / 2;
       grp.name = s < 0 ? 'left flipper button' : 'right flipper button';
       grp.position.set((s < 0 ? OUT_L : OUT_R) - CX,
         buttonY - CY, (oldButtonZ + glassTopZ) / 2);
@@ -1152,6 +1313,11 @@ import * as THREE from './vendor/three.module.min.js';
     var TRIM_H = 0.52;          /* section: height                          */
     var TRIM_R = 0.22;          /* the bull nose on every outside edge      */
     var TRIM_RISE = 0.90;       /* top of the moulding over the pane's top  */
+    /* The moulding's seat. NOT the pane's thickness -- this is where the
+       trim was MEASURED to sit off the glass line, and it is deliberately
+       left at its tuned value even though the sheet is thicker now, so the
+       lid's silhouette does not move. All it means is that the trim's
+       underside is a little closer to the glass than it used to be. */
     var PANE_T = 0.09;
     function trimZ(y) { return glassZ(y) + PANE_T / 2 + TRIM_RISE - TRIM_H / 2; }
 

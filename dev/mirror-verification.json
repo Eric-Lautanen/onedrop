@@ -3,64 +3,64 @@
     {
       "resolution": 768,
       "passes": 7,
-      "changedPixels": 19414,
+      "changedPixels": 14920,
       "markerPixels": 0
     },
     {
       "resolution": 768,
-      "passes": 2,
-      "changedPixels": 29288,
-      "markerPixels": 9113
+      "passes": 3,
+      "changedPixels": 24319,
+      "markerPixels": 9196
     },
     {
       "resolution": 768,
       "passes": 7,
-      "changedPixels": 454,
+      "changedPixels": 235,
       "markerPixels": 0
     }
   ],
   "mirrorInMirror": [
     {
       "mirror": 0,
-      "reflectedBladePixels": 7866
+      "reflectedBladePixels": 5921
     },
     {
       "mirror": 1,
-      "reflectedBladePixels": 8268
+      "reflectedBladePixels": 6140
     },
     {
       "mirror": 2,
-      "reflectedBladePixels": 2572
+      "reflectedBladePixels": 1589
     }
   ],
   "glass": {
-    "meanArtworkDelta": 5.068505348916553,
-    "saturationKept": 0.9686049504656652,
-    "visibleHighlightPixels": 538447,
-    "artworkPixels": 273638,
+    "meanArtworkDelta": 5.748250304906271,
+    "saturationKept": 0.9666318309725278,
+    "visibleHighlightPixels": 554290,
+    "artworkPixels": 266475,
     "paneMeanDelta": {
-      "player": 3.15294117647059,
-      "grazing": 3.3720720720720716
+      "player": 3.59529411764706,
+      "grazing": 4.388288288288288
     },
     "paneMaxDelta": {
-      "player": 23,
-      "grazing": 90.66666666666667
+      "player": 30.333333333333332,
+      "grazing": 171
     },
     "paneContrast": {
-      "player": 1.0676540410440283,
-      "grazing": 2.4164912663896216
+      "player": 1.0439842232357888,
+      "grazing": 2.9007333923041068
     },
     "panePointsVisibleFromBoth": 370,
-    "viewDependence": 0.4297725289762444,
+    "viewDependence": 0.4082980572102867,
     "meanFresnel": {
-      "player": 0.043734925114746075,
-      "grazing": 0.14864667664932812
+      "player": 0.04376025856702401,
+      "grazing": 0.15034184694844097
     },
-    "highlightMovedByView": 0.7083333333333334
+    "highlightMovedByView": 0.5416666666666666
   },
   "medianRenderMs": {
-    "noMirrors": 0.9000000953674316,
-    "liveMirrors": 8.099999904632568
+    "noMirrors": 2.4000000059604645,
+    "liveMirrors": 24.399999991059303
   },
   "crop": {
     "sx": 99.999999966,

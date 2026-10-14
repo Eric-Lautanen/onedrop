@@ -212,7 +212,16 @@ import './guard.js';
       color: 0x000000, transparent: true, opacity: 0.55,
       blending: THREE.AdditiveBlending,
       roughness: 0.08, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.04,
-      reflectivity: 0.5, envMapIntensity: 1.3, depthWrite: false
+      reflectivity: 0.5, envMapIntensity: 1.3, depthWrite: false,
+      /* a decal a fiftieth of a unit over the painting: at a grazing view
+         that gap is small enough for the two to trade the depth test, and
+         this layer is the single biggest contributor to it -- hiding it
+         takes about three fifths of the flicker out of a low view. It is
+         ADDITIVE and never writes depth, so biasing it hard cannot hide
+         anything: the lacquer can only add light over the ball and the
+         artwork, which is what a lacquer does. (Measured: -1/-1 left the
+         fight standing, -2/-16 removes three quarters of it.) */
+      polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -16
     })
   );
   sheen.position.copy(L(CX, CY, 0.02));

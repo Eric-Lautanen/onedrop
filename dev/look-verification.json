@@ -1,0 +1,82 @@
+{
+  "buffer": [
+    1000,
+    750
+  ],
+  "overlayMaterials": 6,
+  "views": {
+    "player": {
+      "off": 36,
+      "on": 35
+    },
+    "grazing": {
+      "off": 39585,
+      "on": 8884
+    },
+    "steep": {
+      "off": 23,
+      "on": 24
+    }
+  },
+  "mirrors": [
+    {
+      "size": [
+        768,
+        768
+      ],
+      "samples": 4,
+      "hardEdgePx": 6603,
+      "isolatedPx": 892,
+      "index": 0
+    },
+    {
+      "size": [
+        768,
+        768
+      ],
+      "samples": 4,
+      "hardEdgePx": 6940,
+      "isolatedPx": 787,
+      "index": 1
+    },
+    {
+      "size": [
+        768,
+        768
+      ],
+      "samples": 4,
+      "hardEdgePx": 2285,
+      "isolatedPx": 315,
+      "index": 2
+    }
+  ],
+  "pane": {
+    "geometry": "ExtrudeGeometry",
+    "chamfer": 0.13,
+    "pane": {
+      "width": 26.87,
+      "height": 49.85437862318201,
+      "depth": 0.36
+    },
+    "bevelFacetVertices": 72,
+    "depthWrite": false,
+    "transparent": true,
+    "shaderHasSchlick": true,
+    "f0": 0.04,
+    "coating": 0.45,
+    "gain": 5
+  },
+  "glass": {
+    "player": {
+      "artworkPixels": 61954,
+      "meanDelta": 2.6,
+      "saturationKept": 0.985
+    },
+    "grazing": {
+      "artworkPixels": 207043,
+      "meanDelta": 8.73,
+      "saturationKept": 0.894
+    }
+  },
+  "errors": []
+}
