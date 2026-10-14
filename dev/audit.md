@@ -194,6 +194,105 @@ server was restarted with the repaired `serve.py`; `/ping` now returns
 `200`, and a fresh boot with the heartbeat allowed to fire reports an
 empty console-error list.
 
+## Pass 5 -- the load sequence
+
+Pass 1 made the load fast; this pass asks what the player is actually
+waiting FOR. The answer was the loader itself: `revealMachine()` was
+reachable from exactly two places -- inside `fitPlayfield()`'s sheet
+callback (the resize path) and the 9 s safety `setTimeout` -- and
+`fitPlayfield()` is never called at boot. So on **every** launch the
+loading bar was cleared by the flat 9-second timer, no matter how long
+the machine took to come up. Measured on this machine's **real GPU (the
+desktop app window's path)**: cabinet finished at 0.90 s, screen held to
+**9.31 s**.
+
+The timeline was measured with `dev/_bootshape.py` (marks in order, main
+thread long tasks, painted frames, per-resource transfer, and a
+MutationObserver on the loader's class so the dismissal is stamped when it
+happens rather than when a blocked thread can answer a poll).
+
+| run | machine ready (`boot:cabinet-done`) | loader gone before | after |
+|---|---|---|---|
+| GPU cold | 2.71 s | 9.34 s | **4.53 s** |
+| GPU warm | 0.90 s | 9.31 s | **0.52 s** |
+| software cold | 4.36 s | 10.54 s | **6.67 s** |
+| software warm | 4.23 s | 11.23 s | **6.64 s** |
+| software, loaded process | 11.5 s | 17.49 s | **4.39 s** |
+
+Cold GPU is 4.53 s rather than 2.71 s for a reason worth keeping: the gate
+waits for a frame drawn *after* the cabinet, and on a cold shader cache that
+first frame is a 1.8 s shader compile. Before the fix the 9 s timer revealed
+the machine at 9.34 s and then that compile blocked the thread anyway -- the
+loader had already faded, so what it uncovered was an unpainted canvas.
+
+Four changes, all in `src/js/game.js`, `src/js/assets.js` and the two
+launcher servers:
+
+1. **A reveal gate instead of a timer** (`game.js`). "There is a machine to
+   look at" is now two facts plus a frame: the sheet has settled, the cabinet
+   has been built off it, and a frame has been drawn *after the later of
+   those two* -- so the fade always uncovers a canvas with the machine in it.
+   Each fact is raised where it becomes true (`buildCabinet()` and the sheet's
+   own consumer), the frame half is consumed by the frame loop, and the 9 s
+   timer stays as the panic button for an asset that never arrives. On sheet
+   FAILURE the queued consumers -- the cabinet's included -- are still dropped
+   by design, so that path is unchanged and the timer reveals it.
+2. **The loader bar's milestones are the boot's real stages** (`game.js`):
+   scripts evaluated (60), sheet art on (78), cabinet up (88), ready (100),
+   with the messages to match. The old bar crept toward 40 because its first
+   `ldStage(60)` was immediately overwritten by the `var ldCap = 40`
+   initialiser on the next line; the creep's floor is also higher now, because
+   the whole boot fits in about a second on this machine and a bar that has
+   not moved before it snaps to 100 reads as broken.
+3. **The sheet is decoded before it settles** (`assets.js`).
+   `decoding = 'async'` is only a hint; the decode otherwise lands inside the
+   first `drawImage` -- i.e. inside the burst of sheet consumers, on the main
+   thread, with the loader animation frozen behind it. Awaiting
+   `image.decode()` moves it off the main thread during the tail of the script
+   eval; the burst then starts with a bitmap it can blit. A rejecting decode
+   settles exactly as `onload` did. Measured `assets:fetch-done` ->
+   `assets:decoded`: 21-25 ms on the GPU path, 80-300 under software GL. This
+   is sequencing, not a time saving -- it keeps the thread the loader animates
+   on free while the decode runs.
+4. **Both launcher servers send real validators and real types.**
+   `scripts/serve.py` sent `Cache-Control: no-store`, so every launch
+   re-downloaded all of it (1,346,130 B measured, warm, every run); Python's
+   MIME table on Windows does not know `.webp` either, so the sheet the page
+   PRELOADS as `type="image/webp"` arrived as `application/octet-stream`.
+   `scripts/serve.ps1` (the desktop `.bat`'s server) had the right type but
+   the same `no-store` and no `Last-Modified` at all. Both now revalidate
+   (`no-cache` + `Last-Modified`; the PS1 one answers the conditional GET
+   itself with a 304). Warm transfer, same run: **1,346,130 B -> 4,502 B**.
+
+### Verification
+
+* **No page errors** in any of the timed runs (both rasterisers), and the
+  live browser panel's console after a fresh load shows the boot-marks
+  warning and nothing else; its network log shows only `/ping` 200s.
+* All six physics/input suites **exit 0** on the final tree:
+  `verify-playfield`, `verify-drains`, `verify-plunger`,
+  `verify-buttons-sling`, `verify-mirrors`, `verify-flow`.
+* The reveal lands on a real machine: the frame captured the moment the
+  loader is dismissed measures mean RGB (13, 19, 17) with 244 colour
+  buckets, against (18, 23, 20) / 220 for the known-good cabinet shot --
+  versus (<5) / (<20) buckets for an unpainted canvas.
+* The conditional GET was checked on the wire: `.webp` now answers
+  `Content-type: image/webp`, and `If-Modified-Since` on `game.js` answers
+  `304` with `0` bytes.
+* `node --check` is NOT available in this environment (no Node on PATH),
+  so the earlier passes' syntax checks could not be repeated here. The
+  substitute is stronger for this change: the edit only ships if the page
+  parses and runs it -- a syntax error would leave the loader on screen and
+  the timed runs would fail, which is exactly what they watch for.
+
+**A note on what could not be measured here:** the desktop `.bat` ->
+`launch-app.ps1` -> `serve.ps1` chain (its own Edge `--app` window and its
+`--user-data-dir` profile) is where the 304 win is biggest, because that
+profile persists a cache between launches. The fix is verified at the
+protocol level (a 304 with a matching `Last-Modified` is what a browser
+revalidates against) and in `serve.py` end to end, but the Edge app-window
+launch itself was not driven in this pass.
+
 ## Remaining / not done
 
 * `verify-audio.py` has been re-run over the final working tree (the
@@ -203,3 +302,8 @@ empty console-error list.
 * DMD raster, as above.
 * `three.min.js` (594 KB) is vendored unmodified; splitting the parts the
   game uses would need its own loader audit and is out of scope here.
+* The two launcher files (`scripts/serve.py`, `scripts/serve.ps1`) carry
+  another session's uncommitted launcher work in the same regions as this
+  pass's edits, so nothing in them is committed here; the hunks added by
+  Pass 5 are the MIME table and `no-store`/validator changes described
+  above.

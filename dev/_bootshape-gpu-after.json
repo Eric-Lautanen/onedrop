@@ -1,0 +1,614 @@
+[
+  {
+    "DCL": 318,
+    "load": 2406,
+    "fcp": 2644,
+    "marks": [
+      [
+        "assets:fetch-done",
+        2405
+      ],
+      [
+        "assets:decoded",
+        2658
+      ],
+      [
+        "assets:fire-1-of-4",
+        2658
+      ],
+      [
+        "assets:fire-2-of-4",
+        2658
+      ],
+      [
+        "assets:fire-3-of-4",
+        2659
+      ],
+      [
+        "boot:machine-start",
+        2659
+      ],
+      [
+        "boot:machine-done",
+        2705
+      ],
+      [
+        "boot:vibrance-done",
+        2705
+      ],
+      [
+        "boot:cabinet-done",
+        2707
+      ],
+      [
+        "assets:fire-4-of-4",
+        2707
+      ]
+    ],
+    "longs": [
+      [
+        40,
+        278
+      ],
+      [
+        325,
+        2079
+      ],
+      [
+        2707,
+        1827
+      ]
+    ],
+    "frames": 8,
+    "gone": 4534,
+    "resources": [
+      {
+        "name": "sprite2.webp",
+        "status": 200,
+        "dur": 5,
+        "start": 8,
+        "transfer": 270040,
+        "encoded": 269740,
+        "ct": "image/webp"
+      },
+      {
+        "name": "style.css",
+        "status": 200,
+        "dur": 6,
+        "start": 8,
+        "transfer": 22954,
+        "encoded": 22654,
+        "ct": "text/css"
+      },
+      {
+        "name": "table.js",
+        "status": 200,
+        "dur": 9,
+        "start": 8,
+        "transfer": 32162,
+        "encoded": 31862,
+        "ct": "text/javascript"
+      },
+      {
+        "name": "three.min.js",
+        "status": 200,
+        "dur": 11,
+        "start": 8,
+        "transfer": 608381,
+        "encoded": 608081,
+        "ct": "text/javascript"
+      },
+      {
+        "name": "physics.js",
+        "status": 200,
+        "dur": 9,
+        "start": 8,
+        "transfer": 20666,
+        "encoded": 20366,
+        "ct": "text/javascript"
+      },
+      {
+        "name": "art.js",
+        "status": 200,
+        "dur": 10,
+        "start": 8,
+        "transfer": 16922,
+        "encoded": 16622,
+        "ct": "text/javascript"
+      },
+      {
+        "name": "assets.js",
+        "status": 200,
+        "dur": 11,
+        "start": 8,
+        "transfer": 16006,
+        "encoded": 15706,
+        "ct": "text/javascript"
+      },
+      {
+        "name": "vibrance.js",
+        "status": 200,
+        "dur": 13,
+        "start": 9,
+        "transfer": 7813,
+        "encoded": 7513,
+        "ct": "text/javascript"
+      },
+      {
+        "name": "machine.js",
+        "status": 200,
+        "dur": 12,
+        "start": 9,
+        "transfer": 85030,
+        "encoded": 84730,
+        "ct": "text/javascript"
+      },
+      {
+        "name": "playfield.js",
+        "status": 200,
+        "dur": 12,
+        "start": 9,
+        "transfer": 67367,
+        "encoded": 67067,
+        "ct": "text/javascript"
+      },
+      {
+        "name": "audio.js",
+        "status": 200,
+        "dur": 14,
+        "start": 9,
+        "transfer": 75098,
+        "encoded": 74798,
+        "ct": "text/javascript"
+      },
+      {
+        "name": "dmd.js",
+        "status": 200,
+        "dur": 15,
+        "start": 9,
+        "transfer": 26777,
+        "encoded": 26477,
+        "ct": "text/javascript"
+      },
+      {
+        "name": "game.js",
+        "status": 200,
+        "dur": 15,
+        "start": 9,
+        "transfer": 100478,
+        "encoded": 100178,
+        "ct": "text/javascript"
+      },
+      {
+        "name": "ping",
+        "status": 200,
+        "dur": 2,
+        "start": 327,
+        "transfer": 302,
+        "encoded": 2,
+        "ct": "text/plain"
+      },
+      {
+        "name": "favicon.ico",
+        "status": 204,
+        "dur": 2,
+        "start": 4555,
+        "transfer": 300,
+        "encoded": 0,
+        "ct": ""
+      }
+    ],
+    "sheet": "sprite2.webp",
+    "sheetReady": true,
+    "cold": true,
+    "errors": []
+  },
+  {
+    "DCL": 132,
+    "load": 293,
+    "fcp": 60,
+    "marks": [
+      [
+        "assets:fetch-done",
+        292
+      ],
+      [
+        "assets:decoded",
+        317
+      ],
+      [
+        "assets:fire-1-of-4",
+        317
+      ],
+      [
+        "assets:fire-2-of-4",
+        317
+      ],
+      [
+        "assets:fire-3-of-4",
+        317
+      ],
+      [
+        "boot:machine-start",
+        317
+      ],
+      [
+        "boot:machine-done",
+        362
+      ],
+      [
+        "boot:vibrance-done",
+        362
+      ],
+      [
+        "boot:cabinet-done",
+        363
+      ],
+      [
+        "assets:fire-4-of-4",
+        364
+      ]
+    ],
+    "longs": [
+      [
+        42,
+        91
+      ],
+      [
+        140,
+        151
+      ],
+      [
+        366,
+        156
+      ]
+    ],
+    "frames": 7,
+    "gone": 522,
+    "resources": [
+      {
+        "name": "sprite2.webp",
+        "status": 200,
+        "dur": 4,
+        "start": 7,
+        "transfer": 300,
+        "encoded": 269740,
+        "ct": "image/webp"
+      },
+      {
+        "name": "style.css",
+        "status": 200,
+        "dur": 3,
+        "start": 7,
+        "transfer": 300,
+        "encoded": 22654,
+        "ct": "text/css"
+      },
+      {
+        "name": "table.js",
+        "status": 200,
+        "dur": 7,
+        "start": 7,
+        "transfer": 300,
+        "encoded": 31862,
+        "ct": "text/javascript"
+      },
+      {
+        "name": "three.min.js",
+        "status": 200,
+        "dur": 6,
+        "start": 7,
+        "transfer": 300,
+        "encoded": 608081,
+        "ct": "text/javascript"
+      },
+      {
+        "name": "physics.js",
+        "status": 200,
+        "dur": 7,
+        "start": 7,
+        "transfer": 300,
+        "encoded": 20366,
+        "ct": "text/javascript"
+      },
+      {
+        "name": "assets.js",
+        "status": 200,
+        "dur": 8,
+        "start": 7,
+        "transfer": 300,
+        "encoded": 15706,
+        "ct": "text/javascript"
+      },
+      {
+        "name": "art.js",
+        "status": 200,
+        "dur": 8,
+        "start": 7,
+        "transfer": 300,
+        "encoded": 16622,
+        "ct": "text/javascript"
+      },
+      {
+        "name": "vibrance.js",
+        "status": 200,
+        "dur": 11,
+        "start": 7,
+        "transfer": 300,
+        "encoded": 7513,
+        "ct": "text/javascript"
+      },
+      {
+        "name": "playfield.js",
+        "status": 200,
+        "dur": 11,
+        "start": 7,
+        "transfer": 300,
+        "encoded": 67067,
+        "ct": "text/javascript"
+      },
+      {
+        "name": "machine.js",
+        "status": 200,
+        "dur": 11,
+        "start": 7,
+        "transfer": 300,
+        "encoded": 84730,
+        "ct": "text/javascript"
+      },
+      {
+        "name": "dmd.js",
+        "status": 200,
+        "dur": 13,
+        "start": 7,
+        "transfer": 300,
+        "encoded": 26477,
+        "ct": "text/javascript"
+      },
+      {
+        "name": "audio.js",
+        "status": 200,
+        "dur": 12,
+        "start": 7,
+        "transfer": 300,
+        "encoded": 74798,
+        "ct": "text/javascript"
+      },
+      {
+        "name": "game.js",
+        "status": 200,
+        "dur": 13,
+        "start": 7,
+        "transfer": 300,
+        "encoded": 100178,
+        "ct": "text/javascript"
+      },
+      {
+        "name": "ping",
+        "status": 200,
+        "dur": 2,
+        "start": 142,
+        "transfer": 302,
+        "encoded": 2,
+        "ct": "text/plain"
+      },
+      {
+        "name": "favicon.ico",
+        "status": 204,
+        "dur": 7,
+        "start": 300,
+        "transfer": 300,
+        "encoded": 0,
+        "ct": ""
+      }
+    ],
+    "sheet": "sprite2.webp",
+    "sheetReady": true,
+    "cold": false,
+    "errors": []
+  },
+  {
+    "DCL": 124,
+    "load": 288,
+    "fcp": 64,
+    "marks": [
+      [
+        "assets:fetch-done",
+        288
+      ],
+      [
+        "assets:decoded",
+        309
+      ],
+      [
+        "assets:fire-1-of-4",
+        309
+      ],
+      [
+        "assets:fire-2-of-4",
+        309
+      ],
+      [
+        "assets:fire-3-of-4",
+        310
+      ],
+      [
+        "boot:machine-start",
+        310
+      ],
+      [
+        "boot:machine-done",
+        354
+      ],
+      [
+        "boot:vibrance-done",
+        354
+      ],
+      [
+        "boot:cabinet-done",
+        355
+      ],
+      [
+        "assets:fire-4-of-4",
+        356
+      ]
+    ],
+    "longs": [
+      [
+        44,
+        81
+      ],
+      [
+        133,
+        154
+      ],
+      [
+        356,
+        152
+      ]
+    ],
+    "frames": 7,
+    "gone": 507,
+    "resources": [
+      {
+        "name": "sprite2.webp",
+        "status": 200,
+        "dur": 4,
+        "start": 8,
+        "transfer": 300,
+        "encoded": 269740,
+        "ct": "image/webp"
+      },
+      {
+        "name": "style.css",
+        "status": 200,
+        "dur": 4,
+        "start": 9,
+        "transfer": 300,
+        "encoded": 22654,
+        "ct": "text/css"
+      },
+      {
+        "name": "art.js",
+        "status": 200,
+        "dur": 9,
+        "start": 9,
+        "transfer": 300,
+        "encoded": 16622,
+        "ct": "text/javascript"
+      },
+      {
+        "name": "physics.js",
+        "status": 200,
+        "dur": 9,
+        "start": 9,
+        "transfer": 300,
+        "encoded": 20366,
+        "ct": "text/javascript"
+      },
+      {
+        "name": "table.js",
+        "status": 200,
+        "dur": 9,
+        "start": 9,
+        "transfer": 300,
+        "encoded": 31862,
+        "ct": "text/javascript"
+      },
+      {
+        "name": "three.min.js",
+        "status": 200,
+        "dur": 7,
+        "start": 9,
+        "transfer": 300,
+        "encoded": 608081,
+        "ct": "text/javascript"
+      },
+      {
+        "name": "assets.js",
+        "status": 200,
+        "dur": 10,
+        "start": 9,
+        "transfer": 300,
+        "encoded": 15706,
+        "ct": "text/javascript"
+      },
+      {
+        "name": "vibrance.js",
+        "status": 200,
+        "dur": 12,
+        "start": 9,
+        "transfer": 300,
+        "encoded": 7513,
+        "ct": "text/javascript"
+      },
+      {
+        "name": "machine.js",
+        "status": 200,
+        "dur": 12,
+        "start": 9,
+        "transfer": 300,
+        "encoded": 84730,
+        "ct": "text/javascript"
+      },
+      {
+        "name": "playfield.js",
+        "status": 200,
+        "dur": 11,
+        "start": 9,
+        "transfer": 300,
+        "encoded": 67067,
+        "ct": "text/javascript"
+      },
+      {
+        "name": "audio.js",
+        "status": 200,
+        "dur": 12,
+        "start": 9,
+        "transfer": 300,
+        "encoded": 74798,
+        "ct": "text/javascript"
+      },
+      {
+        "name": "dmd.js",
+        "status": 200,
+        "dur": 12,
+        "start": 9,
+        "transfer": 300,
+        "encoded": 26477,
+        "ct": "text/javascript"
+      },
+      {
+        "name": "game.js",
+        "status": 200,
+        "dur": 13,
+        "start": 9,
+        "transfer": 300,
+        "encoded": 100178,
+        "ct": "text/javascript"
+      },
+      {
+        "name": "ping",
+        "status": 200,
+        "dur": 1,
+        "start": 134,
+        "transfer": 302,
+        "encoded": 2,
+        "ct": "text/plain"
+      },
+      {
+        "name": "favicon.ico",
+        "status": 204,
+        "dur": 3,
+        "start": 294,
+        "transfer": 300,
+        "encoded": 0,
+        "ct": ""
+      }
+    ],
+    "sheet": "sprite2.webp",
+    "sheetReady": true,
+    "cold": false,
+    "errors": []
+  }
+]
