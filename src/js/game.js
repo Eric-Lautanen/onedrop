@@ -1907,7 +1907,51 @@ import './guard.js';
   var raycaster = new THREE.Raycaster();
   var pickV2 = new THREE.Vector2();
   function plungerKnob() { return (PF && PF.plunger) ? PF.plunger.knob : null; }
+
+  /* ---- a fingertip is not a cursor -------------------------------------
+     The buttons are REAL controls, but they are small on screen: measured
+     in the standing view at 1100x720 the red disc is about 9 px across, and
+     a fingertip is nearer 40. A mouse can be aimed at 9 px and the hand
+     cursor tells it where the button is; a finger cannot -- and on a touch
+     screen whose PRIMARY pointer is fine (a laptop or all-in-one, where
+     `pointer: coarse` never matches, so the mobile FLIP strip in index.html
+     is not shown either) that button is the only flipper the player has.
+
+     So a touch or a pen answers within TAP_RADIUS of the button's PROJECTED
+     CENTRE, and the mouse keeps the exact geometry it can be aimed at. The
+     test is in screen space, not world space, because a fingertip is
+     measured in pixels: the button has to be equally tappable at any window
+     aspect, camera distance or zoom. */
+  var TAP_RADIUS = 26;                 /* CSS px: a ~52 px target round a 9 px disc */
+  var tapPoint = new THREE.Vector3(), tapRel = new THREE.Vector3();
+  var tapFwd = new THREE.Vector3(), tapProj = new THREE.Vector3();
+  function finger(e) { return e.pointerType === 'touch' || e.pointerType === 'pen'; }
+  function tapPick(e) {
+    var list = (machine && machine.flipperBtns) ? machine.flipperBtns : [];
+    if (!list.length) return null;
+    /* the eye's own forward axis, to drop anything BEHIND the camera: a
+       point behind the eye projects to a mirrored screen position, and
+       would otherwise answer taps on the far side of the window */
+    var el = camera.matrixWorld.elements;
+    tapFwd.set(-el[8], -el[9], -el[10]).normalize();
+    var best = null, bestD2 = TAP_RADIUS * TAP_RADIUS;
+    for (var i = 0; i < list.length; i++) {
+      list[i].btn.getWorldPosition(tapPoint);
+      tapRel.copy(tapPoint).sub(camera.position);
+      if (tapRel.dot(tapFwd) <= 0) continue;
+      tapProj.copy(tapPoint).project(camera);
+      var dx = (tapProj.x * 0.5 + 0.5) * global.innerWidth - e.clientX;
+      var dy = (-tapProj.y * 0.5 + 0.5) * global.innerHeight - e.clientY;
+      var d2 = dx * dx + dy * dy;
+      if (d2 < bestD2) { bestD2 = d2; best = list[i].btn; }
+    }
+    return best;
+  }
+
   function pickControl(e) {
+    /* a finger's generous test comes first and wins: the whole point of it
+       is that a tap which LOOKS like it landed on a button counts as one */
+    var near = finger(e) ? tapPick(e) : null;
     pickV2.x = (e.clientX / global.innerWidth) * 2 - 1;
     pickV2.y = -(e.clientY / global.innerHeight) * 2 + 1;
     raycaster.setFromCamera(pickV2, camera);
@@ -1917,21 +1961,41 @@ import './guard.js';
     }
     var knob = plungerKnob();
     if (knob) targets.push(knob);
-    if (!targets.length) return null;
+    if (!targets.length) return near;
     var hits = raycaster.intersectObjects(targets, false);
+    if (near) return near;
     return hits.length ? hits[0].object : null;
   }
-  var mouseCharging = false, mouseChargeY0 = 0;
-  var mouseFlip = -1;               /* index of the button held, -1 = none */
-  function endMouseHold(fire) {
-    if (mouseCharging) {
-      mouseCharging = false;
+  /* ---- which pointer is holding what -----------------------------------
+     A touch player uses two thumbs and a real machine has two buttons, so
+     the holds are remembered by the POINTER that made them. With a single
+     "current button" slot the second finger to land owned both: pressing
+     left+right together and lifting one released the other, on exactly the
+     devices this section exists for. */
+  var chargeId = null;              /* pointer pulling the plunger, or null */
+  var mouseChargeY0 = 0;
+  var flipIds = [null, null];       /* pointer holding each flipper button */
+  function pressFlip(i, on) { if (i === 0) pressLeft(on); else pressRight(on); }
+  function releaseFlip(i) {
+    if (flipIds[i] === null) return;
+    flipIds[i] = null;
+    pressFlip(i, false);
+  }
+  function pointerHeld(id) {
+    return chargeId === id || flipIds[0] === id || flipIds[1] === id;
+  }
+  /* a release, however it arrives: pointerup fires the launch, a cancel or
+     a lost window does not */
+  function pointerRelease(id, fire) {
+    for (var i = 0; i < flipIds.length; i++) if (flipIds[i] === id) releaseFlip(i);
+    if (chargeId === id) {
+      chargeId = null;
       if (charging) { charging = false; if (fire) launch(); }
     }
-    if (mouseFlip >= 0) {
-      if (mouseFlip === 0) pressLeft(false); else pressRight(false);
-      mouseFlip = -1;
-    }
+  }
+  function releaseAll() {
+    for (var i = 0; i < flipIds.length; i++) releaseFlip(i);
+    if (chargeId !== null) { chargeId = null; charging = false; }
   }
   global.addEventListener('pointerdown', function (e) {
     if (e.target !== renderer.domElement) return;
@@ -1940,11 +2004,17 @@ import './guard.js';
     e.preventDefault();
     e.stopPropagation();            /* the camera never gets this grab */
     audio.resume();
+    /* the grab is OURS now: capture the pointer so the release arrives even
+       if the finger slides off the canvas, which is what leaves a flipper
+       held down forever */
+    if (renderer.domElement.setPointerCapture) {
+      try { renderer.domElement.setPointerCapture(e.pointerId); } catch (err) { /* gone already */ }
+    }
     var knob = plungerKnob();
     if (hit === knob) {
       if (state === 'attract' || state === 'gameover') { startGame(); return; }
       if (state === 'ready') {
-        mouseCharging = true; charging = true; charge = 0;
+        chargeId = e.pointerId; charging = true; charge = 0;
         mouseChargeY0 = e.clientY;
       }
       return;
@@ -1952,15 +2022,16 @@ import './guard.js';
     if (machine && machine.flipperBtns) {
       for (var i = 0; i < machine.flipperBtns.length; i++) {
         if (machine.flipperBtns[i].btn === hit) {
-          mouseFlip = i;
-          if (i === 0) pressLeft(true); else pressRight(true);
+          if (flipIds[i] !== null) return;     /* that button is already down */
+          flipIds[i] = e.pointerId;
+          pressFlip(i, true);
           break;
         }
       }
     }
   }, true);
   global.addEventListener('pointermove', function (e) {
-    if (mouseCharging) {
+    if (chargeId !== null && e.pointerId === chargeId) {
       /* pulling DOWN the knob charges, like drawing a real plunger back */
       charge = Math.max(0, Math.min(1, (e.clientY - mouseChargeY0) / 150));
       return;
@@ -1971,13 +2042,21 @@ import './guard.js';
     }
   }, true);
   global.addEventListener('pointerup', function (e) {
-    if (mouseCharging || mouseFlip >= 0) {
+    if (pointerHeld(e.pointerId)) {
       e.stopPropagation();
-      endMouseHold(true);           /* release fires the launch */
+      pointerRelease(e.pointerId, true);   /* release fires the launch */
     }
   }, true);
-  global.addEventListener('pointercancel', function () {
-    endMouseHold(false);            /* a cancelled grab never fires */
+  global.addEventListener('pointercancel', function (e) {
+    pointerRelease(e.pointerId, false);    /* a cancelled grab never fires */
+  }, true);
+  /* a window that goes away (alt-tab, a system gesture) can swallow the
+     pointerup entirely, and a flipper held down forever is worse than one
+     that never pressed. Only the WINDOW's own blur counts: this listener
+     capture-fires for every element's blur too, and a slider losing focus
+     must not knock a held flipper out of the player's hand. */
+  global.addEventListener('blur', function (e) {
+    if (!e.target || e.target === global) releaseAll();
   }, true);
 
   bindHold(D.touchLeft, function () { pressLeft(true); }, function () { pressLeft(false); });
@@ -2110,7 +2189,7 @@ import './guard.js';
       by DISTANCE -- the frame loop only auto-charges when the drag is not
       the thing driving it, or the knob would fill up while held still. */
     if (state === 'ready' && charging) {
-      if (!mouseCharging) charge = Math.min(1, charge + raw * 1.05);
+      if (chargeId === null) charge = Math.min(1, charge + raw * 1.05);
       /* steers one continuous spring voice, once per frame: see
          AudioEngine.chargeLevel */
       audio.chargeLevel(charge);
