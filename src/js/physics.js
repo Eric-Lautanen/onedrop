@@ -246,6 +246,13 @@
     }
   };
 
+  /* flipper travel driven WITHOUT a physics step: an idle table (attract,
+     game over) still answers the flipper buttons -- the bats move, no
+     ball, no scoring. The stepper calls this internally on every step. */
+  World.prototype.updateFlippers = function (dt) {
+    this._updateFlippers(dt);
+  };
+
   World.prototype._integrate = function (b, dt) {
     if (b.rampI !== undefined) { this._rampStep(b, dt); return; }
     b.prevX = b.x; b.prevY = b.y;
