@@ -909,6 +909,9 @@ import './guard.js';
   var saveActive = false, saveTime = 0;
   var tiltWarn = 0, tiltTimer = 0, tilted = false;
   var charge = 0, charging = false;
+  /* THE HANDLE HAS TO COME ALL THE WAY BACK, or the ball does not launch:
+     a spring let go half drawn just returns home. See launch(). */
+  var FULL_DRAW = 0.999;
   var spinCount = 0, standupHits = 0, targetsDown = 0, bashCount = 0;
   var rampShots = { 'ROOTS ORBIT': 0, 'SKANK RAMP': 0 };
   var skillTimer = 0, skillLive = false;
@@ -1230,7 +1233,7 @@ import './guard.js';
     skillLive = false; skillTimer = 0;
     syncLamps();
     PF.setPlunger(0); PF.snapPlunger();
-    setMessage('BALL ' + ballNum + '  \u2014  HOLD SPACE TO PLUNGE', false, 3, 'gold');
+    setMessage('BALL ' + ballNum + '  \u2014  PULL ALL THE WAY BACK', false, 3, 'gold');
   }
 
   function startGame() {
@@ -1608,9 +1611,11 @@ import './guard.js';
   }
 
   /* ================= the demo player =================
-     The attract screen's machine plays ITSELF: it draws the plunger back,
-     lets it go and works both flippers, so the cabinet is alive while it
-     waits and the rules can be watched running with nobody at the glass.
+     The attract screen's machine plays ITSELF: it draws the plunger all the
+     way back, lets it go and works both flippers, so the cabinet is alive
+     while it waits and the rules can be watched running with nobody at the
+     glass. (All the way back, because a part-drawn handle only springs
+     home -- see launch().)
 
      It drives the same inputs a human does -- the charge, launch(),
      pressLeft/pressRight, nudge -- and never touches the rules, so what you
@@ -1626,10 +1631,6 @@ import './guard.js';
     on: false,
     idle: 0,          /* seconds of attract before it takes the machine */
     wait: 6,
-    chargeTo: 0.8,    /* how far it draws the spring back, per ball */
-    entered: false,   /* has this plunge reached the table proper yet? */
-    plunged: false,   /* and was it one of ours that is being judged? */
-    lastState: '',
     hold: [0, 0],     /* seconds left on each flipper's stab */
     nudgeCool: 0,
     still: 0,         /* seconds the ball has been sitting motionless */
@@ -1655,14 +1656,7 @@ import './guard.js';
     demo.still = 0;
     demo.shakeCool = 0;
     demo.overHold = 0;
-    demo.entered = false;
-    demo.plunged = false;
-    /* a different draw every ball, like a hand on a real plunger. A soft
-       one sometimes fails to clear the arch and rolls back -- that is the
-       machine being honest, not a bug. */
-    demo.chargeTo = 0.5 + Math.random() * 0.5;
     startGame();
-    demo.lastState = state;      /* 'ready': the first ball is in the lane */
   }
   /* one frame of it */
   function demoPlay(raw) {
@@ -1687,32 +1681,14 @@ import './guard.js';
       showOverlay(true);
       return;
     }
-    /* a ball that came back to the lane: judge the plunge that put it there
-       and draw the next one. Too soft to reach the table means pull harder
-       next time -- which is what a person does, and without it a demo whose
-       first draw was soft would plunge that same weak shot forever. */
-    if (state === 'ready' && demo.lastState !== 'ready') {
-      if (demo.plunged) {
-        if (demo.entered) demo.chargeTo = 0.5 + Math.random() * 0.5;
-        else demo.chargeTo = Math.min(1, demo.chargeTo + 0.22);
-      }
-      demo.plunged = false;
-      demo.entered = false;
-    }
-    demo.lastState = state;
-
     /* ---- the plunge ---- */
     if (state === 'ready') {
       charging = true;                    /* the frame loop below charges it */
-      if (charge >= demo.chargeTo) { charging = false; demo.plunged = true; launch(); }
+      /* all the way back, or the ball does not go anywhere */
+      if (charge >= FULL_DRAW) { charging = false; launch(); }
       return;
     }
     if (state !== 'play') return;
-    /* up into the table proper? (the lane and the arch are the bottom
-       sixth of it, so anything above that means the shot went in) */
-    if (!demo.entered && world.balls.length && world.balls[0].y > table.H * 0.55) {
-      demo.entered = true;
-    }
 
     /* ---- the flippers ---- */
     var geo = table.flippers, live = world.flippers;
@@ -2000,13 +1976,30 @@ import './guard.js';
   });
 
   function launch() {
-    /* 25% more launch power than the original 26..54 band. */
+    /* 25% more launch power than the original 26..54 band. The draw is
+       always full by the time we get here (the gate below), so this is its
+       top end; it stays in charge terms so the band is still readable. */
     var power = (26 + charge * 28) * 1.25;
     if (state !== 'ready' || !world.balls.length) {
       /* the spring still lets go. With no ball to throw, the handle has to
          come home anyway: this is the only thing that ever releases a
          charge, so an early return left the plunger drawn back for good. */
       dropCharge();
+      return;
+    }
+    /* THE HANDLE HAS TO BE ALL THE WAY BACK. A draw let go halfway only
+       springs home and the ball stays in the lane: a part-drawn plunge
+       used to fire at whatever power it had reached, and a soft one was a
+       ball that never cleared the arch and rolled back down the lane. The
+       panel says so, so a short draw reads as "not yet" rather than as a
+       plunger that did nothing. */
+    if (charge < FULL_DRAW) {
+      var drawn = charge > 0.2;      /* did they pull on it at all? */
+      charging = false;
+      charge = 0;
+      if (drawn && PF.releasePlunger) PF.releasePlunger();   /* spring it home */
+      else dropCharge();
+      if (drawn) setMessage('PULL ALL THE WAY BACK', false, 1.8, 'gold');
       return;
     }
     /* deliberately NOT exitOrbit(): plunging is gameplay, and the player

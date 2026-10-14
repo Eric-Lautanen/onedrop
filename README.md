@@ -50,13 +50,17 @@ the physics layout and the artwork can never drift apart.
 | ------------------------ | ------------------------------------- |
 | `Z` / left arrow         | Left flipper                          |
 | `/` / right arrow        | Right flipper                         |
-| `Space` (hold + release) | Plunge                                |
+| `Space` (hold to the stop, release) | Plunge (the draw must be full) |
 | `A` / `D`                | Nudge left / right                    |
 | `R`                      | Reset game                            |
 | `M`                      | Sound on/off                          |
 | `P`                      | Pause                                 |
 | `F`                      | Fullscreen                            |
 | Mouse / touch            | Drag to orbit the view, wheel to zoom |
+
+The plunger has to come **all the way back**: let go early and the spring simply  
+returns, the ball stays in the lane and the panel says so. The same is true of  
+the knob on the cabinet — drag it down its full travel.
 
 Keys are rebindable from the side menu — click a keycap, then press the key  
 you want. The menu also has volume, FX, fullscreen and reset controls. Opening  
