@@ -1,0 +1,2374 @@
+/* ============================================================
+   ONE DROP PINBALL  --  game.js
+   Wires the machine together and runs the rules.
+
+     table.js      the measured layout (pure data)
+     physics.js    the solver
+     playfield.js  every piece of hardware, built and animated
+     machine.js    the cabinet, backbox and legs
+     dmd.js        the dot-matrix display
+     audio.js      the riddim engine
+
+   WHAT THIS FILE OWNS
+     - the renderer / scene / camera framing
+     - the rules: 5 missions, IRIE letters, multiball, wizard mode,
+       jackpots, combos, bonus, ball save, skill shot, kickback, tilt
+     - input, HUD and the main loop
+   ============================================================ */
+(function (global) {
+  'use strict';
+
+  if (!global.THREE) { alert('three.js failed to load'); return; }
+
+  var PAL = global.PB.PALETTE;
+  var table = global.PB.buildTable(global.PB.PF_SIZE);
+  var world = new global.PB.World(table);
+  var audio = new global.PB.AudioEngine();
+  var art = global.PB.art;
+  var assets = global.PB.assets;
+
+  var CX = table.centerX, CY = table.centerY;
+
+  /* Physics/geometry note: the playfield is inclined only a few degrees,
+     like a real cabinet (~6.5 deg), and the CABINET shares that incline.
+     The steep, wide-at-the-bottom look comes from the CAMERA elevation,
+     which is how a player actually stands in front of a machine. */
+  var TILT = 6.5 * Math.PI / 180;
+  var CAM_PITCH = 0.44;
+  var FIXED = 1 / 180;
+  var MAX_BALLS = 4;
+  var BALL_R = 0.62 * (table.K || 1);
+
+  /* ================= DOM ================= */
+  var D = {};
+  ['score', 'highscore', 'ball', 'mult', 'message', 'lamps', 'spins', 'fps',
+    'menu', 'menuTab', 'menuStatus', 'menuHigh', 'playBtn', 'resetBtn', 'resetGameBtn',
+    'keyLeft', 'keyRight', 'keyPlunge', 'keyNudgeL', 'keyNudgeR', 'keyReset',
+    'soundBtn', 'pauseBtn', 'fsBtn', 'fxBtn', 'vol', 'volVal',
+    'touchLeft', 'touchRight', 'touchLaunch', 'touchNudgeL', 'touchNudgeR',
+    'hint', 'dmd', 'flash', 'floats',
+    'loader', 'ldFill', 'ldMsg'
+  ].forEach(function (id) { D[id] = document.getElementById(id); });
+
+  /* ================= renderer ================= */
+  var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
+  renderer.setPixelRatio(Math.min(global.devicePixelRatio || 1, 2));
+  renderer.setSize(global.innerWidth, global.innerHeight);
+  if ('outputEncoding' in renderer) renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.20;
+  document.getElementById('stage').appendChild(renderer.domElement);
+
+  var scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x05070a);
+  scene.fog = new THREE.FogExp2(0x05070a, 0.0032);
+
+  var camera = new THREE.PerspectiveCamera(45, global.innerWidth / global.innerHeight, 0.5, 400);
+
+  /* environment for chrome reflections */
+  var pmrem = new THREE.PMREMGenerator(renderer);
+  var envTex = art.makeEnv();
+  var envRT = pmrem.fromEquirectangular(envTex);
+  scene.environment = envRT.texture;
+  envTex.dispose();
+
+  /* ================= lights ================= */
+  scene.add(new THREE.HemisphereLight(0xaee0ff, 0x3a2408, 0.70));
+  scene.add(new THREE.AmbientLight(0x445566, 0.50));
+  var key = new THREE.DirectionalLight(0xfff3d0, 1.35);
+  key.position.set(14, 60, 46);
+  scene.add(key);
+  var mood = [
+    { c: PAL.red, p: [-26, 34, 14] },
+    { c: PAL.gold, p: [2, 52, 20] },
+    { c: PAL.green, p: [30, 30, 14] }
+  ];
+  var moodLights = mood.map(function (m) {
+    var l = new THREE.PointLight(m.c, 0.75, 90, 2);
+    l.position.set(m.p[0], m.p[1], m.p[2]);
+    scene.add(l);
+    return l;
+  });
+
+  /* ================= table group ================= */
+  var LAY = -(Math.PI / 2 - TILT);
+  var group = new THREE.Group();
+  group.position.set(CX, CY, 0);
+  group.rotation.x = LAY;
+  scene.add(group);
+  function L(x, y, z) { return new THREE.Vector3(x - CX, y - CY, z); }
+
+  var glowTex = art.makeGlow();
+
+  /* --- the playfield surface ------------------------------------------
+     The painted playfield is a PAINTING, not a lit surface. Reproducing
+     it is the whole brief, so it gets an unlit material with the film
+     curve switched off (see vibrance.js): the sRGB atlas goes in and the
+     sprite's own colours come out, instead of being greyed by metalness
+     and rolled off toward white by ACES. Depth and gloss come from the
+     lacquer sheen sitting on top, and from the exp fog dimming the far
+     end of the table. */
+  var pfTex = art.makePlayfield(table);
+  var playfield = new THREE.Mesh(
+    new THREE.PlaneGeometry(table.W, table.H),
+    new THREE.MeshBasicMaterial({ color: 0xffffff, map: pfTex, fog: true })
+  );
+  playfield.material.toneMapped = false;          /* the sprite, ungraded */
+  playfield.position.copy(L(CX, CY, 0));
+  group.add(playfield);
+
+  function swapInAtlas() {
+    if (!assets.ready) return;                 /* sheet failed: keep procedural art */
+    assets.mapUV(playfield.geometry, 'playfield');
+    playfield.material.map = assets.texture;
+    playfield.material.needsUpdate = true;
+    if (pfTex && pfTex.dispose) pfTex.dispose();
+  }
+  assets.load(swapInAtlas);
+
+  /* A lacquered sheen over the artwork -- and the ONLY thing that lights
+     the painting, which is what stops it reading as a flat sticker.
+
+     Three details make this work, and getting any of them wrong puts the
+     wash straight back:
+       colour 0x000000   a white base adds a milky diffuse layer over the
+                         art -- the exact grey we are removing. Black
+                         leaves nothing but the gloss and the reflection.
+       additive          so the layer can only ever ADD a highlight, never
+                         darken or replace a pixel of the painting.
+       low opacity       the specular is scaled by it, which is the knob
+                         for how wet the lacquer looks. */
+  var sheen = new THREE.Mesh(
+    new THREE.PlaneGeometry(table.W, table.H),
+    new THREE.MeshPhysicalMaterial({
+      color: 0x000000, transparent: true, opacity: 0.55,
+      blending: THREE.AdditiveBlending,
+      roughness: 0.08, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.04,
+      reflectivity: 0.5, envMapIntensity: 1.3, depthWrite: false
+    })
+  );
+  sheen.position.copy(L(CX, CY, 0.02));
+  sheen.renderOrder = 2;
+  group.add(sheen);
+
+  /* ================= hardware ================= */
+  var PF = global.PB.Playfield.build({ table: table, world: world, glowTex: glowTex });
+  group.add(PF.group);
+  assets.load(function () {
+    PF.refreshArt();
+    global.PB.vibrance.sweep(PF.group);
+  });
+
+  /* ================= dot-matrix display ================= */
+  var dmd = global.PB.DMD.create(D.dmd);
+
+  /* ================= particles ================= */
+  function Particles(max) {
+    this.max = max;
+    this.pos = new Float32Array(max * 3);
+    this.col = new Float32Array(max * 3);
+    this.data = [];
+    for (var i = 0; i < max; i++) {
+      this.data.push({ life: 0, max: 1, vx: 0, vy: 0, vz: 0, g: 1, br: 1, bg: 1, bb: 1 });
+      this.pos[i * 3 + 2] = -999;
+    }
+    var geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(this.pos, 3));
+    geo.setAttribute('color', new THREE.BufferAttribute(this.col, 3));
+    this.geo = geo;
+    this.mat = new THREE.PointsMaterial({
+      size: 1.5, map: glowTex, transparent: true, depthWrite: false,
+      blending: THREE.AdditiveBlending, vertexColors: true, sizeAttenuation: true, opacity: 0.95
+    });
+    this.points = new THREE.Points(geo, this.mat);
+    this.points.frustumCulled = false;
+    group.add(this.points);
+    this.cursor = 0;
+    this.col3 = new THREE.Color();
+  }
+  Particles.prototype.burst = function (x, y, z, color, n, speed) {
+    this.col3.set(color);
+    for (var i = 0; i < n; i++) {
+      var idx = this.cursor;
+      this.cursor = (this.cursor + 1) % this.max;
+      var a = Math.random() * Math.PI * 2, s = speed * (0.4 + Math.random() * 0.9);
+      var d = this.data[idx];
+      d.life = 0.45 + Math.random() * 0.5;
+      d.max = d.life;
+      d.g = 1;
+      d.vx = Math.cos(a) * s;
+      d.vy = Math.sin(a) * s + 3;
+      d.vz = 4 + Math.random() * 7;
+      d.br = this.col3.r; d.bg = this.col3.g; d.bb = this.col3.b;
+      this.pos[idx * 3] = x; this.pos[idx * 3 + 1] = y; this.pos[idx * 3 + 2] = z;
+      this.col[idx * 3] = d.br; this.col[idx * 3 + 1] = d.bg; this.col[idx * 3 + 2] = d.bb;
+    }
+  };
+  Particles.prototype.trail = function (x, y, z, color, life) {
+    var idx = this.cursor;
+    this.cursor = (this.cursor + 1) % this.max;
+    var d = this.data[idx];
+    this.col3.set(color);
+    d.life = life; d.max = life; d.g = 0;
+    d.vx = 0; d.vy = 0; d.vz = 0;
+    d.br = this.col3.r; d.bg = this.col3.g; d.bb = this.col3.b;
+    this.pos[idx * 3] = x; this.pos[idx * 3 + 1] = y; this.pos[idx * 3 + 2] = z;
+    this.col[idx * 3] = d.br; this.col[idx * 3 + 1] = d.bg; this.col[idx * 3 + 2] = d.bb;
+  };
+  Particles.prototype.clear = function () {
+    for (var i = 0; i < this.max; i++) { this.data[i].life = 0; this.pos[i * 3 + 2] = -999; }
+  };
+  Particles.prototype.update = function (dt) {
+    for (var i = 0; i < this.max; i++) {
+      var d = this.data[i];
+      if (d.life <= 0) continue;
+      d.life -= dt;
+      if (d.life <= 0) { this.pos[i * 3 + 2] = -999; continue; }
+      d.vy -= 16 * d.g * dt;
+      this.pos[i * 3] += d.vx * dt;
+      this.pos[i * 3 + 1] += d.vy * dt;
+      this.pos[i * 3 + 2] += d.vz * dt;
+      var f = d.life / d.max;
+      this.col[i * 3] = d.br * f;
+      this.col[i * 3 + 1] = d.bg * f;
+      this.col[i * 3 + 2] = d.bb * f;
+    }
+    this.geo.attributes.position.needsUpdate = true;
+    this.geo.attributes.color.needsUpdate = true;
+  };
+  var particles = new Particles(1400);
+  function pburst(x, y, z, color, n, speed) {
+    if (!fxAllowed()) return;
+    particles.burst(x - CX, y - CY, z, color, n, speed);
+  }
+  function ptrail(x, y, z, color, life) {
+    if (!fxAllowed()) return;
+    particles.trail(x - CX, y - CY, z, color, life);
+  }
+
+  /* ================= floating score text ================= */
+  function floatText(x, y, text, cls) {
+    if (!fxAllowed()) return;
+    var v = L(x, y, 2.4);
+    group.updateMatrixWorld();
+    camera.updateMatrixWorld();
+    group.localToWorld(v);
+    v.project(camera);
+    var el = document.createElement('div');
+    el.className = 'float ' + (cls || '');
+    el.textContent = text;
+    el.style.left = ((v.x * 0.5 + 0.5) * 100) + '%';
+    el.style.top = ((-v.y * 0.5 + 0.5) * 100) + '%';
+    if (D.floats) D.floats.appendChild(el);
+    setTimeout(function () { el.remove(); }, 1100);
+  }
+
+  /* ================= cabinet ================= */
+  /* ================= cabinet =================
+     machine.js is owned by whoever is building the cabinet, and it gets
+     rewritten on its own schedule. So this seam is deliberately
+     forgiving: whatever buildMachine() returns -- or whatever it throws
+     -- the playfield still has to come up playable.
+
+     CONTRACT -- what game.js asks of machine.js:
+
+       PB.buildMachine({ table, tilt, glowTex }) -> {
+         root              REQUIRED. added to the scene.
+         head              optional. only used to frame inspection shots.
+         dmdPlane          optional. its tone mapping is switched off.
+         update(now, hot)  optional. called once per frame.
+         dispose()         optional. called when the playfield is resized.
+       }
+
+     `table` carries { W, H, K, centerX, centerY } so the cabinet can
+     align itself to the playfield. The playfield's own size does NOT
+     come from here -- it comes from PB.PF_SIZE in table.js. Anything
+     missing above is skipped, never fatal. */
+  var machine = null;
+  var machineFloorY = 0;
+  function pfWarn(msg) {
+    if (global.console && global.console.warn) {
+      global.console.warn('[playfield] ' + msg);
+    }
+  }
+  function buildCabinet() {
+    if (machine) return;
+    try {
+      var built = global.PB.buildMachine
+        ? global.PB.buildMachine({ table: table, tilt: TILT, glowTex: glowTex })
+        : null;
+      if (built && built.root) {
+        machine = built;
+        group.add(machine.root);
+      } else {
+        pfWarn('machine.js returned no root -- running playfield-only');
+      }
+    } catch (err) {
+      machine = null;
+      pfWarn('machine.js threw while building the cabinet; the playfield ' +
+             'still works. ' + ((err && err.message) ? err.message : err));
+    }
+
+    if (machine) {
+      /* The cabinet carries a lot of painted art -- the backglass, the dot
+         plate, the rasta flanks, the coin door, the apron cards. Same rule
+         as the playfield: reproduce it, don't regrade it. This runs after
+         buildMachine so it survives that module being rewritten, and it is
+         art-only, so a failure here must not stop the build. */
+      try { global.PB.vibrance.sweep(machine.root); } catch (e) { /* cosmetic */ }
+
+      /* machine.js sizes the DMD canvas to the painted plate's aspect and
+         builds the band window off the same numbers -- tell the display
+         object, which caches its cell sizes, so it re-cuts its dot assets. */
+      if (dmd && dmd.resize && D.dmd) dmd.resize(D.dmd.width, D.dmd.height);
+
+      dmdTex = (machine.dmdPlane && machine.dmdPlane.material)
+        ? machine.dmdPlane.material.map : null;
+      if (machine.dmdPlane && machine.dmdPlane.material) {
+        /* the live display is already unlit, but ACES would still mute its
+           palette -- the DMD's own colours are the design, so skip it */
+        machine.dmdPlane.material.toneMapped = false;
+      }
+    }
+    group.updateMatrixWorld(true);
+    cabinetFit = checkCabinetFit();
+    computeFitCorners();
+    buildFloor();
+    fitCamera();
+  }
+  /* ---- does the playfield still fit the cabinet it was handed? ----
+     The cabinet is rebuilt on its own schedule, so the two can drift
+     silently: machine.js changes its outer numbers, table.js still
+     holds the mirrored copy, and the field ends up the wrong size with
+     nothing on screen to say why.
+
+     This reports rather than polices. A bounding box is NOT a safe
+     test: the cabinet legitimately carries trim, flipper buttons and
+     backbox panels that stick out past its own outer walls, so a
+     measurement of "everything under machine.root" reads wide even
+     when the fit is perfect. The one exact signal is PB.MACHINE_BOX --
+     if the cabinet publishes its box and that box disagrees with what
+     the playfield was built from, that is a real drift and worth a
+     warning. Otherwise this just records the numbers. */
+  function checkCabinetFit() {
+    if (!machine || !machine.root) return null;
+    /* The field is built from table.js's mirrored CABINET at script-load
+       time -- which is BEFORE machine.js exists, since index.html loads
+       table.js first. So compare what the field was actually BUILT at
+       against what the cabinet now OFFERS; comparing cabinetOpening()
+       with itself would always agree and guard nothing. */
+    var built = global.PB.PF_SIZE;
+    var box = global.PB.MACHINE_BOX;
+    var offers = global.PB.cabinetOpening(box || undefined);
+    var bb = new THREE.Box3().setFromObject(machine.root);
+    var info = {
+      playfieldW: +built.W.toFixed(2),
+      playfieldH: +built.H.toFixed(2),
+      cabinetW: +(bb.max.x - bb.min.x).toFixed(2),
+      cabinetSpanY: +(bb.max.y - bb.min.y).toFixed(2),
+      source: box ? 'PB.MACHINE_BOX' : 'table.js CABINET'
+    };
+    if (Math.abs(offers.W - built.W) > 0.05 || Math.abs(offers.H - built.H) > 0.05) {
+      pfWarn('the cabinet offers ' + offers.W.toFixed(2) + ' x ' +
+        offers.H.toFixed(2) + ' but the field was built at ' +
+        built.W.toFixed(2) + ' x ' + built.H.toFixed(2) +
+        '. Re-fit with PB.game.fitPlayfieldToCabinet().');
+    }
+    return info;
+  }
+  var cabinetFit = null;
+
+  var dmdTex = null;
+  assets.load(buildCabinet);
+
+  /* ================= floor ================= */
+  var floorGroup = null, gridTex = null;
+  var machineCenter = new THREE.Vector3(CX, CY, 0);
+  function buildFloor() {
+    if (floorGroup) return;
+    floorGroup = new THREE.Group();
+    var y = machineFloorY - 0.35;
+
+    var floor = new THREE.Mesh(
+      new THREE.PlaneGeometry(900, 900),
+      new THREE.MeshStandardMaterial({ color: 0x07090a, metalness: 0.2, roughness: 0.9 })
+    );
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.set(machineCenter.x, y, machineCenter.z);
+    floorGroup.add(floor);
+
+    var gc = document.createElement('canvas');
+    gc.width = gc.height = 256;
+    var gx2 = gc.getContext('2d');
+    for (var ci = 0; ci < 4; ci++) {
+      var p = ci * 64;
+      gx2.fillStyle = 'rgba(58, 220, 138, 0.30)';
+      gx2.fillRect(p, 0, 2, 256);
+      gx2.fillRect(0, p, 256, 2);
+    }
+    gx2.fillStyle = 'rgba(246, 196, 69, 0.32)';
+    gx2.fillRect(64, 0, 2, 256); gx2.fillRect(0, 64, 256, 2);
+    gx2.fillStyle = 'rgba(215, 38, 61, 0.22)';
+    gx2.fillRect(192, 0, 2, 256); gx2.fillRect(0, 192, 256, 2);
+    gridTex = new THREE.CanvasTexture(gc);
+    gridTex.wrapS = gridTex.wrapT = THREE.RepeatWrapping;
+    gridTex.repeat.set(76, 76);
+    if ('encoding' in gridTex) gridTex.encoding = THREE.sRGBEncoding;
+    var grid = new THREE.Mesh(
+      new THREE.PlaneGeometry(900, 900),
+      new THREE.MeshBasicMaterial({
+        map: gridTex, transparent: true, opacity: 0.5,
+        blending: THREE.AdditiveBlending, depthWrite: false
+      })
+    );
+    grid.rotation.x = -Math.PI / 2;
+    grid.position.set(machineCenter.x, y + 0.02, machineCenter.z);
+    floorGroup.add(grid);
+
+    var fc = document.createElement('canvas');
+    fc.width = fc.height = 256;
+    var fx = fc.getContext('2d');
+    var fg = fx.createRadialGradient(128, 128, 10, 128, 128, 128);
+    fg.addColorStop(0, 'rgba(0,0,0,0)');
+    fg.addColorStop(0.42, 'rgba(0,0,0,0.35)');
+    fg.addColorStop(0.72, 'rgba(0,0,0,0.86)');
+    fg.addColorStop(1, 'rgba(0,0,0,1)');
+    fx.fillStyle = fg; fx.fillRect(0, 0, 256, 256);
+    var fade = new THREE.Mesh(
+      new THREE.PlaneGeometry(760, 760),
+      new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(fc), transparent: true, depthWrite: false })
+    );
+    fade.rotation.x = -Math.PI / 2;
+    fade.position.set(machineCenter.x, y + 0.05, machineCenter.z);
+    floorGroup.add(fade);
+
+    var pool = new THREE.Mesh(
+      new THREE.PlaneGeometry(120, 120),
+      new THREE.MeshBasicMaterial({
+        map: glowTex, color: 0x1d9a4e, transparent: true, opacity: 0.45,
+        blending: THREE.AdditiveBlending, depthWrite: false
+      })
+    );
+    pool.rotation.x = -Math.PI / 2;
+    pool.position.set(machineCenter.x, y + 0.08, machineCenter.z);
+    floorGroup.add(pool);
+
+    var sc = document.createElement('canvas');
+    sc.width = sc.height = 256;
+    var sx = sc.getContext('2d');
+    var sg = sx.createRadialGradient(128, 128, 6, 128, 128, 126);
+    sg.addColorStop(0, 'rgba(0,0,0,0.72)');
+    sg.addColorStop(0.55, 'rgba(0,0,0,0.34)');
+    sg.addColorStop(1, 'rgba(0,0,0,0)');
+    sx.fillStyle = sg; sx.fillRect(0, 0, 256, 256);
+    var shadow = new THREE.Mesh(
+      new THREE.PlaneGeometry(58, 66),
+      new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(sc), transparent: true, depthWrite: false })
+    );
+    shadow.rotation.x = -Math.PI / 2;
+    shadow.position.set(machineCenter.x, y + 0.05, machineCenter.z);
+    floorGroup.add(shadow);
+
+    scene.add(floorGroup);
+  }
+
+  /* ================= ball ================= */
+  var ballGeo = new THREE.SphereGeometry(BALL_R, 34, 24);
+  var ballMat = new THREE.MeshStandardMaterial({ color: 0xdfe6ef, metalness: 1.0, roughness: 0.11, emissive: 0x0a0a0a });
+  var shadowTex = (function () {
+    var c = document.createElement('canvas'); c.width = c.height = 64;
+    var x = c.getContext('2d');
+    var g = x.createRadialGradient(32, 32, 0, 32, 32, 32);
+    g.addColorStop(0, 'rgba(0,0,0,0.75)');
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    x.fillStyle = g; x.fillRect(0, 0, 64, 64);
+    return new THREE.CanvasTexture(c);
+  })();
+
+  /* ================= camera framing ================= */
+  var FIT_TOP = 0.92, FIT_BOTTOM = -0.96;
+  var fitCorners = [];
+
+  function computeFitCorners() {
+    var bb = new THREE.Box3();
+    group.updateMatrixWorld(true);
+    /* the cabinet is optional: if machine.js is mid-rewrite or throws,
+       the playfield still has to frame itself correctly */
+    if (machine && machine.root) bb.expandByObject(machine.root);
+    bb.expandByObject(playfield);
+    if (bb.isEmpty()) return;
+    var mn = bb.min, mx = bb.max;
+    bb.getCenter(machineCenter);
+    machineFloorY = (machine && machine.root &&
+                     machine.root.userData.floorWorldY !== undefined)
+      ? machine.root.userData.floorWorldY : mn.y;
+    fitCorners = [];
+    [[mn.x, mx.y], [mx.x, mx.y], [mx.x, mn.y], [mn.x, mn.y]].forEach(function (c) {
+      fitCorners.push(new THREE.Vector3(c[0], c[1], mn.z));
+      fitCorners.push(new THREE.Vector3(c[0], c[1], mx.z));
+    });
+  }
+
+  var camDist = 70, camLook = 0, camZoom = 0;
+  var HERO_YAW = 0.30;
+
+  /* ---- the fly-in track ----------------------------------------------
+     Game start tweens the camera from wherever it sits (attract drift,
+     an orbit the player left it in) to the exact fit pose -- placeCamera
+     at camDist/camLook. The tween's END IS that pose, to the decimal, so
+     when the fly-in finishes and updateCamera takes over there is no
+     pop; the player just sees the machine settle into the standing view
+     with DMD and flippers in one frame. */
+  var camFly = { on: false, t: 0, dur: 1.4,
+    fromPos: null, fromQuat: null, toPos: null, toQuat: null };
+
+  /* ---- the player pose ----
+     Standing at the machine: the eye sits IN FRONT of the cabinet,
+     elevated, looking down at ~33 degrees -- one frame holds the full
+     DMD at the top, the flippers at the bottom, and the whole lane the
+     ball travels between them. The camera is centred on the machine's
+     axis (no yaw), and the DISTANCE is solved so both anchors -- the
+     backbox top (DMD) and the flipper pivot line -- land inside the
+     vertical FOV with breathing room. Every input is a real world
+     position, so the pose stays correct as geometry is tuned. */
+  var playerPose = null;   /* { pos: Vector3, quat: Quaternion } */
+  /* the standing pose, hand-tuned with the on-screen CAM readout (C key):
+     in front of the cabinet, above the playfield, looking down 42 -- one
+     frame holds the DMD at the top, the flippers at the bottom and the
+     whole lane in between. X rides the machine's centre line so a table
+     re-fit keeps the view centred; y/z/pitch are the tuned constants. */
+  var PLAYER_VIEW = { y: 81.0, z: 62.5, pitch: 42 * Math.PI / 180 };
+  function computePlayerPose() {
+    if (!machine || !machine.root) return null;
+    machine.root.updateMatrixWorld(true);
+    var pos = new THREE.Vector3(machineCenter.x, PLAYER_VIEW.y, PLAYER_VIEW.z);
+    var fwd = new THREE.Vector3(0, -Math.sin(PLAYER_VIEW.pitch), -Math.cos(PLAYER_VIEW.pitch));
+    var look = pos.clone().addScaledVector(fwd, 50);
+    var quat = new THREE.Quaternion().setFromRotationMatrix(
+      new THREE.Matrix4().lookAt(pos, look, new THREE.Vector3(0, 1, 0)));
+    return { pos: pos, quat: quat };
+  }
+
+  function beginFlyIn() {
+    if (!fitCorners.length) return;           /* boot not done yet */
+    wobbleAmp = 0;                            /* sway eases back in after landing */
+    swayT = 0;                                /* ...from zero phase, so the landed
+                                                 pose is the exact sway origin */
+    /* remember where the camera IS right now (attract drift, or an
+       orbit view the player left it in) -- the tween starts here */
+    camFly.fromPos = camera.position.clone();
+    camFly.fromQuat = camera.quaternion.clone();
+    /* if the player had dragged to an orbit view, that rig is STILL ON
+       and would yank the camera back to its own pose the instant the
+       tween ends -- capture the start view, then disarm the rig */
+    orbit.on = false;
+    orbit.drag = false;
+    /* the target is the player pose, computed fresh so a resized window
+       still frames DMD + flippers; falling back to the fitted hero view
+       only if the anchors are missing */
+    var pose = computePlayerPose();
+    if (pose) playerPose = pose;   /* the standing view holds this after the tween */
+    else {
+      placeCamera(camDist, camLook);
+      camera.updateMatrixWorld(true);
+      pose = { pos: camera.position.clone(), quat: camera.quaternion.clone() };
+    }
+    camFly.toPos = pose.pos.clone();
+    camFly.toQuat = pose.quat.clone();
+    camFly.t = 0;
+    camFly.on = true;
+  }
+
+  function flyTick(raw) {
+    if (!camFly.on) return false;
+    camFly.t = Math.min(camFly.dur, camFly.t + raw);
+    var k = camFly.t / camFly.dur;
+    k = k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;   /* easeInOutCubic */
+    camera.position.lerpVectors(camFly.fromPos, camFly.toPos, k);
+    /* r125+ ships Quaternion#slerpQuaternions; older builds only get the
+       flat two-pose copy, which is still the right endpoints */
+    if (camera.quaternion.slerpQuaternions) {
+      camera.quaternion.slerpQuaternions(camFly.fromQuat, camFly.toQuat, k);
+    } else {
+      camera.quaternion.copy(k < 1 ? camFly.fromQuat : camFly.toQuat);
+    }
+    if (camFly.t >= camFly.dur) camFly.on = false;
+    return true;
+  }
+
+  /* the PLAY/Space camera track */
+  function placeCamera(D2, look) {
+    var horiz = D2 * Math.cos(CAM_PITCH);
+    camera.position.set(
+      machineCenter.x + Math.sin(HERO_YAW) * horiz,
+      machineCenter.y + D2 * Math.sin(CAM_PITCH),
+      Math.cos(HERO_YAW) * horiz
+    );
+    camera.lookAt(machineCenter.x, machineCenter.y + look, 0);
+  }
+
+  function fitCamera() {
+    if (!fitCorners.length) return;
+    if (!isFinite(camera.aspect) || camera.aspect <= 0) return;
+    var vFov = camera.fov * Math.PI / 180;
+    var D2 = 70, look = 0;
+    var mid = (FIT_TOP + FIT_BOTTOM) / 2;
+    var targetV = FIT_TOP - FIT_BOTTOM;
+    var TAN = Math.tan(vFov / 2);
+    for (var it = 0; it < 24; it++) {
+      placeCamera(D2, look);
+      camera.updateMatrixWorld(true);
+      camera.updateProjectionMatrix();
+      var minY = 9, maxY = -9;
+      for (var i = 0; i < fitCorners.length; i++) {
+        var v = fitCorners[i].clone().project(camera);
+        minY = Math.min(minY, v.y); maxY = Math.max(maxY, v.y);
+      }
+      var c = (maxY + minY) / 2;
+      look += (c - mid) * D2 * TAN;
+      placeCamera(D2, look);
+      camera.updateMatrixWorld(true);
+      camera.updateProjectionMatrix();
+      minY = 9; maxY = -9;
+      var minX = 9, maxX = -9;
+      for (var j = 0; j < fitCorners.length; j++) {
+        var w = fitCorners[j].clone().project(camera);
+        minY = Math.min(minY, w.y); maxY = Math.max(maxY, w.y);
+        minX = Math.min(minX, w.x); maxX = Math.max(maxX, w.x);
+      }
+      var spanV = maxY - minY, spanH = maxX - minX;
+      var k = spanV > 1e-4 ? spanV / targetV : 1;
+      if (spanH / 1.9 > k) k = spanH / 1.9;
+      D2 *= k;
+    }
+    camDist = D2;
+    camLook = look;
+  }
+
+  var lastW = 0, lastH = 0;
+  function resize() {
+    var w = global.innerWidth, h = global.innerHeight;
+    if (!w || !h) return;
+    if (w === lastW && h === lastH) return;
+    lastW = w; lastH = h;
+    renderer.setSize(w, h);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    fitCamera();
+    /* the standing view frames DMD + flippers against the FOV, so a new
+       aspect needs a new pose -- recomputed live even mid-game */
+    playerPose = computePlayerPose();
+  }
+  global.addEventListener('resize', resize);
+  resize();
+  function syncSize() {
+    if (global.innerWidth !== lastW || global.innerHeight !== lastH) resize();
+  }
+
+  /* ============ orbit inspection camera ============ */
+  var orbit = { on: false, yaw: 0, pitch: CAM_PITCH, dist: 90,
+    pivot: new THREE.Vector3(), drag: false, px: 0, py: 0 };
+
+  function enterOrbit() {
+    if (orbit.on) return;
+    /* pivot where the camera is ALREADY looking -- along its forward ray
+       toward the machine -- so grabbing the view never shifts it. The old
+       machineCenter pivot yanked the frame sideways the instant a pointer
+       touched the canvas, especially from the off-axis standing view. */
+    var fwd = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+    var along = machineCenter.clone().sub(camera.position).dot(fwd);
+    if (along > 1) orbit.pivot.copy(camera.position).addScaledVector(fwd, along);
+    else orbit.pivot.copy(machineCenter);
+    var d = camera.position.clone().sub(orbit.pivot);
+    orbit.dist = Math.max(20, d.length());
+    orbit.pitch = Math.acos(Math.max(-1, Math.min(1, d.y / orbit.dist)));
+    orbit.yaw = Math.atan2(d.x, d.z);
+    orbit.on = true;
+  }
+  function exitOrbit() {
+    if (!orbit.on) return;
+    orbit.on = false;
+    fitCamera();
+  }
+
+  (function bindOrbit() {
+    var dom = renderer.domElement;
+    dom.style.touchAction = 'none';
+    dom.addEventListener('pointerdown', function (e) {
+      if (paused) return;   /* a paused table must not swallow the camera:
+                               clicks while frozen would otherwise grab the
+                               orbit rig and the resume would land tilted */
+      enterOrbit();
+      orbit.drag = true; orbit.px = e.clientX; orbit.py = e.clientY;
+      if (dom.setPointerCapture) { try { dom.setPointerCapture(e.pointerId); } catch (err) { /* pointer already gone */ } }
+    });
+    dom.addEventListener('pointermove', function (e) {
+      if (!orbit.drag) return;
+      orbit.yaw -= (e.clientX - orbit.px) * 0.006;
+      orbit.pitch = Math.max(0.08, Math.min(1.45, orbit.pitch + (e.clientY - orbit.py) * 0.005));
+      orbit.px = e.clientX; orbit.py = e.clientY;
+    });
+    function endDrag(e) {
+      orbit.drag = false;
+      if (dom.releasePointerCapture && e.pointerId !== undefined) {
+        try { dom.releasePointerCapture(e.pointerId); } catch (err) { /* already released */ }
+      }
+    }
+    dom.addEventListener('pointerup', endDrag);
+    dom.addEventListener('pointercancel', endDrag);
+    dom.addEventListener('wheel', function (e) {
+      e.preventDefault();
+      if (paused) return;
+      enterOrbit();
+      orbit.dist = Math.max(24, Math.min(320, orbit.dist * Math.exp(e.deltaY * 0.0012)));
+    }, { passive: false });
+  })();
+
+  var shake = 0, shakeX = 0, shakeY = 0;
+  /* the standing view's idle sway eases in AFTER the fly-in lands -- it
+     starts at zero so the tween hands off to an identical pose with no
+     twitch, then the breathing motion fades up over ~2 seconds.
+     The sway runs on its OWN accumulated clock (swayT), not wall time:
+     updateCamera is skipped during the fly-in and while paused, so a
+     wall-clock phase would jump sideways across either gap -- the exact
+     "shifts a little on resume" glitch. swayT only advances when the
+     camera is actually being driven, and begins at 0 on landing. */
+  var wobbleAmp = 0, lastUC = -1, swayT = 0;  function updateCamera(t) {
+    /* clamp the raw delta: gaps (fly-in, pause) must not advance the
+       sway clock in one leap */
+    var udt = lastUC < 0 ? 0.016 : Math.min(0.05, Math.max(0, t - lastUC));
+    lastUC = t;
+    if (!camFly.on) {
+      wobbleAmp = Math.min(1, wobbleAmp + udt * 0.5);
+      swayT += udt;
+    }
+    if (orbit.on) {
+      var sy = Math.sin(orbit.pitch), cy = Math.cos(orbit.pitch);
+      camera.position.set(
+        orbit.pivot.x + Math.sin(orbit.yaw) * orbit.dist * sy,
+        orbit.pivot.y + orbit.dist * cy,
+        orbit.pivot.z + Math.cos(orbit.yaw) * orbit.dist * sy
+      );
+      camera.lookAt(orbit.pivot);
+      return;
+    }
+    /* the standing view: once a game has begun, hold the player pose the
+       fly-in landed on -- recomputed if the window resizes -- with the
+       shake wobble layered on top. Attract keeps the old drifting hero. */
+    if (playerPose && state !== 'attract') {
+      var p = playerPose.pos;
+      camera.position.set(
+        p.x + Math.sin(swayT * 0.13) * 0.8 * wobbleAmp + shakeX * 0.30,
+        p.y + shakeY * 0.30,
+        p.z
+      );
+      camera.quaternion.copy(playerPose.quat);
+      /* roll the shake into the held view so hits still jolt the cabinet */
+      if (shakeX || shakeY) camera.rotateZ(shakeX * 0.004);
+      return;
+    }
+    var driftP = state === 'attract' ? Math.sin(swayT * 0.23) * 0.075 : 0;
+    var pitch = CAM_PITCH + driftP + shakeY * 0.004;
+    var a = camDist * (1 - camZoom * 0.05) * (1 - shake * 0.004);
+    var horiz = a * Math.cos(pitch);
+    camera.position.set(
+      machineCenter.x + Math.sin(HERO_YAW) * horiz + Math.sin(swayT * 0.13) * 1.6 + shakeX * 0.30,
+      machineCenter.y + Math.sin(pitch) * a,
+      Math.cos(HERO_YAW) * horiz
+    );
+    camera.lookAt(machineCenter.x + shakeX * 0.18, machineCenter.y + camLook, 0);
+  }
+
+  /* ==========================================================
+     RULES
+     ========================================================== */
+
+  /* ---------------- missions ----------------
+     Five goals. Each holds three steps, so the bar on the DMD
+     fills as you work it. Finishing all five starts WIZARD MODE. */
+  var MISSIONS = [
+    { id: 'orbit', name: 'ROOTS ORBIT', need: 3, hint: 'SHOOT THE ROOTS ORBIT' },
+    { id: 'spins', name: 'DUB SPINNER', need: 50, hint: 'SPIN THE DUB SPINNER' },
+    { id: 'tiki', name: 'TIKI BASH', need: 8, hint: 'BASH THE TIKI' },
+    { id: 'bank', name: 'ONE DROP', need: 4, hint: 'DROP THE WHOLE BANK' },
+    { id: 'skank', name: 'SKANK RAMP', need: 3, hint: 'SHOOT THE SKANK RAMP' }
+  ];
+  var missions = MISSIONS.map(function (m) {
+    return { id: m.id, name: m.name, need: m.need, have: 0, step: 0, done: false };
+  });
+  var missionNames = MISSIONS.map(function (m) { return m.name; });
+
+  var IRIE = ['I', 'R', 'I', 'E'];
+  var irieOn = [false, false, false, false];
+  var wizardDone = false, wizardActive = false, wizardTimer = 0;
+
+  /* ---------------- state ---------------- */
+  var state = 'attract';      // attract | ready | play | ballover | gameover
+  var score = 0, displayScore = 0, highScore = 0, ballNum = 1, ballsLeft = 3;
+  var mult = 1, combo = 0, comboTimer = 0;
+  var extraBalls = 0;                 /* earned free balls, one per award */
+  var saveActive = false, saveTime = 0;
+  var tiltWarn = 0, tiltTimer = 0, tilted = false;
+  var charge = 0, charging = false;
+  var spinCount = 0, standupHits = 0, targetsDown = 0, bashCount = 0;
+  var rampShots = { 'ROOTS ORBIT': 0, 'SKANK RAMP': 0 };
+  var skillTimer = 0, skillLive = false;
+  var multiballActive = false, multiballTimer = 0, multiballShots = 0;
+  var jackpotArmed = false, jackpotValue = 15000;
+  var gridLit = 0;
+  var messageTimer = 0;
+  var attractTimer = 0, attractMsg = 0;
+  var el = {};
+  var bonusTicking = 0, bonusTotal = 0, bonusShown = 0;
+  var jackpotLadder = 0;
+
+  highScore = parseInt(global.localStorage.getItem('onedrop.high') || '0', 10) || 0;
+
+  /* the master fader. It lives in localStorage like the high score and
+     the key bindings, and it starts at 50% -- the mix is built so the
+     band is a bed at that setting rather than the whole show. The value
+     is handed to the engine before it has an AudioContext; setVolume()
+     remembers it and the buses come up at the right level when init()
+     finally runs on the player's first click. */
+  var VOL_KEY = 'onedrop.vol';
+  var volFrac = parseFloat(global.localStorage.getItem(VOL_KEY));
+  if (!isFinite(volFrac) || volFrac < 0 || volFrac > 1) volFrac = 0.5;
+  audio.setVolume(volFrac);
+  function showVolume() {
+    var pct = Math.round(volFrac * 100);
+    if (D.vol) D.vol.value = String(pct);
+    setText(D.volVal, pct + '%');
+  }
+  showVolume();
+
+  /* ---------------- HUD ---------------- */
+  function setText(node, txt) { if (node && node.textContent !== txt) node.textContent = txt; }
+  function updateHUD() {
+    var s = Math.floor(displayScore);
+    if (el.score !== s) { setText(D.score, s.toLocaleString('en-US')); el.score = s; }
+    if (el.high !== highScore) {
+      setText(D.highscore, highScore.toLocaleString('en-US'));
+      setText(D.menuHigh, highScore.toLocaleString('en-US'));
+      el.high = highScore;
+    }
+    if (el.ball !== ballNum) { setText(D.ball, String(ballNum)); el.ball = ballNum; }
+    if (el.mult !== mult) { setText(D.mult, mult + 'x'); el.mult = mult; }
+    if (el.spins !== spinCount) { setText(D.spins, String(spinCount)); el.spins = spinCount; }
+  }
+  function bigMessage(msg, sub) {
+    if (D.menuStatus) D.menuStatus.textContent = sub ? (msg + '  \u2014  ' + sub) : msg;
+  }
+  var menuDown = true;   /* true while the panel sits at the dropped spot;
+                            the tabbed/up position keeps it false so PLAY and
+                            the handle can act as close-and-resume */
+  function showOverlay(on) {
+    /* on = menu fully shown, hidden-with-handle otherwise. While a game
+       is live this is the PAUSE TOGGLE: sliding the menu down pauses the
+       table, sliding it back up closes the menu and resumes. Attract and
+       game-over have nothing to pause, so those pass untouched. */
+    if (!D.menu) return;
+    D.menu.classList.toggle('ingame', !on);
+    menuPause(on);
+    menuDown = on;
+    menuSlide(on ? 'down' : 'up');
+  }
+  function menuPause(on) {
+    /* an open menu over a live ball pauses; re-tabbing it resumes.
+       Pause takes the riddim with it -- the band stops on the beat it is
+       at (startMusic later resumes from there) -- and restarts on open. */
+    if (!(state === 'ready' || state === 'play' || state === 'ballover')) return;
+    if (paused === on) return;
+    paused = on;
+    if (D.pauseBtn) D.pauseBtn.textContent = paused ? 'RESUME' : 'PAUSE';
+    if (on) setMessage('PAUSED', false, 1.4);
+    if (on) audio.stopMusic();
+    else if (!state || state !== 'attract') audio.startMusic();
+  }
+  /* ---- the menu's slide choreography ----------------------------------
+     'up'     slides the panel to its tabbed spot: only the MENU handle
+              peeks from the top of the screen while you play. It also
+              queues a bounce for the next slide down.
+     'down'   slides back to the dropped spot. With bounce (first reveal,
+              game over, reset) the panel plays the drop-and-bounce, so it
+              lands like a ball dropping onto the playfield; without, it
+              just slides (the mid-game handle click). The .drop class is
+              removed on animationend so the animation's fill never holds
+              the final keyframe over the panel's own opacity rules. */
+  var menuBounceQueued = true;   /* reveal plays the drop from above */
+  function menuSlide(dir, bounce) {
+    if (!D.menu) return;
+    if (dir === 'up') {
+      menuBounceQueued = true;
+      D.menu.classList.remove('drop');
+      D.menu.classList.add('tabbed');
+    } else {
+      D.menu.classList.remove('tabbed');
+      if (bounce === undefined) bounce = menuBounceQueued;
+      menuBounceQueued = false;
+      if (bounce) {
+        D.menu.classList.remove('drop');
+        void D.menu.offsetWidth;
+        D.menu.classList.add('drop');
+      }
+    }
+  }
+  if (D.menu) {
+    D.menu.addEventListener('animationend', function (e) {
+      if (e.animationName === 'menuDrop') D.menu.classList.remove('drop');
+    });
+  }
+  function setMessage(msg, sticky, secs, kind) {
+    if (!dmd) return;
+    if (!msg) { dmd.clear(); messageTimer = 0; return; }
+    dmd.say(msg, sticky ? 1e9 : (secs || 2.2), kind);
+    messageTimer = sticky ? 1e9 : (secs || 2.2);
+  }
+
+  /* ---------------- scoring ---------------- */
+  function addScore(n, x, y, label, cls) {
+    var gained = Math.round(n * mult * (1 + combo * 0.1));
+    score += gained;
+    if (x !== undefined) floatText(x, y, (label || '') + gained.toLocaleString('en-US'), cls || '');
+    if (score > highScore) {
+      highScore = score;
+      global.localStorage.setItem('onedrop.high', String(highScore));
+    }
+    return gained;
+  }
+  function bumpCombo() { combo = Math.min(combo + 1, 12); comboTimer = 2.4; }
+
+  /* ---------------- lamp sync ---------------- */
+  function syncLamps() {
+    /* the two top lanes are the IRIE lane letters */
+    PF.setLamp(PF.groups.lane[0], irieOn[0]);
+    PF.setLamp(PF.groups.lane[1], irieOn[2]);
+
+    /* drop bank: lit while the target is down */
+    for (var i = 0; i < 4; i++) {
+      if (PF.groups.drop[i] !== undefined) PF.setLamp(PF.groups.drop[i], !table.targets[i].up);
+    }
+    /* standups: a rising ladder */
+    var sl = Math.min(3, standupHits % 4);
+    for (var s = 0; s < 3; s++) {
+      if (PF.groups.stand[s] !== undefined) PF.setLamp(PF.groups.stand[s], s < sl);
+    }
+    /* shack bracket: one lens per bash, all six at eight */
+    var sh = Math.min(6, Math.ceil(bashCount / 1.4));
+    for (var k = 0; k < 6; k++) {
+      if (PF.groups.shack[k] !== undefined) PF.setLamp(PF.groups.shack[k], k < sh);
+    }
+    /* the palm grid counts completed missions */
+    for (var g = 0; g < PF.groups.grid.length; g++) {
+      PF.setLamp(PF.groups.grid[g], g < gridLit);
+    }
+    /* always-on house lighting */
+    PF.setGroup('sling', true);
+    PF.setGroup('inlane', true);
+    PF.setGroup('outlane', true);
+    PF.setGroup('bump', true);
+    PF.setGroup('spinner', true);
+  }
+
+  /* ---------------- mission bookkeeping ---------------- */
+  function missionStep(id, amount) {
+    if (wizardActive) return;
+    var m = null;
+    for (var i = 0; i < missions.length; i++) if (missions[i].id === id) m = missions[i];
+    if (!m || m.done) return;
+    m.have += (amount === undefined ? 1 : amount);
+    var newStep = Math.min(3, Math.floor(m.have / m.need * 3));
+    if (newStep !== m.step) {
+      m.step = newStep;
+      if (m.step > 0 && m.step < 3) {
+        setMessage(m.name + '  ' + m.step + '/3', false, 1.6, 'green');
+      }
+    }
+    if (m.have >= m.need) completeMission(m);
+  }
+
+  function completeMission(m) {
+    m.done = true;
+    m.step = 3;
+    gridLit = Math.min(16, gridLit + 3);
+    syncLamps();
+    audio.sfx('jackpot');
+    shake = 1.2;
+    flashScreen(PAL.gold, 0.45);
+
+    var award = {
+      orbit: 40000, spins: 30000, tiki: 60000, bank: 25000, skank: 50000
+    }[m.id] || 25000;
+    addScore(award, undefined, undefined, '', 'jack');
+
+    /* FREE BALL: the 2nd and 4th missions completed each earn one. On a
+       real table this is the special worth chasing, so it comes with its
+       own fanfare -- and finishBonus() below spends it instead of ending
+       the game. */
+    var doneCount = 0;
+    for (var fc = 0; fc < missions.length; fc++) if (missions[fc].done) doneCount++;
+    var earnsBall = (doneCount === 2 || doneCount === 4);
+
+    /* a mission gets its own music: the vamp drops into the set on the next
+       bar line and hands the song back where it left off. The bank's vamp
+       is the multiball one -- startMultiball() below asks for it after this
+       and wins the queue. */
+    audio.playInsert('MISSION VAMP');
+
+    if (m.id === 'bank') {
+      setMessage('ONE DROP BANK!  MULTIBALL!', false, 3.4, 'multiball');
+      startMultiball();
+    } else if (m.id === 'tiki') {
+      jackpotLadder = 1;
+      setMessage('TIKI COMPLETE!  JACKPOT ARMED', false, 3.2, 'jackpot');
+      jackpotArmed = true;
+    } else {
+      setMessage(m.name + ' COMPLETE!  ' + award.toLocaleString('en-US'), false, 2.8, 'jackpot');
+    }
+    if (earnsBall) {
+      extraBalls++;
+      audio.sfx('start');
+      flashScreen(PAL.green, 0.55);
+      setMessage('FREE BALL LIT!', false, 3.0, 'green');
+    }
+    checkWizard();
+  }
+
+  function checkWizard() {
+    if (wizardDone) return;
+    for (var i = 0; i < missions.length; i++) if (!missions[i].done) return;
+    wizardDone = true;
+    startWizard();
+  }
+
+  function startWizard() {
+    wizardActive = true;
+    wizardTimer = 30;
+    addScore(500000, undefined, undefined, '', 'jack');
+    setMessage('WIZARD MODE!  IRIE MASTER!', false, 5, 'wizard');
+    audio.sfx('jackpot');
+    flashScreen(PAL.gold, 0.8);
+    shake = 2.0;
+    gridLit = 16;
+    syncLamps();
+    startMultiball(2);
+    /* the biggest moment on the table gets the biggest music: asked for
+       after the multiball vamp, so this is the one that takes over */
+    audio.playInsert('IRIE MASTER');
+  }
+
+  /* ---------------- IRIE letters ---------------- */
+  function awardIrie(i) {
+    if (irieOn[i]) return;
+    irieOn[i] = true;
+    audio.sfx('rollover');
+    syncLamps();
+    PF.pulse('lane', 1);
+    var got = 0;
+    for (var k = 0; k < 4; k++) if (irieOn[k]) got++;
+    if (got === 4) {
+      irieOn = [false, false, false, false];
+      mult = Math.min(mult + 1, 9);
+      addScore(75000, undefined, undefined, '', 'jack');
+      setMessage('IRIE!  BONUS ' + mult + 'X  +75,000', false, 3.2, 'jackpot');
+      audio.sfx('multiball');
+      flashScreen(PAL.gold, 0.6);
+      shake = 1.4;
+      gridLit = Math.min(16, gridLit + 2);
+      syncLamps();
+    } else {
+      setMessage(IRIE[i] + ' LIT  (' + got + '/4)', false, 1.4, 'green');
+    }
+  }
+
+  /* ---------------- balls ---------------- */
+  var ballMeshes = [];
+  function spawnBall(x, y, vx, vy) {
+    var b = world.addBall(x, y, vx, vy, BALL_R);
+    var m = new THREE.Mesh(ballGeo, ballMat);
+    m.position.copy(L(x, y, BALL_R));
+    group.add(m);
+    var sh = new THREE.Mesh(new THREE.PlaneGeometry(1.9, 1.9),
+      new THREE.MeshBasicMaterial({ map: shadowTex, transparent: true, depthWrite: false, opacity: 0.5 }));
+    sh.position.copy(L(x, y, 0.045));
+    group.add(sh);
+    b.mesh = m;
+    b.shadow = sh;
+    ballMeshes.push(b);
+    return b;
+  }
+  function removeBallMesh(b) {
+    if (b.mesh) group.remove(b.mesh);
+    if (b.shadow) {
+      group.remove(b.shadow);
+      b.shadow.geometry.dispose();
+      b.shadow.material.dispose();
+    }
+    b.mesh = null;
+    b.shadow = null;
+    var i = ballMeshes.indexOf(b);
+    if (i >= 0) ballMeshes.splice(i, 1);
+  }
+
+  function resetDropBank() {
+    for (var i = 0; i < 4; i++) table.targets[i].up = true;
+    targetsDown = 0;
+  }
+
+  function newBall() {
+    world.balls.forEach(removeBallMesh);
+    world.balls.length = 0;
+    ballMeshes.length = 0;
+    spawnBall(table.spawn.x, table.spawn.y, 0, 0);
+    state = 'ready';
+    charge = 0; charging = false;
+    saveActive = false;
+    combo = 0; comboTimer = 0;
+    rampShots['ROOTS ORBIT'] = 0; rampShots['SKANK RAMP'] = 0;
+    tilted = false; tiltWarn = 0; tiltTimer = 0;
+    irieOn = [false, false, false, false];
+    standupHits = 0;
+    resetDropBank();
+    multiballActive = false; jackpotArmed = false; multiballTimer = 0;
+    skillLive = false; skillTimer = 0;
+    syncLamps();
+    PF.setPlunger(0); PF.snapPlunger();
+    setMessage('BALL ' + ballNum + '  \u2014  HOLD SPACE TO PLUNGE', false, 3, 'gold');
+  }
+
+  function startGame() {
+    score = 0; displayScore = 0; ballNum = 1; ballsLeft = 3; mult = 1;
+    extraBalls = 0;
+    spinCount = 0; bashCount = 0; gridLit = 0; jackpotLadder = 0;
+    missions = MISSIONS.map(function (m) {
+      return { id: m.id, name: m.name, need: m.need, have: 0, step: 0, done: false };
+    });
+    wizardDone = false; wizardActive = false;
+    audio.resume();
+    audio.startMusic();
+    audio.sfx('coin');
+    /* starting fresh (or RESUMING a live game through PLAY) drops the
+       menu and clears its pause -- showOverlay handles the state check */
+    showOverlay(false);
+    /* the camera track: sweep from wherever we are (attract drift or a
+       left-behind orbit) into the exact standing-at-the-machine pose */
+    beginFlyIn();
+    newBall();
+  }
+
+  /* ---------------- physics events ---------------- */
+  /* events carry the hit's (e.x, e.y) on the playfield; the sound follows
+     the hit left/right across the cabinet so a shot keeps the stereo image
+     the playfield already suggests. x only -- the y axis maps to depth and
+     a web-game mix wants a narrow front. */
+  function panOf(x) {
+    return Math.max(-0.85, Math.min(0.85, ((x - CX) / (table.W / 2)) * 0.85));
+  }
+  function handleEvents() {
+    var evs = world.events;
+    for (var i = 0; i < evs.length; i++) {
+      var e = evs[i];
+      switch (e.t) {
+        case 'bumper': {
+          var c = table.circles[e.i];
+          addScore(c.points, e.x, e.y, '', 'pts');
+          audio.sfx('bumper', c.id, panOf(e.x));
+          PF.flash('bumper', PF.bumpers.map(function (b) { return b.i; }).indexOf(e.i));
+          pburst(e.x, e.y, 1.2, PAL[c.color], 18, 26);
+          bumpCombo();
+          break;
+        }
+        case 'target': {
+          var t = table.targets[e.i];
+          addScore(t.points, e.x, e.y, '', 'pts');
+          audio.sfx('target', null, panOf(e.x));
+          PF.flash('target', e.i);
+          pburst(e.x, e.y, 0.9, PAL.red, 12, 18);
+          bumpCombo();
+          var down = 0;
+          for (var q = 0; q < 4; q++) if (!table.targets[q].up) down++;
+          targetsDown = down;
+          missionStep('bank');
+          syncLamps();
+          break;
+        }
+        case 'standup': {
+          var st = table.targets[e.i];
+          addScore(st.points, e.x, e.y, '', 'pts');
+          audio.sfx('standup', null, panOf(e.x));
+          PF.flash('target', e.i);
+          bumpCombo();
+          standupHits++;
+          if (standupHits % 3 === 0) {
+            mult = Math.min(mult + 1, 9);
+            setMessage('SKANK BANK  \u2014  BONUS ' + mult + 'X', false, 2.4, 'gold');
+            audio.sfx('ballsave');
+          }
+          syncLamps();
+          break;
+        }
+        case 'sling': {
+          addScore(table.slings[e.i].points, e.x, e.y, '', 'pts');
+          audio.sfx('sling', null, panOf(e.x));
+          PF.flash('sling', e.i);
+          pburst(e.x, e.y, 1.0, PAL.gold, 10, 20);
+          break;
+        }
+        case 'spinner': {
+          spinCount++;
+          PF.flash('spinner', 0, 1);
+          addScore(200 + spinCount * 12, e.x, e.y, '', 'pts');
+          audio.sfx('spinner', spinCount);
+          if (skillLive) {
+            skillLive = false;
+            addScore(50000, e.x, e.y, 'SKILL SHOT ', 'jack');
+            setMessage('SKILL SHOT!  50,000', false, 2.8, 'jackpot');
+            audio.sfx('jackpot');
+            flashScreen(PAL.gold, 0.5);
+            shake = 1.0;
+          }
+          missionStep('spins');
+          if (spinCount % 25 === 0) {
+            addScore(20000, e.x, e.y, 'SPIN BONUS ', 'jack');
+            setMessage('DUB SPINNER ' + spinCount + '  \u2014  20,000', false, 2.6, 'gold');
+            audio.sfx('jackpot');
+          }
+          break;
+        }
+        case 'rollover': {
+          awardIrie(e.i === 0 ? 0 : 2);
+          PF.pulse('lane', 1);
+          pburst(table.rollovers[e.i].x, table.rollovers[e.i].y, 0.9,
+            [PAL.red, PAL.green][e.i], 14, 18);
+          break;
+        }
+        case 'bash': {
+          bashCount++;
+          addScore(2500, e.x, e.y, 'TIKI ', 'jack');
+          audio.sfx('bash', null, panOf(e.x));
+          PF.flash('shack', 0, 1);
+          pburst(e.x, e.y, 1.4, PAL.gold, 22, 30);
+          shake = Math.max(shake, 0.6);
+          bumpCombo();
+          if (jackpotArmed) {
+            jackpotArmed = false;
+            jackpotValue = 15000 + jackpotLadder * 10000;
+            addScore(jackpotValue, e.x, e.y, 'JACKPOT! ', 'jack');
+            audio.sfx('jackpot');
+            setMessage('TIKI JACKPOT!  ' + jackpotValue.toLocaleString('en-US'), false, 3, 'jackpot');
+            flashScreen(PAL.gold, 0.7);
+            shake = 1.6;
+          }
+          missionStep('tiki');
+          syncLamps();
+          break;
+        }
+        case 'kickback': {
+          audio.sfx('kickback', null, panOf(e.x));
+          addScore(2000, e.x, e.y, 'KICKBACK ', 'jack');
+          setMessage('KICKBACK!', false, 1.6, 'red');
+          PF.flash('kickback', 0, 1);
+          pburst(e.x, e.y, 1.0, PAL.red, 24, 30);
+          shake = 0.8;
+          break;
+        }
+        case 'flipper': {
+          if (e.speed > 9) audio.sfx('flipper', null, panOf(e.x));
+          break;
+        }
+        case 'wall': {
+          if (e.speed > 16) audio.sfx('post', null, panOf(e.x));
+          break;
+        }
+        case 'rampenter': {
+          audio.sfx('rampup');
+          setMessage(e.name + '!', false, 1.0, 'green');
+          break;
+        }
+        case 'ramp': {
+          var rn = e.name;
+          addScore(e.score || 20000, e.x, e.y, rn + ' ', 'jack');
+          audio.sfx('ramp');
+          bumpCombo();
+          rampShots[rn] = (rampShots[rn] || 0) + 1;
+          pburst(e.x, e.y, 1.0, PAL.gold, 28, 32);
+          flashScreen(PAL.gold, 0.35);
+          shake = Math.max(shake, 0.9);
+          if (rn === 'ROOTS ORBIT') {
+            awardIrie(1);
+            missionStep('orbit');
+          } else {
+            awardIrie(3);
+            missionStep('skank');
+          }
+          if (rampShots[rn] % 3 === 0) {
+            addScore(50000, e.x, e.y, 'RAMP TRIO ', 'jack');
+            setMessage('RAMP TRIO!  50,000', false, 2.8, 'jackpot');
+            audio.sfx('jackpot');
+            shake = 1.2;
+          }
+          break;
+        }
+        case 'drain': {
+          /* Physics has already removed this ball. Dispose its visuals
+             even when other multiball balls remain or ball-save respawns. */
+          removeBallMesh(e.ball);
+          onDrain();
+          break;
+        }
+      }
+    }
+    evs.length = 0;
+  }
+
+  function startMultiball(extraOverride) {
+    multiballActive = true;
+    multiballTimer = wizardActive ? 30 : 22;
+    multiballShots = 0;
+    jackpotArmed = true;
+    jackpotLadder = Math.max(jackpotLadder, 1);
+    var want = extraOverride === undefined ? 2 : extraOverride;
+    var extra = Math.min(want, MAX_BALLS - world.balls.length);
+    var artX = table.artX, artY = table.artY;
+    for (var i = 0; i < extra; i++) {
+      var b = spawnBall(
+        artX(38 + i * 8), artY(14 + i * 4),
+        (i ? 7 : -7), -3 - i
+      );
+      b.vy = -2;
+    }
+    saveActive = true; saveTime = 12;
+    mult = Math.min(mult + 1, 9);
+    audio.playInsert('SKANK RIOT');
+    audio.setIntensity(1);
+    syncLamps();
+  }
+
+  function onDrain() {
+    if (world.balls.length > 0) return;      /* multiball: only when the last one drops */
+    audio.sfx('drain');
+    if (multiballActive) {
+      multiballActive = false;
+      jackpotArmed = false;
+      audio.setIntensity(0);
+      /* the mission music is temporary: cut short, it hands the set back on
+         the step it paused at, so a drained multiball does not leave its
+         vamp playing over ordinary play */
+      audio.stopInsert();
+    }
+    if (wizardActive) { wizardActive = false; wizardTimer = 0; }
+    if (saveActive && (state === 'play' || state === 'ready')) {
+      saveActive = false;
+      audio.sfx('ballsave');
+      setMessage('NO DROP!  BALL SAVED', false, 2.6, 'green');
+      spawnBall(table.spawn.x, table.spawn.y, 0, 0);
+      state = 'ready';
+      charge = 0;
+      PF.setPlunger(0); PF.snapPlunger();
+      return;
+    }
+    state = 'ballover';
+    endOfBallBonus();
+  }
+
+  function endOfBallBonus() {
+    var base = 1000
+      + targetsDown * 1500
+      + spinCount * 30
+      + standupHits * 500
+      + bashCount * 750
+      + gridLit * 1200
+      + (rampShots['ROOTS ORBIT'] + rampShots['SKANK RAMP']) * 2500;
+    bonusTotal = base * mult;
+    bonusShown = 0;
+    bonusTicking = 0;
+    if (dmd) dmd.setBonus(bonusTotal);
+    setMessage('BONUS ' + bonusTotal.toLocaleString('en-US'), true, 0, 'gold');
+    audio.sfx('bonus');
+  }
+  function finishBonus() {
+    score += bonusTotal;
+    if (score > highScore) {
+      highScore = score;
+      global.localStorage.setItem('onedrop.high', String(highScore));
+    }
+    bonusTotal = 0;
+    if (dmd) dmd.setBonus(0);
+    world.balls.forEach(removeBallMesh);
+    world.balls.length = 0;
+    ballMeshes.length = 0;
+    if (ballNum >= ballsLeft && extraBalls > 0) {
+      /* the free ball: the game was over, the earned ball steps in --
+         the same ball number replays with its fanfare */
+      extraBalls--;
+      audio.sfx('start');
+      bigMessage('FREE BALL!', 'PLAY ON');
+      setMessage('FREE BALL!', false, 3.0, 'green');
+      newBall();
+      return;
+    }
+    ballNum++;
+    if (ballNum > ballsLeft) {
+      state = 'gameover';
+      audio.sfx('gameover');
+      bigMessage('GAME OVER', 'FINAL SCORE  ' + Math.floor(score).toLocaleString('en-US') +
+        '   \u2014   PRESS SPACE FOR ONE MORE DROP');
+      showOverlay(true);
+      audio.stopMusic();
+    } else {
+      newBall();
+    }
+  }
+
+  var flashEl = null;
+  function flashScreen(color, strength) {
+    if (!fxAllowed()) return;
+    flashEl = flashEl || D.flash;
+    if (!flashEl) return;
+    flashEl.style.background = 'radial-gradient(circle at 50% 40%, ' + art.css(color) + ', rgba(0,0,0,0) 70%)';
+    flashEl.style.opacity = String(strength === undefined ? 0.55 : strength);
+    flashEl.classList.remove('go');
+    void flashEl.offsetWidth;
+    flashEl.classList.add('go');
+  }
+
+  /* ---------------- input ---------------- */
+  var paused = false;
+
+  /* ---------------- FX mode ----------------
+     The fancy play: particle bursts on every hit, ball trails, the
+     full-screen flashes and the floating score text. FX OFF gives the
+     plain table -- physics, lamps, sounds and scoring all still run,
+     only the eye candy above the playfield goes quiet. Persisted, and
+     ON by default. */
+  var FX_KEY = 'onedrop.fx';
+  var fxOn = true;
+  try { fxOn = global.localStorage.getItem(FX_KEY) !== '0'; } catch (e) { /* private mode */ }
+  function fxAllowed() { return fxOn; }
+  function setFx(on) {
+    fxOn = on;
+    try { global.localStorage.setItem(FX_KEY, on ? '1' : '0'); } catch (e) { /* private mode */ }
+    if (D.fxBtn) {
+      D.fxBtn.textContent = on ? 'FX ON' : 'FX OFF';
+      D.fxBtn.classList.toggle('off', !on);
+      D.fxBtn.blur();
+    }
+    if (on) particles.clear();
+    else { flashEl = flashEl || D.flash; if (flashEl) { flashEl.style.opacity = '0'; flashEl.classList.remove('go'); } }
+    if (dmd) setMessage(on ? 'FX ON' : 'FX OFF', false, 1.2);
+  }
+  if (D.fxBtn) {
+    setFx(fxOn);
+    D.fxBtn.addEventListener('click', function () { setFx(!fxOn); });
+  }
+
+  var sp = { flash: 0 };
+
+  /* The cabinet's flipper buttons move with the flippers: machine.js owns the
+     button geometry and its travel, this only tells it which way. Optional --
+     a cabinet without setFlipper (an older machine.js, or one that failed to
+     build) simply does not move. */
+  function buttonTravel(side, on) {
+    if (machine && machine.setFlipper) machine.setFlipper(side, on);
+  }
+
+  function pressLeft(on) {
+    if (tilted) on = false;
+    var f = world.flippers[0];
+    if (f.active !== on) {
+      f.active = on;
+      audio.sfx(on ? 'flipper' : 'flipperReturn', null, -0.35);
+    }
+    buttonTravel('L', on);
+  }
+  function pressRight(on) {
+    if (tilted) on = false;
+    var f = world.flippers[1];
+    if (f.active !== on) {
+      f.active = on;
+      audio.sfx(on ? 'flipper' : 'flipperReturn', null, 0.35);
+    }
+    buttonTravel('R', on);
+  }
+
+  function nudge(dir) {
+    if (state !== 'play' || tilted) return;
+    audio.sfx('nudge', dir < 0 ? 'left' : 'right');
+    world.balls.forEach(function (b) { b.vx += dir * 7.5; b.vy += 3.5; });
+    shakeX += dir * 0.35;
+    shake = Math.max(shake, 0.35);
+    tiltWarn++;
+    tiltTimer = 4.0;
+    if (tiltWarn >= 3) {
+      tilted = true;
+      audio.sfx('tilt');
+      setMessage('TILT!', true, 0, 'red');
+      pressLeft(false); pressRight(false);
+      flashScreen(PAL.red, 0.5);
+    } else {
+      setMessage('EASY NOW... (' + tiltWarn + '/3)', false, 1.2, 'red');
+    }
+  }
+
+  /* ============ rebindable keys + reset game ============
+     The menu's key caps are buttons: click one, press a key, done. The
+     bindings live in localStorage so they survive a reload, and the
+     gameplay handlers below read them instead of hardcoded codes -- the
+     hardcoded ones were exactly why a left-handed player had to reach
+     for Z and / with the same hand. */
+  var KEY_DEFAULTS = {
+    left: 'KeyZ', right: 'Slash', plunge: 'Space',
+    nudgeL: 'KeyA', nudgeR: 'KeyD', reset: 'KeyR'
+  };
+  var keys = (function () {
+    var s = {};
+    try { s = JSON.parse(global.localStorage.getItem('onedrop.keys') || '{}') || {}; } catch (e) { s = {}; }
+    for (var k in KEY_DEFAULTS) if (typeof s[k] !== 'string') s[k] = KEY_DEFAULTS[k];
+    return s;
+  })();
+  function saveKeys() {
+    try { global.localStorage.setItem('onedrop.keys', JSON.stringify(keys)); } catch (e) { /* private mode */ }
+  }
+  function keyLabel(code) {
+    if (!code) return '--';
+    var named = {
+      Space: 'SPACE', Enter: 'ENTER', Escape: 'ESC', Tab: 'TAB',
+      ShiftLeft: 'LSHIFT', ShiftRight: 'RSHIFT',
+      ControlLeft: 'LCTRL', ControlRight: 'RCTRL',
+      AltLeft: 'LALT', AltRight: 'RALT',
+      ArrowUp: '\u2191', ArrowDown: '\u2193', ArrowLeft: '\u2190', ArrowRight: '\u2192',
+      Slash: '/', Period: '.', Comma: ',', Semicolon: ';', Quote: "'",
+      Backquote: '`', Backslash: '\\', BracketLeft: '[', BracketRight: ']',
+      Minus: '-', Equal: '=', CapsLock: 'CAPS'
+    };
+    if (named[code]) return named[code];
+    if (/^Key[A-Z]$/.test(code)) return code.slice(3);
+    if (/^Digit.$/.test(code)) return code.slice(5);
+    if (/^Numpad.$/.test(code)) return 'NUM' + code.slice(6);
+    return code.toUpperCase();
+  }
+  var KEYCAP_IDS = { left: 'keyLeft', right: 'keyRight', plunge: 'keyPlunge',
+                     nudgeL: 'keyNudgeL', nudgeR: 'keyNudgeR', reset: 'keyReset' };
+  var KEYCAP_NAME = { left: 'LEFT FLIPPER', right: 'RIGHT FLIPPER', plunge: 'PLUNGE',
+                      nudgeL: 'NUDGE LEFT', nudgeR: 'NUDGE RIGHT', reset: 'RESET GAME' };
+  var listening = null;
+  function refreshKeycaps() {
+    for (var k in KEYCAP_IDS) {
+      var cap = D[KEYCAP_IDS[k]];
+      if (!cap) continue;
+      cap.textContent = keyLabel(keys[k]);
+      cap.classList.toggle('listen', listening === k);
+    }
+  }
+  function startListen(which) {
+    listening = (listening === which) ? null : which;
+    refreshKeycaps();
+    if (listening) setMessage('PRESS A KEY FOR ' + KEYCAP_NAME[listening], true, 0, 'gold');
+    else setMessage('REBIND CANCELLED', false, 1.2);
+  }
+  (function wireKeycaps() {
+    for (var k in KEYCAP_IDS) {
+      (function (which) {
+        var cap = D[KEYCAP_IDS[which]];
+        if (!cap) return;
+        cap.addEventListener('click', function (e) {
+          e.preventDefault();
+          audio.resume();
+          startListen(which);
+          cap.blur();   /* a focused cap would eat Space as a click later */
+        });
+      })(k);
+    }
+    refreshKeycaps();
+  })();
+
+  /* ---- reset game: two-step, because it throws away a live ball ----
+     Both the button and the keyboard binding go through the same arm /
+     fire gate: the first press arms it for 3 s, the second fires. */
+  var resetArmed = false, resetArmTimer = null;
+  function disarmReset() {
+    resetArmed = false;
+    if (resetArmTimer) { clearTimeout(resetArmTimer); resetArmTimer = null; }
+    if (D.resetGameBtn) {
+      D.resetGameBtn.classList.remove('armed');
+      D.resetGameBtn.textContent = 'RESET GAME';
+    }
+  }
+  function doResetGame() {
+    disarmReset();
+    audio.stopMusic();
+    audio.setIntensity(0);
+    world.balls.forEach(removeBallMesh);
+    world.balls.length = 0;
+    ballMeshes.length = 0;
+    score = 0; displayScore = 0; ballNum = 1; ballsLeft = 3; mult = 1;
+    extraBalls = 0;
+    combo = 0; comboTimer = 0;
+    spinCount = 0; standupHits = 0; bashCount = 0; targetsDown = 0;
+    rampShots = { 'ROOTS ORBIT': 0, 'SKANK RAMP': 0 };
+    gridLit = 0; jackpotLadder = 0; jackpotArmed = false; jackpotValue = 15000;
+    multiballActive = false; multiballTimer = 0; multiballShots = 0;
+    wizardActive = false; wizardTimer = 0;
+    saveActive = false; saveTime = 0;
+    skillLive = false; skillTimer = 0;
+    tilted = false; tiltWarn = 0; tiltTimer = 0;
+    charging = false; charge = 0;
+    bonusTicking = 0; bonusTotal = 0; bonusShown = 0;
+    irieOn = [false, false, false, false];
+    resetDropBank();
+    syncLamps();
+    PF.setPlunger(0); PF.snapPlunger();
+    state = 'attract';
+    attractTimer = 0;
+    /* a reset also lifts a pause -- otherwise the attract loop sits frozen
+       behind a PAUSED flag nobody can see */
+    paused = false;
+    if (D.pauseBtn) D.pauseBtn.textContent = 'PAUSE';
+    showOverlay(true);
+    bigMessage('ONE DROP', 'GAME RESET');
+    setMessage('GAME RESET', false, 1.6);
+    audio.sfx('gameover');
+  }
+  function requestReset() {
+    if (state === 'attract') { setMessage('NOTHING TO RESET', false, 1.4); return; }
+    if (resetArmed) { doResetGame(); return; }
+    resetArmed = true;
+    if (D.resetGameBtn) {
+      D.resetGameBtn.classList.add('armed');
+      D.resetGameBtn.textContent = 'SURE? AGAIN';
+    }
+    setMessage('RESET GAME?  PRESS AGAIN TO CONFIRM', false, 2.6, 'red');
+    if (resetArmTimer) clearTimeout(resetArmTimer);
+    resetArmTimer = setTimeout(disarmReset, 3000);
+  }
+  if (D.resetGameBtn) {
+    D.resetGameBtn.addEventListener('click', function () {
+      audio.resume();
+      requestReset();
+    });
+  }
+
+  /* ============ input ============
+     THE KEYBOARD IS FOR GAMEPLAY ONLY. It never touches the camera.
+     That is deliberate: a player who has dragged the table round to a
+     view they like must be able to plunge, flip and nudge without the
+     view snapping back under them. The camera is moved by the MOUSE
+     (drag to orbit, wheel to zoom) and reset by the RESET VIEW button,
+     and by nothing else. */
+  global.addEventListener('keydown', function (e) {
+    if (e.repeat) return;
+    /* capture mode: the next key becomes the binding being listened for.
+       Escape cancels without changing anything. Return before the gameplay
+       switch so the key that SETS a binding cannot also FIRE one. */
+    if (listening) {
+      e.preventDefault();
+      var done = listening;
+      listening = null;
+      if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+      if (e.code !== 'Escape') { keys[done] = e.code; saveKeys(); }
+      refreshKeycaps();
+      setMessage(e.code === 'Escape' ? 'REBIND CANCELLED'
+        : KEYCAP_NAME[done] + ' = ' + keyLabel(e.code), false, 1.8, 'gold');
+      return;
+    }
+    /* A MENU CONTROL OWNS THE KEYBOARD WHILE IT HAS FOCUS. Without this the
+       volume fader cannot be moved with the arrow keys at all: the guard
+       underneath swallows them for the game's sake, so the browser never
+       gets to move the thumb. Only text-ish fields opt out, so a player who
+       just clicked PLAY (the button keeps focus) can still flip. */
+    var et = e.target;
+    if (et && (et.tagName === 'INPUT' || et.tagName === 'TEXTAREA' ||
+               et.tagName === 'SELECT' || et.isContentEditable)) return;
+    var bound = [keys.left, keys.right, keys.plunge, keys.nudgeL, keys.nudgeR, keys.reset];
+    if (['Space', 'Slash', 'Period', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].indexOf(e.code) >= 0 ||
+        bound.indexOf(e.code) >= 0) e.preventDefault();
+
+    if (e.code === 'KeyM') {
+      var m = audio.toggleMute();
+      setMessage(m ? 'SOUND OFF' : 'SOUND ON', false, 1.2);
+      if (D.soundBtn) {           /* the button label follows the key too */
+        D.soundBtn.textContent = m ? 'SOUND OFF' : 'SOUND ON';
+        D.soundBtn.classList.toggle('off', m);
+      }
+      return;
+    }
+    if (e.code === 'KeyP') { menuPause(!paused); return; }   /* menuPause also stops/restarts the riddim */
+    if (e.code === 'KeyF') { toggleFull(); return; }
+    /* no camera keys here on purpose -- see the note above */
+
+    if (e.code === keys.reset) { requestReset(); return; }
+
+    if (state === 'attract' || state === 'gameover') {
+      if (e.code === keys.plunge || e.code === 'Enter') { startGame(); return; }
+    }
+    if (e.code === keys.left) pressLeft(true);
+    if (e.code === keys.right) pressRight(true);
+    if (e.code === keys.nudgeL) nudge(-1);
+    if (e.code === keys.nudgeR) nudge(1);
+    if (e.code === keys.plunge && state === 'ready') { charging = true; charge = 0; }
+  });
+  global.addEventListener('keyup', function (e) {
+    if (e.code === keys.left) pressLeft(false);
+    if (e.code === keys.right) pressRight(false);
+    if (e.code === keys.plunge && charging) { charging = false; launch(); }
+  });
+
+  function launch() {
+    if (state !== 'ready' || !world.balls.length) return;
+    /* deliberately NOT exitOrbit(): plunging is gameplay, and the player
+       keeps whatever view they set. */
+    var b = world.balls[0];
+    /* 25% more launch power than the original 26..54 band. */
+    var power = (26 + charge * 28) * 1.25;
+    b.vy = power;
+    b.vx = 0.6;
+    if (PF.releasePlunger) PF.releasePlunger();
+    state = 'play';
+    saveActive = true; saveTime = 9;
+    audio.sfx('launch');
+    charge = 0;
+    skillLive = true; skillTimer = 5.0;
+    setMessage('SKILL SHOT  \u2014  HIT THE DUB SPINNER', false, 2.6, 'gold');
+  }
+
+  function toggleFull() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen && document.documentElement.requestFullscreen();
+    } else {
+      document.exitFullscreen && document.exitFullscreen();
+    }
+  }
+
+  if (D.playBtn) {
+    D.playBtn.addEventListener('click', function () {
+      audio.resume();
+      if (state === 'attract' || state === 'gameover') startGame();
+      else if (menuDown && D.menu) {
+        /* mid-game with the menu dropped: PLAY is CLOSE-AND-RESUME */
+        menuDown = false;
+        menuPause(false);
+        menuSlide('up', false);
+        D.menu.classList.add('ingame');
+      }
+      D.playBtn.blur();  /* a focused PLAY would eat Space as a click */
+    });
+  }
+  if (D.resetBtn) D.resetBtn.addEventListener('click', function () { exitOrbit(); });
+
+  /* the MENU handle that peeks over the top edge while playing: tap it
+     and the panel slides back down to the dropped spot -- a plain slide,
+     not the theatrical drop, which is for reveal and game over. With a
+     ball live that same tap is CLOSE-AND-RESUME: the menu opened by
+     pausing, so closing it un-pauses. */
+  if (D.menuTab) {
+    var tabFn = function (e) {
+      e.preventDefault();
+      if (D.menu.classList.contains('tabbed')) {
+        menuDown = true;
+        menuSlide('down', false);
+        menuPause(false);   /* closing the menu resumes the live game */
+      }
+      D.menuTab.blur();  /* a focused handle would eat Space as a click */
+    };
+    D.menuTab.addEventListener('click', tabFn);
+    D.menuTab.addEventListener('pointerdown', function (e) { e.stopPropagation(); audio.resume(); }, true);
+  }
+
+  function bindHold(node, on, off) {
+    if (!node) return;
+    node.addEventListener('pointerdown', function (e) { e.preventDefault(); audio.resume(); on(); });
+    node.addEventListener('pointerup', function (e) { e.preventDefault(); off(); });
+    node.addEventListener('pointercancel', function (e) { e.preventDefault(); off(); });
+    node.addEventListener('pointerleave', function (e) { e.preventDefault(); off(); });
+  }
+  /* a one-shot tap: fires on release so the button can also show its own
+     active state, and a slide off the button cancels instead of firing */
+  function bindTap(node, fn) {
+    if (!node) return;
+    var pressed = false;
+    node.addEventListener('pointerdown', function (e) {
+      e.preventDefault(); audio.resume(); pressed = true;
+    });
+    node.addEventListener('pointerup', function (e) {
+      e.preventDefault();
+      if (pressed) { pressed = false; fn(); }
+    });
+    node.addEventListener('pointercancel', function () { pressed = false; });
+    node.addEventListener('pointerleave', function () { pressed = false; });
+  }
+  /* ================= the cabinet's own controls =================
+     The red buttons on the flanks and the plunger knob are REAL controls
+     now, not decoration: the pointer is raycast into the scene, a hit on
+     a button presses that flipper, and a hit on the knob starts a pull --
+     drag down to charge, release to launch, exactly like holding SPACE.
+
+     These listeners sit on the WINDOW's capture phase and stop any event
+     that lands on a control, so the orbit-camera handler on the canvas
+     never sees it: grabbing the plunger must not also spin the view.
+     Everything the pointer is not on still orbits, as before. */
+  var raycaster = new THREE.Raycaster();
+  var pickV2 = new THREE.Vector2();
+  function plungerKnob() { return (PF && PF.plunger) ? PF.plunger.knob : null; }
+  function pickControl(e) {
+    pickV2.x = (e.clientX / global.innerWidth) * 2 - 1;
+    pickV2.y = -(e.clientY / global.innerHeight) * 2 + 1;
+    raycaster.setFromCamera(pickV2, camera);
+    var targets = [];
+    if (machine && machine.flipperBtns) {
+      for (var i = 0; i < machine.flipperBtns.length; i++) targets.push(machine.flipperBtns[i].btn);
+    }
+    var knob = plungerKnob();
+    if (knob) targets.push(knob);
+    if (!targets.length) return null;
+    var hits = raycaster.intersectObjects(targets, false);
+    return hits.length ? hits[0].object : null;
+  }
+  var mouseCharging = false, mouseChargeY0 = 0;
+  var mouseFlip = -1;               /* index of the button held, -1 = none */
+  function endMouseHold(fire) {
+    if (mouseCharging) {
+      mouseCharging = false;
+      if (charging) { charging = false; if (fire) launch(); }
+    }
+    if (mouseFlip >= 0) {
+      if (mouseFlip === 0) pressLeft(false); else pressRight(false);
+      mouseFlip = -1;
+    }
+  }
+  global.addEventListener('pointerdown', function (e) {
+    if (e.target !== renderer.domElement) return;
+    var hit = pickControl(e);
+    if (!hit) return;
+    e.preventDefault();
+    e.stopPropagation();            /* the camera never gets this grab */
+    audio.resume();
+    var knob = plungerKnob();
+    if (hit === knob) {
+      if (state === 'attract' || state === 'gameover') { startGame(); return; }
+      if (state === 'ready') {
+        mouseCharging = true; charging = true; charge = 0;
+        mouseChargeY0 = e.clientY;
+      }
+      return;
+    }
+    if (machine && machine.flipperBtns) {
+      for (var i = 0; i < machine.flipperBtns.length; i++) {
+        if (machine.flipperBtns[i].btn === hit) {
+          mouseFlip = i;
+          if (i === 0) pressLeft(true); else pressRight(true);
+          break;
+        }
+      }
+    }
+  }, true);
+  global.addEventListener('pointermove', function (e) {
+    if (mouseCharging) {
+      /* pulling DOWN the knob charges, like drawing a real plunger back */
+      charge = Math.max(0, Math.min(1, (e.clientY - mouseChargeY0) / 150));
+      return;
+    }
+    /* cursor feedback: a hand over the controls, the default elsewhere */
+    if (e.target === renderer.domElement) {
+      renderer.domElement.style.cursor = pickControl(e) ? 'grab' : '';
+    }
+  }, true);
+  global.addEventListener('pointerup', function (e) {
+    if (mouseCharging || mouseFlip >= 0) {
+      e.stopPropagation();
+      endMouseHold(true);           /* release fires the launch */
+    }
+  }, true);
+  global.addEventListener('pointercancel', function () {
+    endMouseHold(false);            /* a cancelled grab never fires */
+  }, true);
+
+  bindHold(D.touchLeft, function () { pressLeft(true); }, function () { pressLeft(false); });
+  bindHold(D.touchRight, function () { pressRight(true); }, function () { pressRight(false); });
+  /* the nudges: a tap fires one nudge, a HOLD (150ms) means "oh no" and
+     fires nothing until release -- same tap/hold shape as the plunger */
+  bindTap(D.touchNudgeL, function () { nudge(-1); });
+  bindTap(D.touchNudgeR, function () { nudge(1); });
+  var touchCharging = false;
+  bindHold(D.touchLaunch, function () {
+    audio.resume();
+    if (state === 'attract' || state === 'gameover') { startGame(); return; }
+    if (state === 'ready') { touchCharging = true; charging = true; charge = 0; }
+  }, function () { if (touchCharging) { touchCharging = false; charging = false; launch(); } });
+
+  /* ---- the M / P / F row as buttons: touch players have no keys ---- */
+  /* ---- the fader ----
+     `input` fires continuously while dragging, so the level follows the
+     thumb; the value is written to localStorage on every change (a
+     synchronous 20-byte write) so the setting survives a reload without
+     needing a save button. Dragging the fader is also a user gesture,
+     so it is a perfectly good way to unlock the AudioContext for a
+     player who never touched PLAY. */
+  if (D.vol) {
+    D.vol.addEventListener('input', function () {
+      volFrac = Math.max(0, Math.min(1, (parseFloat(D.vol.value) || 0) / 100));
+      audio.resume();
+      audio.setVolume(volFrac);
+      try { global.localStorage.setItem(VOL_KEY, String(volFrac)); } catch (e) { /* private mode */ }
+      showVolume();
+    });
+  }
+
+  if (D.soundBtn) {
+    D.soundBtn.addEventListener('click', function () {
+      audio.resume();
+      var m = audio.toggleMute();
+      D.soundBtn.textContent = m ? 'SOUND OFF' : 'SOUND ON';
+      D.soundBtn.classList.toggle('off', m);
+      setMessage(m ? 'SOUND OFF' : 'SOUND ON', false, 1.2);
+      D.soundBtn.blur();
+    });
+  }
+  if (D.pauseBtn) {
+    D.pauseBtn.addEventListener('click', function () {
+      menuPause(!paused);   /* same pause the menu uses: music + table together */
+      D.pauseBtn.blur();
+    });
+  }
+  if (D.fsBtn) {
+    D.fsBtn.addEventListener('click', function () { toggleFull(); D.fsBtn.blur(); });
+  }
+
+  /* ================= main loop ================= */
+  var last = performance.now() / 1000;
+  var acc = 0;
+  var fpsAcc = 0, fpsFrames = 0;
+  var prevT = 0;
+  var rollTimer = 0;            /* the rolling-ball noise clock */
+
+  function frame(now) {
+    requestAnimationFrame(frame);
+    now /= 1000;
+    var raw = now - last;
+    last = now;
+    if (raw > 0.1) raw = 0.1;
+    if (raw <= 0) raw = 1 / 60;
+    syncSize();
+    if (paused) return;
+    var dt = now - prevT;
+    prevT = now;
+
+    fpsAcc += raw; fpsFrames++;
+    if (fpsAcc > 0.5) {
+      var info = renderer.info;
+      setText(D.fps, Math.round(fpsFrames / fpsAcc) + ' FPS   ' +
+        info.render.calls + ' calls   ' + (info.render.triangles / 1000).toFixed(1) + 'k tri   ' +
+        info.memory.geometries + ' geo   ' + info.memory.textures + ' tex');
+      fpsAcc = 0; fpsFrames = 0;
+    }
+
+    /* ---- attract mode ---- */
+    if (state === 'attract') {
+      attractTimer += raw;
+      if (attractTimer > 3.4) {
+        attractTimer = 0;
+        var hints = MISSIONS.map(function (m) { return m.hint; });
+        hints.push('COMPLETE ALL FIVE MISSIONS FOR WIZARD MODE');
+        attractMsg = (attractMsg + 1) % hints.length;
+      }
+    }
+
+    /* ---- charge plunger ----
+      Two models: the keyboard/touch hold charges over TIME (hold longer,
+      plunge harder), while a mouse/touch DRAG on the knob itself charges
+      by DISTANCE -- the frame loop only auto-charges when the drag is not
+      the thing driving it, or the knob would fill up while held still. */
+    if (state === 'ready' && charging) {
+      if (!mouseCharging) charge = Math.min(1, charge + raw * 1.05);
+      /* steers one continuous spring voice, once per frame: see
+         AudioEngine.chargeLevel */
+      audio.chargeLevel(charge);
+    }
+
+    /* ---- physics ---- */
+    acc += raw;
+    var steps = 0;
+    while (acc >= FIXED && steps < 12) {
+      if (state === 'play' || state === 'ready' || state === 'ballover') {
+        world.step(FIXED);
+        world.pollZones();
+      }
+      acc -= FIXED;
+      steps++;
+    }
+    if (acc > FIXED * 12) acc = 0;
+    handleEvents();
+
+    /* ---- ball back in the shooter lane? let the player plunge again ---- */
+    if (state === 'play' && world.balls.length === 1) {
+      var only = world.balls[0];
+      var laneMid = (table.artX(92) + table.artX(100)) / 2;
+      /* anywhere in the lane, not just at its top: a soft plunge can be
+         spent before the arch (26 u/s climbs art y 84 -> 64 -- measured),
+         and the ball then rolls back down and rests on the lane floor at
+         art y 86. The old art-y 20 test never matched that, so the ball
+         sat there with state still 'play' and the plunger dead. */
+      if (only.x > laneMid - 1.2 &&
+          Math.abs(only.vx) + Math.abs(only.vy) < 3.5) {
+        state = 'ready';
+        charge = 0;
+        PF.setPlunger(0); PF.snapPlunger();
+        setMessage('BALL RETURNED  \u2014  PULL AGAIN', false, 2, 'gold');
+      }
+    }
+
+    /* ---- timers ---- */
+    if (comboTimer > 0) { comboTimer -= raw; if (comboTimer <= 0) combo = 0; }
+    if (skillTimer > 0) {
+      skillTimer -= raw;
+      if (skillTimer <= 0) skillLive = false;
+    }
+    if (tiltTimer > 0) { tiltTimer -= raw; if (tiltTimer <= 0) tiltWarn = 0; }
+    if (saveActive) { saveTime -= raw; if (saveTime <= 0) saveActive = false; }
+    if (messageTimer > 0) {
+      messageTimer -= raw;
+      if (messageTimer <= 0 && state !== 'attract' && state !== 'gameover') {
+        setMessage(combo > 1 ? 'COMBO ' + combo + 'X' : '', false, 0);
+      }
+    }
+    if (multiballTimer > 0) {
+      multiballTimer -= raw;
+      if (multiballTimer <= 0 && multiballActive && !wizardActive) {
+        multiballActive = false; jackpotArmed = false;
+        audio.setIntensity(0);
+        audio.stopInsert();
+        setMessage('ONE DROP OVER', false, 2, 'gold');
+      }
+    }
+    if (wizardTimer > 0) {
+      wizardTimer -= raw;
+      if (wizardTimer <= 0) {
+        wizardActive = false;
+        multiballActive = false;
+        jackpotArmed = false;
+        audio.setIntensity(0);
+        audio.stopInsert();
+        setMessage('IRIE MASTER COMPLETE', false, 3, 'wizard');
+      }
+    }
+    if (state === 'ballover' && bonusTotal > 0) {
+      bonusTicking += raw;
+      bonusShown = Math.min(bonusTotal, bonusShown + bonusTotal * raw * 1.6);
+      if (dmd) dmd.state.bonusShown = bonusShown;
+      if (bonusShown >= bonusTotal && bonusTicking > 1.1) { bonusTicking = 0; finishBonus(); }
+    }
+
+    /* ---- score roll-up ---- */
+    if (displayScore < score) {
+      displayScore = Math.min(score, displayScore + Math.max(80, (score - displayScore) * 0.13));
+    } else {
+      displayScore = score;
+    }
+
+    /* ---- visuals ---- */
+    var t = now;
+    var zoomTarget = (state === 'play' || state === 'ready') ? 1 : 0;
+    camZoom += (zoomTarget - camZoom) * Math.min(1, raw * 1.5);
+
+    for (var bi = 0; bi < world.balls.length; bi++) {
+      var b = world.balls[bi];
+      var target = L(b.x, b.y, BALL_R + (b.z || 0));
+      b.mesh.position.lerp(target, 0.5);
+      b.mesh.rotation.x += b.vy * raw * 0.6;
+      b.mesh.rotation.z -= b.vx * raw * 0.6;
+      var sp2 = L(b.x, b.y, 0.045);
+      b.shadow.position.set(sp2.x, sp2.y, sp2.z);
+      var h = THREE.MathUtils.clamp((b.y - 0) / 40, 0, 1);
+      b.shadow.material.opacity = 0.5 * (1 - h * 0.5) * (1 - Math.min(1, (b.z || 0) / 6) * 0.85);
+      var bs = Math.abs(b.vx) + Math.abs(b.vy);
+      if (bs > 7 && (state === 'play' || state === 'ready')) {
+        ptrail(b.x, b.y, BALL_R + (b.z || 0),
+          multiballActive ? [PAL.red, PAL.gold, PAL.green][bi % 3] : 0xfff0b8, 0.26);
+      }
+    }
+
+    /* ---- the ball rolling on the playfield ----
+      A pinball machine is not silent between the big hits: a rolling
+      steel ball has its own noise, brighter and louder the faster it
+      runs, panned across the cabinet as it travels. Sampled at 12 Hz
+      per moving ball so the engine is not flooded with one-shot nodes. */
+    rollTimer -= raw;
+    if (rollTimer <= 0 && (state === 'play' || state === 'ready')) {
+      rollTimer = 0.083;
+      for (var rb = 0; rb < world.balls.length; rb++) {
+        var ball = world.balls[rb];
+        var rspd = Math.abs(ball.vx) + Math.abs(ball.vy);
+        if (rspd > 4 && (ball.z || 0) < 1.5) audio.roll(rspd, panOf(ball.x));
+      }
+    }
+
+    /* ---- hardware ---- */
+    PF.update(raw, t, {
+      multiball: multiballActive,
+      attract: state === 'attract',
+      charge: (state === 'ready') ? charge : 0,
+      boost: wizardActive ? 0.8 : (multiballActive ? 0.5 : (state === 'attract' ? 0.25 : 0))
+    });
+
+    /* update() is optional -- see the CONTRACT note above buildCabinet */
+    if (machine && machine.update) machine.update(t, multiballActive);
+    if (gridTex) gridTex.offset.y = (t * 0.006) % 1;
+    for (var mi = 0; mi < moodLights.length; mi++) {
+      moodLights[mi].intensity = 0.5 + 0.5 * (0.5 + 0.5 * Math.sin(t * (1.1 + mi * 0.3) + mi));
+    }
+
+    particles.update(raw);
+    if (shake > 0) {
+      shake = Math.max(0, shake - raw * 2.2);
+      shakeX = (Math.random() - 0.5) * shake;
+      shakeY = (Math.random() - 0.5) * shake;
+    }
+    /* the fly-in owns the camera for its 1.25s; the standing view takes
+       over from the exact pose the tween ends on */
+    if (!flyTick(raw)) updateCamera(t);
+
+    /* ---- dot-matrix display ---- */
+    if (dmd) {
+      dmd.tick(raw);
+      dmd.set({
+        mode: state === 'attract' ? 'attract' : (state === 'gameover' ? 'gameover' : (state === 'ready' ? 'ready' : 'play')),
+        score: displayScore,
+        high: highScore,
+        ball: ballNum,
+        balls: ballsLeft,
+        mult: mult,
+        combo: combo,
+        lanes: irieOn,
+        missions: missions.map(function (m) { return m.step; }),
+        missionNames: missionNames,
+        multiball: multiballActive,
+        /* wizard runs on top of multiball, so the DMD needs to be told
+           about it separately or it shows the multiball screen */
+        wizard: wizardActive,
+        wizardTimer: wizardTimer,
+        jackpot: jackpotArmed,
+        tilt: tilted,
+        charge: charge,
+        skill: skillLive,
+        mbShots: multiballShots,
+        bonus: bonusTotal,
+        /* the attract how-to-play screen follows the live bindings */
+        keyLeft: keyLabel(keys.left),
+        keyRight: keyLabel(keys.right)
+      });
+      dmd.render(t);
+      if (dmdTex) dmdTex.needsUpdate = true;
+    }
+
+    updateHUD();
+    renderer.render(scene, camera);
+  }
+
+  /* ================= resize =================
+     Re-fit the whole playfield to a new width and height, live.
+
+     Nothing here is a guess. The layout in table.js is authored in art
+     percent, so changing the frame moves every wall, ramp, lamp, target,
+     slingshot, flipper, the ball radius and the camera together -- the
+     table is rebuilt rather than scaled, which is why nothing can end up
+     half-adjusted.
+
+     The cabinet is rebuilt too, because machine.js bakes the table's
+     centre line at build time. Its own outer dimensions are untouched:
+     if the cabinet itself changes, re-derive the size from its new
+     opening first --
+
+       PB.game.fitPlayfield(PB.cabinetOpening({ outL: ..., outR: ...,
+                                                footY: ..., headY: ... }))
+
+     or, for the numbers currently in machine.js, just:
+
+       PB.game.fitPlayfieldToCabinet()
+
+     Both accept a plain { W, H } too, if the cabinet is being driven
+     from somewhere else. */
+  function fitPlayfield(W, H, centerX, centerY) {
+    W = +W; H = +H;
+    if (!(W > 0) || !(H > 0)) return table;
+
+    if (centerX === undefined || centerX === null) centerX = CX;
+    if (centerY === undefined || centerY === null) centerY = CY;
+
+    global.PB.PF_SIZE = { W: W, H: H, centerX: +centerX, centerY: +centerY };
+    var next = global.PB.buildTable(global.PB.PF_SIZE);
+
+    /* ---- physics: a fresh world on the new frame ---- */
+    world.balls.forEach(removeBallMesh);
+    world.balls.length = 0;
+    ballMeshes.length = 0;
+    world = new global.PB.World(next);
+
+    /* ---- surface + sheen ---- */
+    playfield.geometry.dispose();
+    playfield.geometry = new THREE.PlaneGeometry(next.W, next.H);
+    var oldMap = playfield.material.map;
+    if (assets.ready) {
+      assets.mapUV(playfield.geometry, 'playfield');
+      playfield.material.map = assets.texture;
+    } else {
+      playfield.material.map = art.makePlayfield(next);
+    }
+    playfield.material.needsUpdate = true;
+    if (oldMap && oldMap !== assets.texture && oldMap.dispose) oldMap.dispose();
+    sheen.geometry.dispose();
+    sheen.geometry = new THREE.PlaneGeometry(next.W, next.H);
+
+    /* ---- hardware ---- */
+    global.PB.vibrance.release(PF.group);      /* hand the originals back */
+    group.remove(PF.group);
+    PF.dispose();
+    PF = global.PB.Playfield.build({ table: next, world: world, glowTex: glowTex });
+    group.add(PF.group);
+
+    /* ---- cabinet + floor: both cache the old centre, so both go ---- */
+    if (machine) {
+      try { global.PB.vibrance.release(machine.root); } catch (e) { /* cosmetic */ }
+      if (machine.root) group.remove(machine.root);
+      if (machine.dispose) machine.dispose();
+      machine = null;
+    }
+    if (floorGroup) {
+      scene.remove(floorGroup);
+      floorGroup.traverse(function (o) {
+        if (o.geometry) o.geometry.dispose();
+        if (o.material) {
+          if (o.material.map && o.material.map.dispose) o.material.map.dispose();
+          o.material.dispose();
+        }
+      });
+      floorGroup = null;
+    }
+
+    /* ---- adopt the new frame ---- */
+    table = next;
+    CX = table.centerX; CY = table.centerY;
+    BALL_R = 0.62 * (table.K || 1);
+    group.position.set(CX, CY, 0);
+    playfield.position.copy(L(CX, CY, 0));
+    sheen.position.copy(L(CX, CY, 0.02));
+    ballGeo.dispose();
+    ballGeo = new THREE.SphereGeometry(BALL_R, 34, 24);
+
+    /* ---- rebuild everything that reads the frame ---- */
+    assets.load(function () {
+      PF.refreshArt();
+      global.PB.vibrance.sweep(PF.group);
+      buildCabinet();
+      ldStage(80);            /* cabinet built: unlock the next stride */
+      newBall();
+      computeFitCorners();
+      fitCamera();
+      /* the sprite sheet has settled: bring the machine and the menu in.
+         The loader fades, the panel above the screen drops back in with
+         its bounce, and PLAY goes live. */
+      revealMachine();
+    });
+    return table;
+  }
+
+  /* convenience: derive the size AND the centre from the cabinet numbers
+     in table.js, so a change to machine.js is a one-line re-derivation */
+  function fitPlayfieldToCabinet(cabinet) {
+    var o = global.PB.cabinetOpening(cabinet);
+    return fitPlayfield(o.W, o.H, o.centerX, o.centerY);
+  }
+
+  /* ================= boot ================= */
+  /* The panel starts parked above the screen (CSS .above), fully hidden
+     while the loader covers things. When the sprite sheet settles the
+     loader fades and the panel drops back in with its bounce. If the
+     sheet failed or hung, the safety timer brings the machine up anyway --
+     procedural art beats a stuck loading screen.
+
+     Staged progress for the loader bar. There is no byte-count API for a
+     single Image, so the bar CREEPS toward its next real milestone
+     instead of sitting still or teleporting: the tip crawls while work
+     happens, then advances when an actual stage lands. The safety timer
+     bounds the wait either way. */
+  if (D.menu) D.menu.classList.add('above');
+  ldStage(60);              /* scripts in: first real milestone */
+  var ldPct = 0, ldCap = 40, ldTick = 0;
+  var LD_MSGS = { 40: 'warming up the riddim', 60: 'building the machine', 80: 'painting the table', 100: 'ready' };
+  function ldCreep(now) {
+    /* ease the current bar toward its cap at a perceptible crawl */
+    if (ldPct < ldCap) {
+      ldPct = Math.min(ldCap, ldPct + Math.max(0.35, (ldCap - ldPct) * 0.012));
+      if (D.ldFill) D.ldFill.style.width = ldPct.toFixed(1) + '%';
+      var msg = LD_MSGS[ldCap];
+      if (D.ldMsg && msg) D.ldMsg.textContent = msg;
+    }
+  }
+  (function ldLoop() {
+    if (revealed) return;
+    ldCreep();
+    ldTick = setTimeout(ldLoop, 48);
+  })();
+  function ldStage(cap) {
+    /* raise the milestone: called as real stages land (scripts in,
+       cabinet built, sheet settled) */
+    if (revealed) return;
+    ldCap = cap;
+  }
+  var revealed = false;
+  function revealMachine() {
+    if (revealed) return;
+    revealed = true;
+    clearTimeout(ldTick);
+    ldCap = 100;
+    /* snap the fill to 100 first so the bar reads complete as it fades */
+    ldCreep();
+    if (D.ldFill) D.ldFill.style.width = '100%';
+    if (D.ldMsg) D.ldMsg.textContent = 'ready';
+    if (D.loader) D.loader.classList.add('gone');
+    if (D.menu) {
+      D.menu.classList.remove('above');
+      /* the drop itself: from fully parked above the screen */
+      menuBounceQueued = true;
+      menuSlide('down');
+    }
+  }
+  setTimeout(revealMachine, 9000);   /* keep going even if an asset hangs */
+  bigMessage('ONE DROP', 'PRESS PLAY');
+  syncLamps();
+  setText(D.menuHigh, highScore.toLocaleString('en-US'));
+  requestAnimationFrame(frame);
+
+  /* expose a little for debugging */
+  global.PB.game = {
+    /* getters, because fitPlayfield() replaces these objects wholesale */
+    get world() { return world; },
+    get table() { return table; },
+    /* `playfield` is the hardware module; `surface` is the painted plane
+       and `sheen` the lacquer over it -- the three things a resize
+       touches, named so they can be found without reading the source. */
+    get playfield() { return PF; },
+    get surface() { return playfield; },
+    get sheen() { return sheen; },
+    dmd: dmd,
+    startGame: startGame, spawnBall: spawnBall,
+    renderer: renderer, scene: scene, camera: camera, group: group, audio: audio,
+    get machine() { return machine; },
+    exitOrbit: exitOrbit, fitCamera: fitCamera,
+    /* true while the player is holding a view they set with the mouse */
+    get orbiting() { return orbit.on; },
+    fitPlayfield: fitPlayfield,
+    fitPlayfieldToCabinet: fitPlayfieldToCabinet,
+    resetGame: doResetGame,
+    get keys() { return keys; },
+    /* { playfieldW, cabinetW } -- the fit invariant, for the console */
+    get cabinetFit() { return cabinetFit; },
+    checkCabinetFit: checkCabinetFit,
+    get state() { return state; },
+    get score() { return score; },
+    get extraBalls() { return extraBalls; },   /* earned free balls */
+    get ballNum() { return ballNum; },         /* debug: current ball number */
+    setExtraBalls: function (n) { extraBalls = Math.max(0, n | 0); },   /* test hook */
+    get missions() { return missions; },
+    setCharge: function (v) { charge = v; charging = true; },
+    launch: launch, nudge: nudge,
+    multiball: startMultiball, wizard: startWizard
+  };
+})(window);

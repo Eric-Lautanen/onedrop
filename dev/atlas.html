@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>atlas inspector</title>
+<style>
+  html,body { margin:0; background:#111; color:#eee; font:12px monospace; }
+  #wrap { position:relative; width:1024px; }
+  canvas { display:block; image-rendering:pixelated; }
+  #grid { position:absolute; inset:0; pointer-events:none; }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <canvas id="c" width="1024" height="1536"></canvas>
+  <canvas id="grid" width="1024" height="1536"></canvas>
+</div>
+<script>
+/* Candidate atlas regions, in fractions of the sheet.
+   Drawn as labelled boxes so the crop can be eyeballed and corrected. */
+var REGIONS = [
+  { name:'cab-side-L', x:0.205, y:0.000, w:0.145, h:0.760, col:'#00ffcc' },
+  { name:'backglass',  x:0.292, y:0.004, w:0.298, h:0.232, col:'#ff66cc' },
+  { name:'playfield',  x:0.292, y:0.238, w:0.298, h:0.532, col:'#66ff66' },
+  { name:'dmd-panel',  x:0.608, y:0.004, w:0.194, h:0.084, col:'#66ccff' },
+  { name:'logo-band',  x:0.608, y:0.130, w:0.194, h:0.060, col:'#ffcc33' },
+  { name:'stripe-band',x:0.608, y:0.192, w:0.194, h:0.032, col:'#ff8844' },
+  { name:'decal-col',  x:0.575, y:0.224, w:0.227, h:0.776, col:'#ffffff' },
+  { name:'apron',      x:0.550, y:0.760, w:0.220, h:0.110, col:'#ff3366' },
+  { name:'front-art',  x:0.680, y:0.845, w:0.120, h:0.115, col:'#33ff33' },
+  { name:'instr-card', x:0.198, y:0.960, w:0.080, h:0.035, col:'#ffaa00' }
+];
+
+var c = document.getElementById('c'), ctx = c.getContext('2d');
+var g = document.getElementById('grid'), gx = g.getContext('2d');
+var img = new Image();
+img.onload = function () {
+  ctx.drawImage(img, 0, 0);
+
+  /* percentage grid */
+  gx.lineWidth = 1;
+  for (var i = 0; i <= 20; i++) {
+    var x = i / 20 * 1024, y = i / 20 * 1536;
+    gx.strokeStyle = i % 2 ? 'rgba(255,255,255,.18)' : 'rgba(255,255,255,.42)';
+    gx.beginPath(); gx.moveTo(x, 0); gx.lineTo(x, 1536); gx.stroke();
+    gx.beginPath(); gx.moveTo(0, y); gx.lineTo(1024, y); gx.stroke();
+    gx.fillStyle = i % 2 ? 'rgba(255,255,255,.5)' : '#fff';
+    if (i < 20) { gx.fillText((i * 5) + '%', x + 3, 12); gx.fillText((i * 5) + '%', 2, y + 12); }
+  }
+
+  /* candidate regions */
+  REGIONS.forEach(function (r) {
+    var x = r.x * 1024, y = r.y * 1536, w = r.w * 1024, h = r.h * 1536;
+    gx.strokeStyle = r.col; gx.lineWidth = 2;
+    gx.strokeRect(x, y, w, h);
+    gx.fillStyle = r.col;
+    gx.fillRect(x, y - 14, gx.measureText(r.name).width + 40, 14);
+    gx.fillStyle = '#000';
+    gx.fillText(r.name + ' ' + w.toFixed(0) + 'x' + h.toFixed(0), x + 2, y - 3);
+  });
+};
+img.onerror = function () { document.title = 'IMG FAILED'; };
+img.src = '../assets/sprite.png';
+</script>
+</body>
+</html>

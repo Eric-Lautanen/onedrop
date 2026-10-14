@@ -1,0 +1,50 @@
+cleared 31 stale wav(s) from C:\Users\tonyb\OneDrive\Desktop\Games\Pinball\dev\audio
+flipper        peak -12.98 dB   rms -33.96 dB    0.10s  hi/lo@0ms  -10.6 dB
+flipperReturn  peak -16.72 dB   rms -39.97 dB    0.09s  hi/lo@0ms  -19.7 dB
+bumper         peak -12.66 dB   rms -32.85 dB    0.42s  hi/lo@0ms  -34.7 dB
+sling          peak -15.45 dB   rms -37.77 dB    0.09s  hi/lo@0ms  -15.1 dB
+bash           peak -14.18 dB   rms -33.02 dB    0.84s  hi/lo@0ms  -31.7 dB
+post           peak -17.30 dB   rms -41.11 dB    0.05s  hi/lo@0ms  -11.2 dB
+target         peak -14.90 dB   rms -38.47 dB    0.20s  hi/lo@0ms  -22.8 dB
+standup        peak -16.75 dB   rms -40.57 dB    0.73s  hi/lo@0ms   13.2 dB
+rollover       peak -18.23 dB   rms -38.50 dB    0.75s  hi/lo@0ms   13.4 dB
+spinner        peak -15.12 dB   rms -38.91 dB    0.19s  hi/lo@0ms   26.2 dB
+drain          peak -12.80 dB   rms -26.62 dB    1.03s  hi/lo@0ms  -40.0 dB
+rampup         peak -13.53 dB   rms -32.39 dB    0.52s  hi/lo@0ms  -23.1 dB
+ramp           peak -13.07 dB   rms -35.51 dB    0.60s  hi/lo@0ms  -16.8 dB
+launch         peak -13.73 dB   rms -33.79 dB    0.26s  hi/lo@0ms  -25.8 dB
+kickback       peak -12.42 dB   rms -31.10 dB    0.24s  hi/lo@0ms  -38.3 dB
+ballsave       peak -14.70 dB   rms -39.35 dB    0.70s  hi/lo@0ms   -4.7 dB
+multiball      peak  -9.20 dB   rms -27.14 dB    1.27s  hi/lo@0ms  -15.2 dB
+jackpot        peak  -9.76 dB   rms -26.08 dB    1.11s  hi/lo@0ms  -24.9 dB
+bonus          peak -16.47 dB   rms -45.84 dB    0.07s  hi/lo@0ms   14.7 dB
+tilt           peak  -6.79 dB   rms -20.18 dB    0.76s  hi/lo@0ms  -27.9 dB
+start          peak -12.80 dB   rms -31.26 dB    0.85s  hi/lo@0ms  -30.0 dB
+gameover       peak -14.37 dB   rms -29.39 dB    1.32s  hi/lo@0ms  -34.1 dB
+nudge          peak -15.51 dB   rms -35.41 dB    0.17s  hi/lo@0ms  -35.0 dB
+coin           peak -16.16 dB   rms -39.80 dB    0.45s  hi/lo@0ms    5.7 dB
+charge         peak -24.72 dB   rms -34.62 dB    0.50s  hi/lo@0ms  -25.1 dB
+song one-drop  peak -16.81 dB   rms -30.65 dB   25.79s  hi/lo@0ms    0.0 dB
+song-0-break-break peak -20.22 dB   rms -31.03 dB   13.49s  hi/lo@0ms    0.0 dB
+song-0-peak-chorus peak -15.82 dB   rms -30.35 dB   13.46s  hi/lo@0ms    0.0 dB
+song dub-chamber peak -16.36 dB   rms -28.72 dB   25.99s  hi/lo@0ms    0.0 dB
+song-1-break-break peak -20.30 dB   rms -29.24 dB   12.65s  hi/lo@0ms    0.0 dB
+song-1-peak-chant-2 peak -16.30 dB   rms -28.80 dB   12.48s  hi/lo@0ms    0.0 dB
+song rockers   peak -16.38 dB   rms -29.78 dB   25.69s  hi/lo@0ms    0.0 dB
+song-2-break-break peak -20.78 dB   rms -31.10 dB   11.46s  hi/lo@0ms    0.0 dB
+song-2-peak-chorus peak -15.94 dB   rms -29.91 dB   11.27s  hi/lo@0ms    0.0 dB
+song skank-rail peak -17.01 dB   rms -28.81 dB   25.89s  hi/lo@0ms    0.0 dB
+song-3-break-break peak -17.15 dB   rms -33.89 dB   10.56s  hi/lo@0ms    0.0 dB
+song-3-peak-chorus peak -17.07 dB   rms -29.26 dB   10.54s  hi/lo@0ms    0.0 dB
+song nyabinghi peak -18.83 dB   rms -30.25 dB   26.00s  hi/lo@0ms    0.0 dB
+song-4-break-break peak -20.79 dB   rms -36.83 dB    9.64s  hi/lo@0ms    0.0 dB
+song-4-peak-fire peak -19.42 dB   rms -30.93 dB    9.34s  hi/lo@0ms    0.0 dB
+song steppers  peak -16.47 dB   rms -27.64 dB   26.00s  hi/lo@0ms    0.0 dB
+song-5-break-break peak -17.09 dB   rms -30.86 dB   15.29s  hi/lo@0ms    0.0 dB
+song-5-peak-chorus peak -16.67 dB   rms -27.78 dB   15.28s  hi/lo@0ms    0.0 dB
+insert-skank-riot peak -17.26 dB   rms -28.86 dB   14.93s  hi/lo@0ms    0.0 dB
+insert-irie-master peak -16.23 dB   rms -29.30 dB   19.62s  hi/lo@0ms    0.0 dB
+insert-mission-vamp peak -16.76 dB   rms -30.94 dB    8.85s  hi/lo@0ms    0.0 dB
+
+wrote C:\Users\tonyb\OneDrive\Desktop\Games\Pinball\dev\audio and audio-render.json
+EXIT=0

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>machine view</title>
+<style>html,body{margin:0;background:#05070a;overflow:hidden}
+#f{width:100vw;height:100vh;border:0;display:block}</style>
+</head><body>
+<iframe id="f" src="../index.html"></iframe>
+<script>
+/* dev/_view.html#ex,ey,ez,tx,ty,tz   -- a fixed camera on the running game.
+   Temporary inspection tool: it loads the real index.html in an iframe,
+   hides the HUD, then wraps the renderer so the game's own camera is
+   replaced every frame. A fresh navigation to a new hash therefore gives a
+   fresh, deterministic view -- which is what the preview screenshots need. */
+var f = document.getElementById('f');
+var parts = location.hash.slice(1);
+var cam = null;
+if (parts) {
+  var n = parts.split(',').map(Number);
+  if (n.length === 6 && n.every(function (v) { return isFinite(v); })) cam = n;
+}
+f.addEventListener('load', function () {
+  var W = f.contentWindow;
+  var tries = 0;
+  var t = setInterval(function () {
+    tries++;
+    var g = W.PB && W.PB.game;
+    if (!g || !g.machine || !g.renderer) { if (tries > 200) clearInterval(t); return; }
+    clearInterval(t);
+    ['menu', 'touch', 'fps', 'hud'].forEach(function (id) {
+      var el = W.document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
+    if (g.__patched) return;
+    g.__patched = true;
+    W.__cam = cam;
+    var orig = g.renderer.render.bind(g.renderer);
+    g.renderer.render = function (scene, camera) {
+      if (W.__cam) {
+        camera.position.set(W.__cam[0], W.__cam[1], W.__cam[2]);
+        camera.lookAt(W.__cam[3], W.__cam[4], W.__cam[5]);
+      }
+      return orig(scene, camera);
+    };
+  }, 150);
+});
+</script>
+</body></html>

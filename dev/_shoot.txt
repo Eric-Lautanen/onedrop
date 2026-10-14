@@ -1,0 +1,115 @@
+{
+  "report": {
+    "meshes": 597,
+    "faithful": 11,
+    "stillLitWithMap": 2,
+    "stillToneMapped": 6,
+    "gradedList": [
+      "Mesh | MeshStandardMaterial metal=0.5",
+      "Mesh | MeshStandardMaterial metal=0.5",
+      "Mesh | MeshBasicMaterial metal=-",
+      "Mesh | MeshBasicMaterial metal=-",
+      "Mesh | MeshBasicMaterial metal=-",
+      "Mesh | MeshBasicMaterial metal=-"
+    ],
+    "kinds": {
+      "MeshStandardMaterial metal=0.5": 2
+    },
+    "pfToneMapped": false,
+    "pfType": "MeshBasicMaterial",
+    "table": {
+      "W": 25.94,
+      "H": 48.94,
+      "K": 1.1937
+    },
+    "center": {
+      "x": 1.5,
+      "y": 19.6
+    },
+    "ballR": 0.74,
+    "cabinetFit": {
+      "playfieldW": 25.94,
+      "playfieldH": 48.94,
+      "cabinetW": 32.93,
+      "cabinetSpanY": 76.97,
+      "source": "PB.MACHINE_BOX"
+    },
+    "vibranceCount": 11
+  },
+  "camTest": {
+    "orbitOn": true,
+    "heroView": {
+      "pos": [
+        32.63538,
+        76.48066,
+        105.69112
+      ],
+      "quat": [
+        -0.2281,
+        0.13891,
+        0.0329,
+        0.96312
+      ]
+    },
+    "before": {
+      "pos": [
+        102.4277,
+        92.09306,
+        7.97548
+      ],
+      "quat": [
+        -0.21392,
+        0.64693,
+        0.19626,
+        0.70513
+      ]
+    },
+    "after": {
+      "pos": [
+        102.4277,
+        92.09306,
+        7.97548
+      ],
+      "quat": [
+        -0.21392,
+        0.64693,
+        0.19626,
+        0.70513
+      ]
+    },
+    "dragMoved": true,
+    "cameraMoved": false
+  },
+  "resize": {
+    "before": {
+      "W": 25.94,
+      "H": 48.94
+    },
+    "mid": {
+      "W": 26,
+      "H": 45,
+      "K": 1.0976,
+      "cy": 19.6
+    }
+  },
+  "restored": {
+    "W": 25.94,
+    "H": 48.94,
+    "cy": 19.6
+  },
+  "scoreBox": {
+    "canvas": "512x128",
+    "canvasAspect": 4,
+    "plateAspect": 2.8337,
+    "planeW": 8.394,
+    "planeH": 2.099,
+    "planeAspect": 4
+  },
+  "atlas": {
+    "w": 318,
+    "h": 584
+  }
+}
+
+--- console ---
+WARNING: [playfield] the cabinet offers 25.94 x 48.94 but the field was built at 26.00 x 45.00. Re-fit with PB.game.fitPlayfieldToCabinet().

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#05070a">
+<title>ONE DROP &mdash; Reggae Pinball</title>
+<link rel="stylesheet" href="src/css/style.css">
+</head>
+<body>
+
+<div id="stage"></div>
+<div id="flash"></div>
+<div id="floats"></div>
+<div id="vignette"></div>
+<div id="scanlines"></div>
+
+<!-- ============ LOADING SCREEN ============ -->
+<!-- covers everything until the sprite sheet settles; then it fades and
+     the machine + menu drop in. Written by hand, before any script, so it
+     shows even if a later script explodes: the game clears it itself
+     once its own assets are in. -->
+<div id="loader">
+  <div class="ld-lock">ONE<b>DROP</b></div>
+  <div class="ld-sub">WARMING UP THE RIDDIM</div>
+  <div class="ld-bar"><i id="ldFill"></i></div>
+  <div class="ld-msg" id="ldMsg">loading&hellip;</div>
+</div>
+
+<!-- the dot-matrix canvas is the texture source for the 3D backbox screen.
+     A real DMD is a 128 x 32 plasma panel; this canvas is that grid. The
+     height starts square-ish to the painted plate and is re-set at boot by
+     machine.js to match the plate's exact aspect (see BAND_WIN there). -->
+<div id="hud"><canvas id="dmd" width="512" height="181"></canvas></div>
+
+<!-- ============ STATIC MENU (left side) ============ -->
+<!-- Three positions, all transform-driven:
+     default      dropped down, in your face (attract / game over)
+     .tabbed      slid up so only the handle peeks from the top; the
+                  handle click pulls it back down (used while playing)
+     .above       parked fully above the screen edge until the loader
+                  clears, then animates down with a bounce. -->
+<aside id="menu">
+  <div class="m-logo">ONE<b>DROP</b></div>
+  <div class="m-sub">ROOTS &bull; DUB &bull; SKANK</div>
+  <div class="rasta-bar m-bar"></div>
+  <button id="playBtn" type="button">PLAY</button>
+  <div class="m-row"><span>HIGH SCORE</span><b id="menuHigh">0</b></div>
+  <div class="m-status" id="menuStatus">PRESS PLAY</div>
+  <div class="m-hint">the mouse sets the view &mdash; drag to orbit, wheel to zoom</div>
+  <button id="resetBtn" type="button">RESET VIEW</button>
+  <button id="resetGameBtn" type="button">RESET GAME</button>
+  <div class="m-quick">
+    <button id="soundBtn" type="button">SOUND ON</button>
+    <button id="fxBtn" type="button" title="fancy hit effects: particles, trails, flashes, floating scores">FX ON</button>
+    <button id="pauseBtn" type="button">PAUSE</button>
+    <button id="fsBtn" type="button">FULLSCREEN</button>
+  </div>
+  <!-- the fader. 50% is the default; the mix is built so that at 50%
+       the band is a bed under the machine and at 100% it is a loud
+       arcade, so the middle of the slider is a real listening level. -->
+  <div class="m-vol">
+    <label for="vol">VOLUME</label>
+    <input id="vol" type="range" min="0" max="100" step="1" value="50"
+           aria-label="master volume" autocomplete="off">
+    <b id="volVal">50%</b>
+  </div>
+  <div class="m-hint">click a key to rebind it &mdash; keys play the game, never the camera</div>
+  <ul class="m-keys">
+    <li><button class="keycap" id="keyLeft" type="button">Z</button> left flipper</li>
+    <li><button class="keycap" id="keyRight" type="button">/</button> right flipper</li>
+    <li><button class="keycap" id="keyPlunge" type="button">SPACE</button> plunge (hold &amp; release)</li>
+    <li><button class="keycap" id="keyNudgeL" type="button">A</button> nudge left</li>
+    <li><button class="keycap" id="keyNudgeR" type="button">D</button> nudge right</li>
+    <li><button class="keycap" id="keyReset" type="button">R</button> reset game</li>
+    <li><b>M</b> sound &middot; <b>P</b> pause &middot; <b>F</b> fullscreen</li>
+  </ul>
+  <!-- last child on purpose: when the panel is tabbed up while playing,
+       this bottom strip is the only part peeking over the screen edge. -->
+  <button id="menuTab" type="button" aria-label="show menu"><span class="ar">&#9662;</span> MENU</button>
+</aside>
+
+<div id="fps">-- FPS</div>
+<div id="loaderNote" hidden></div>
+
+<div id="touch">
+  <button id="touchLeft" aria-label="left flipper">FLIP</button>
+  <button id="touchNudgeL" aria-label="nudge left">&larr;</button>
+  <button id="touchLaunch" aria-label="plunge">PLUNGE</button>
+  <button id="touchNudgeR" aria-label="nudge right">&rarr;</button>
+  <button id="touchRight" aria-label="right flipper">FLIP</button>
+</div>
+
+<script src="src/js/vendor/three.min.js"></script>
+<script src="src/js/table.js"></script>
+<script src="src/js/physics.js"></script>
+<script src="src/js/art.js"></script>
+<script src="src/js/assets.js"></script>
+<script src="src/js/playfield.js"></script>
+<script src="src/js/machine.js"></script>
+<script src="src/js/vibrance.js"></script>
+<script src="src/js/audio.js"></script>
+<script src="src/js/dmd.js"></script>
+<script src="src/js/game.js"></script>
+</body>
+</html>

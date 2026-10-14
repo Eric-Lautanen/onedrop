@@ -1,0 +1,6 @@
+{
+  "repeatedDrains": 10,
+  "cleanup": "Drained meshes/shadows removed, shadow resources disposed once, shared resources and survivor preserved",
+  "ballSave": "Last-ball drain removes old visuals; ball save creates one new visible ball",
+  "browserErrors": []
+}

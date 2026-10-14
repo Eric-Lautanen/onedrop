@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>atlas crops</title>
+<style>
+  html,body { margin:0; background:#0b0b0b; color:#ddd; font:11px monospace; }
+  #tiles { display:flex; flex-wrap:wrap; gap:8px; padding:8px; }
+  .tile { background:#161616; border:1px solid #333; padding:4px; }
+  .tile img { display:block; image-rendering:pixelated; }
+  .cap { color:#7fffcf; margin-bottom:3px; white-space:nowrap; }
+  .cap b { color:#ffd24a; }
+</style>
+</head>
+<body>
+<div id="tiles"></div>
+<script>
+/* Regions measured from gutter analysis of the 1024x1536 sheet:
+   vertical gutters at x ~0.009 / 0.144-0.161 / 0.657-0.673 / 0.988
+   and the playfield column narrowing to ~0.608 below y 0.23.
+   Row gutters per column are noted on each entry. */
+var REGIONS = [
+  { n:'cab-side',   x:0.010, y:0.004, w:0.134, h:0.769 },
+  { n:'backglass',  x:0.163, y:0.004, w:0.494, h:0.223 },
+  { n:'playfield',  x:0.155, y:0.232, w:0.453, h:0.541 },
+  { n:'dmd-panel',  x:0.622, y:0.005, w:0.366, h:0.072 },
+  { n:'logo-band',  x:0.622, y:0.081, w:0.366, h:0.155 },
+  { n:'decal-sheet',x:0.622, y:0.242, w:0.366, h:0.533 },
+  { n:'bottom-right',x:0.622,y:0.777, w:0.366, h:0.209 },
+  { n:'card-a',     x:0.010, y:0.779, w:0.134, h:0.069 },
+  { n:'card-b',     x:0.010, y:0.853, w:0.134, h:0.065 },
+  { n:'bottom-mid', x:0.155, y:0.779, w:0.453, h:0.148 },
+  { n:'bottom-mid2',x:0.290, y:0.933, w:0.290, h:0.054 }
+];
+var W = 1024, H = 1536;
+var img = new Image();
+img.onload = function () {
+  var wrap = document.getElementById('tiles');
+  REGIONS.forEach(function (r) {
+    var sx = r.x * W, sy = r.y * H, sw = r.w * W, sh = r.h * H;
+    var cv = document.createElement('canvas');
+    cv.width = sw; cv.height = sh;
+    cv.getContext('2d').drawImage(img, sx, sy, sw, sh, 0, 0, sw, sh);
+    var tile = document.createElement('div');
+    tile.className = 'tile';
+    var target = 190, scale = Math.min(target / sw, 260 / sh);
+    var out = document.createElement('img');
+    out.src = cv.toDataURL();
+    out.width = Math.max(60, Math.round(sw * scale));
+    out.height = Math.round(sh * scale);
+    var cap = document.createElement('div');
+    cap.className = 'cap';
+    cap.innerHTML = r.n + ' <b>' + sw.toFixed(0) + 'x' + sh.toFixed(0) + '</b> ' +
+      (sw / sh).toFixed(2) + ':1';
+    tile.appendChild(cap); tile.appendChild(out);
+    wrap.appendChild(tile);
+  });
+  document.title = 'crops ready';
+};
+img.onerror = function () { document.title = 'IMG FAILED'; };
+img.src = '../assets/sprite.png';
+</script>
+</body>
+</html>

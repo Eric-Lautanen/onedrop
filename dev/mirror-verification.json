@@ -1,0 +1,74 @@
+{
+  "mirrors": [
+    {
+      "resolution": 768,
+      "passes": 6,
+      "changedPixels": 14634,
+      "markerPixels": 0
+    },
+    {
+      "resolution": 768,
+      "passes": 5,
+      "changedPixels": 23883,
+      "markerPixels": 9113
+    },
+    {
+      "resolution": 768,
+      "passes": 6,
+      "changedPixels": 110,
+      "markerPixels": 0
+    }
+  ],
+  "mirrorInMirror": [
+    {
+      "mirror": 0,
+      "reflectedBladePixels": 7876
+    },
+    {
+      "mirror": 1,
+      "reflectedBladePixels": 8245
+    },
+    {
+      "mirror": 2,
+      "reflectedBladePixels": 2530
+    }
+  ],
+  "glass": {
+    "meanArtworkDelta": 5.086940842180206,
+    "saturationKept": 0.9683032440336714,
+    "visibleHighlightPixels": 538914,
+    "artworkPixels": 275444,
+    "paneMeanDelta": {
+      "player": 3.1670588235294135,
+      "grazing": 3.2936936936936934
+    },
+    "paneMaxDelta": {
+      "player": 24,
+      "grazing": 87.66666666666667
+    },
+    "paneContrast": {
+      "player": 1.0699184108246331,
+      "grazing": 2.35732225042109
+    },
+    "panePointsVisibleFromBoth": 370,
+    "viewDependence": 0.4320616554719758,
+    "meanFresnel": {
+      "player": 0.043734925114746075,
+      "grazing": 0.14864667664932812
+    },
+    "highlightMovedByView": 0.7083333333333334
+  },
+  "medianRenderMs": {
+    "noMirrors": 3.399999976158142,
+    "liveMirrors": 403
+  },
+  "crop": {
+    "sx": 99.999999966,
+    "sy": 37.999999824,
+    "sw": 224.000000025,
+    "sh": 142.99999950400002
+  },
+  "rendererState": "restored",
+  "disposedTargets": 3,
+  "errors": []
+}

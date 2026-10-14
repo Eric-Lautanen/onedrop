@@ -1,0 +1,33 @@
+all cues audible           PASS   quietest rollover at -17.9 dB; 23 cues rendered
+core cues mix-solid        PASS   all >= -20 dB except none
+unknown cue is safe        PASS   sfx("no-such-cue") did not throw
+tilt outranks flipper      PASS   tilt -6.9 dB vs flipper -11.8 dB
+flipper release is softer  PASS   fire -11.8 dB, return -16.1 dB
+kit spans bright to deep   PASS   attack brightness spans 57 dB across the kit: spinner +28.2 dB at the top, kickback -28.6 dB at the bottom, both in the group they belong to
+the extremes hold up render to render PASS   spinner over five renders ['+22.5', '+24.5', '+24.5', '+24.6', '+25.9'] (every one above +10); kickback over five ['-30.8', '-29.3', '-28.0', '-28.0', '-26.8'] (every one below -25); widest spread among the rest 6.8 dB (spinner)
+metal rings inharmonically PASS   mode 2.76f beats the octave by 79.8 dB (f0 -45.5, 2f -139.7, 2.76f -59.8)
+playlist has songs         PASS   6 songs: ['ONE DROP', 'DUB CHAMBER', 'ROCKERS', 'SKANK RAIL', 'NYABINGHI', 'STEPPERS']
+songs differ in tempo      PASS   bpms [78, 86, 96, 106, 118, 138]
+songs differ in feel       PASS   feels ['binghi', 'dub', 'onedrop', 'rockers', 'ska', 'steppers']
+no song drags              PASS   slowest is ONE DROP at 78 bpm (it was 66); the set spans 78-138 bpm
+songs are long enough to be songs PASS   shortest NYABINGHI at 28 bars / 57 s, longest STEPPERS at 97 s; the whole set is 7.5 minutes
+songs vary inside themselves PASS   ONE DROP 7 sections / 6 shapes / 2 breaks / 3 with the lead; DUB CHAMBER 7 sections / 6 shapes / 1 breaks / 2 with the lead; ROCKERS 7 sections / 5 shapes / 1 breaks / 3 with the lead; SKANK RAIL 7 sections / 6 shapes / 1 breaks / 4 with the lead; NYABINGHI 7 sections / 5 shapes / 1 breaks / 3 with the lead; STEPPERS 7 sections / 6 shapes / 1 breaks / 4 with the lead
+band plays                 PASS   music bed at the master: mean -35.2 dB, peak -28.1 dB over 590 samples (ctx running)
+cues ride above the band   PASS   smallest margin rollover +17.2 dB over the bed; median +20.9 dB
+impact cues beat the bed at its peak PASS   weakest sling +12.4 dB above the bed's loudest transient {}
+set runs the playlist in order PASS   15 handovers, 8053 notes scheduled, first ['DUB CHAMBER', 'ROCKERS', 'SKANK RAIL', 'NYABINGHI', 'STEPPERS', 'ONE DROP', 'DUB CHAMBER']
+handovers land on bar lines PASS   every song runs a whole number of 16-step bars: [448, 448, 448, 448, 448, 896]
+dub delay retimed per song PASS   echo retimed to [0.3261, 0.3814, 0.4245, 0.4688, 0.5233, 0.5769], one per song, on handover
+every song renders         PASS   quietest none
+each song pulses at its own tempo PASS   ONE DROP 77.9 bpm over 4 beats; DUB CHAMBER 86.0 bpm over 4 beats; ROCKERS 96.0 bpm over 4 beats; SKANK RAIL 106.1 bpm over 8 beats; NYABINGHI 118.2 bpm over 4 beats; STEPPERS 137.9 bpm over 8 beats
+the set changes tempo between songs PASS   measured [78, 86, 96, 106, 118, 138] bpm across the four songs
+every song breaks its own arrangement PASS   ONE DROP break: 28 voices vs 192 in chorus (6.9x); DUB CHAMBER break: 16 voices vs 192 in chant 2 (12.0x); ROCKERS break: 60 voices vs 228 in chorus (3.8x); SKANK RAIL break: 80 voices vs 208 in chorus (2.6x); NYABINGHI break: 76 voices vs 200 in fire (2.6x); STEPPERS break: 224 voices vs 432 in chorus (1.9x)
+the break is audibly a break PASS   ONE DROP break vs chorus: 4.2 dB (level 0.8, peak 4.2); DUB CHAMBER break vs chant 2: 4.9 dB (level 0.4, peak 4.9); ROCKERS break vs chorus: 4.9 dB (level 1.4, peak 4.9); SKANK RAIL break vs chorus: 5.9 dB (level 5.9, peak 0.2); NYABINGHI break vs fire: 9.0 dB (level 9.0, peak 2.7); STEPPERS break vs chorus: 3.3 dB (level 3.3, peak 0.6)
+a break is quiet, not empty PASS   every break still sounds: ONE DROP break peak -20.3 dB, DUB CHAMBER break peak -21.1 dB, ROCKERS break peak -20.6 dB, SKANK RAIL break peak -17.4 dB, NYABINGHI break peak -21.4 dB, STEPPERS break peak -17.4 dB
+there is mission music for the big moments PASS   3 inserts: SKANK RIOT (8 bars, 15 s), IRIE MASTER (8 bars, 19 s), MISSION VAMP (4 bars, 9 s)
+inserts are vamps, not songs PASS   insert lengths in bars: [8, 8, 4]
+EXIT=127
+
+--- INTERRUPTED (stopped on request before the verdict line). This log is partial and is NOT a
+--- result. The last COMPLETE audio run is dev/audio-verification.json (43 checks, 0 failing).
+--- Re-run with: dev/.venv-playfield/Scripts/python.exe dev/verify-audio.py

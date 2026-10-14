@@ -1,0 +1,33 @@
+{
+  "before": {
+    "osc": 0,
+    "buf": 0,
+    "gain": 0,
+    "bq": 0,
+    "pan": 0
+  },
+  "sfxBusGain": 0.800000011920929,
+  "masterGain": 0.9200000166893005,
+  "muted": false,
+  "ready": true,
+  "state": "running",
+  "currentTime": 0.312,
+  "nodesForFlipper": {
+    "osc": 2,
+    "buf": 2,
+    "gain": 4,
+    "bq": 3,
+    "pan": 4
+  },
+  "flipperPeak": 0.12154036126788473,
+  "nodesForBumper": {
+    "osc": 3,
+    "buf": 1,
+    "gain": 5,
+    "bq": 2,
+    "pan": 4
+  },
+  "bumperPeak": 0.19552553961459235,
+  "directTonePeak": 0,
+  "errors": []
+}

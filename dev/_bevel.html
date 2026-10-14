@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>bevel probe</title></head>
+<body><pre id="out">…</pre>
+<script src="../src/js/vendor/three.min.js"></script>
+<script>
+var s = new THREE.Shape();
+var w = 10, h = 4, r = 1;
+s.moveTo(-w / 2 + r, -h / 2);
+s.lineTo(w / 2 - r, -h / 2);
+s.quadraticCurveTo(w / 2, -h / 2, w / 2, -h / 2 + r);
+s.lineTo(w / 2, h / 2 - r);
+s.quadraticCurveTo(w / 2, h / 2, w / 2 - r, h / 2);
+s.lineTo(-w / 2 + r, h / 2);
+s.quadraticCurveTo(-w / 2, h / 2, -w / 2, h / 2 - r);
+s.lineTo(-w / 2, -h / 2 + r);
+s.quadraticCurveTo(-w / 2, -h / 2, -w / 2 + r, -h / 2);
+
+function probe(opts, label) {
+  var g = new THREE.ExtrudeGeometry(s, opts);
+  g.computeBoundingBox();
+  var b = g.boundingBox;
+  return label + ' x[' + b.min.x.toFixed(2) + ',' + b.max.x.toFixed(2) + '] ' +
+    'y[' + b.min.y.toFixed(2) + ',' + b.max.y.toFixed(2) + '] ' +
+    'z[' + b.min.z.toFixed(2) + ',' + b.max.z.toFixed(2) + ']';
+}
+var out = [];
+out.push('shape w=' + w + ' h=' + h + ' r=' + r);
+out.push(probe({ depth: 2, bevelEnabled: false }, 'no bevel, depth 2           '));
+out.push(probe({ depth: 2, bevelEnabled: true, bevelSize: 0.5, bevelThickness: 0.5, bevelSegments: 3 }, 'bevel .5/.5 depth 2         '));
+out.push(probe({ depth: 1, bevelEnabled: true, bevelSize: 0.5, bevelThickness: 0.5, bevelSegments: 3 }, 'bevel .5/.5 depth 1 (2x .5) '));
+document.getElementById('out').textContent = out.join('\n');
+document.title = 'DONE';
+</script>
+</body></html>

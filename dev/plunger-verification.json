@@ -1,0 +1,32 @@
+{
+  "charge": {
+    "pullFraction": 0.945,
+    "travelUnits": 3.213,
+    "springScale": 0.6031,
+    "handleOutOfFrontUnits": 6.506753220165738,
+    "glassFrontZ": 24.755427480012337,
+    "travelK": 3.4
+  },
+  "release": "Release snapped the handle home",
+  "settled": {
+    "restOffsetUnits": 0,
+    "springScale": 1,
+    "handleNubAtRestUnits": 1.9252911284402394
+  },
+  "face": {
+    "ferruleOffRodUnits": 2.4279387088187486e-15,
+    "ferruleOffPanelUnits": 0.002235121951210395,
+    "ferruleTravels": false,
+    "paintedPlungerPixelsLeft": 0
+  },
+  "power": {
+    "idlePower": 32.5,
+    "fullPower": 67.5,
+    "oldBand": [
+      26,
+      54
+    ],
+    "cap": 68
+  },
+  "browserErrors": []
+}

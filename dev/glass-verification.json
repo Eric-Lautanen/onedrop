@@ -1,0 +1,17 @@
+{
+  "grazing": {
+    "visiblePixels": 414444,
+    "meanArtworkDelta": 4.063968765972836,
+    "meanSignedLift": 3.6843485115867853,
+    "saturationKept": 0.9566457714967489,
+    "artworkPixels": 276536
+  },
+  "playerView": {
+    "visiblePixels": 518291,
+    "meanArtworkDelta": 5.091514904701677,
+    "meanSignedLift": 4.440633052975398,
+    "saturationKept": 0.9542978632902527,
+    "artworkPixels": 297121
+  },
+  "browserErrors": []
+}

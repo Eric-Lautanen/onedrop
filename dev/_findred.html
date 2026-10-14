@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>find red</title></head>
+<body><pre id="out">loading…</pre>
+<script>
+var img = new Image();
+img.onload = function () {
+  var c = document.createElement('canvas');
+  c.width = img.width; c.height = img.height;
+  var x = c.getContext('2d', { willReadFrequently: true });
+  x.drawImage(img, 0, 0);
+  var W = img.width, H = img.height;
+  var d = x.getImageData(0, 0, W, H).data;
+  function redAt(px, py) {
+    var i = (py * W + px) * 4;
+    var r = d[i], g = d[i + 1], b = d[i + 2];
+    return r > 140 && g < 90 && b < 90 && (r - Math.max(g, b)) > 60;
+  }
+  function scan(x0, y0, x1, y1, label) {
+    var seen = {}, res = [];
+    for (var py = y0; py < y1; py++) {
+      for (var px = x0; px < x1; px++) {
+        if (!redAt(px, py) || seen[px + ',' + py]) continue;
+        // flood fill
+        var stack = [[px, py]], n = 0, minx = px, maxx = px, miny = py, maxy = py;
+        seen[px + ',' + py] = 1;
+        while (stack.length) {
+          var p = stack.pop(); n++;
+          if (p[0] < minx) minx = p[0]; if (p[0] > maxx) maxx = p[0];
+          if (p[1] < miny) miny = p[1]; if (p[1] > maxy) maxy = p[1];
+          var nb = [[p[0] + 1, p[1]], [p[0] - 1, p[1]], [p[0], p[1] + 1], [p[0], p[1] - 1]];
+          for (var k = 0; k < 4; k++) {
+            var q = nb[k];
+            if (q[0] < x0 || q[0] >= x1 || q[1] < y0 || q[1] >= y1) continue;
+            if (seen[q[0] + ',' + q[1]] || !redAt(q[0], q[1])) continue;
+            seen[q[0] + ',' + q[1]] = 1; stack.push(q);
+          }
+        }
+        if (n >= 12) res.push({ px: n, box: [minx, miny, maxx - minx + 1, maxy - miny + 1],
+          cx: (minx + maxx) / 2, cy: (miny + maxy) / 2 });
+      }
+    }
+    res.sort(function (a, b) { return b.px - a.px; });
+    return { label: label, blobs: res.slice(0, 14) };
+  }
+  var out = [
+    scan(0, 633, 424, 1264, 'side-elev'),
+    scan(425, 633, 843, 1264, '3/4 persp'),
+    scan(0, 0, 424, 632, 'front ortho')
+  ];
+  out.forEach(function (r) {
+    document.getElementById('out').textContent += '\n== ' + r.label + ' ==\n' +
+      r.blobs.map(function (b) {
+        return 'px=' + b.px + ' box=' + JSON.stringify(b.box) + ' c=(' + b.cx + ',' + b.cy + ')';
+      }).join('\n') + '\n';
+  });
+  document.title = 'DONE';
+};
+img.src = '../assets/3dref.jpg';
+</script>
+</body></html>

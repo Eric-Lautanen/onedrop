@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>physics walls in the 3D render</title>
+<style>html,body{margin:0;background:#05070a;overflow:hidden}
+#f{width:100vw;height:100vh;border:0;display:block}
+#hud{position:fixed;left:6px;top:6px;color:#9fe;font:12px monospace;background:#0009;padding:4px 6px}
+</style></head><body>
+<div id="hud">loading…</div>
+<iframe id="f" src="/index.html"></iframe>
+<script>
+/* dev/_walls.html#ax,ay,span   -- top-down view centred on art percent (ax,ay)
+   with the physics segments drawn as red lines on the field.
+   The game re-places its camera every frame, so the camera is forced inside
+   a wrapper around renderer.render (same trick as dev/_view.html). */
+var Q = location.hash.slice(1).split(',').map(Number);
+var AX = isFinite(Q[0]) ? Q[0] : 18;
+var AY = isFinite(Q[1]) ? Q[1] : 10;
+var SPAN = isFinite(Q[2]) ? Q[2] : 26;         /* world units of field height visible */
+var f = document.getElementById('f');
+f.addEventListener('load', function () {
+  var W = f.contentWindow;
+  var tries = 0;
+  var t = setInterval(function () {
+    tries++;
+    var g = W.PB && W.PB.game;
+    if (!g || !g.renderer || !g.scene || !W.THREE) { if (tries > 200) clearInterval(t); return; }
+    clearInterval(t);
+    ['menu', 'touch', 'fps', 'hud'].forEach(function (id) {
+      var el = W.document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
+    var THREE = W.THREE;
+    var PF = W.PB.PF_SIZE, T = W.PB.buildTable(PF);
+    var CX = PF.centerX, CY = PF.centerY;
+    var pts = [];
+    T.segments.forEach(function (s) {
+      pts.push(new THREE.Vector3(s.ax - CX, s.ay - CY, 0.45));
+      pts.push(new THREE.Vector3(s.bx - CX, s.by - CY, 0.45));
+    });
+    var line = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(pts),
+      new THREE.LineBasicMaterial({ color: 0xff2020, depthTest: false }));
+    line.name = 'seg-debug';
+    line.renderOrder = 999;
+    g.group.add(line);
+    /* the table group is rotated so physics (x, y) lie in world (x, z).
+       Work out the world-space point and the world direction of the
+       field's own +y (toward the arch) from the group's matrix, so the
+       top-down view is oriented the way the player sees the field. */
+    g.group.updateMatrixWorld(true);
+    var origin = g.group.localToWorld(new THREE.Vector3(0, 0, 0));
+    var target = g.group.localToWorld(new THREE.Vector3(T.artX(AX) - CX, T.artY(AY) - CY, 0));
+    var upDir = g.group.localToWorld(new THREE.Vector3(0, 1, 0)).sub(origin).normalize();
+    var dist = (SPAN / 2) / Math.tan((g.camera.fov / 2) * Math.PI / 180) * (g.camera.aspect < 1 ? 1 / g.camera.aspect : 1);
+    var orig = g.renderer.render.bind(g.renderer);
+    g.renderer.render = function (scene, camera) {
+      camera.position.set(target.x + upDir.x * dist * 0.15, target.y + dist, target.z + upDir.z * dist * 0.15);
+      camera.up.copy(upDir);
+      camera.lookAt(target);
+      return orig(scene, camera);
+    };
+    document.getElementById('hud').textContent =
+      'top-down on art (' + AX + ',' + AY + '), span ' + SPAN + 'u, red = physics walls';
+    W.__wallsReady = true;
+  }, 150);
+});
+</script>
+</body></html>

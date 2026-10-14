@@ -1,0 +1,66 @@
+{
+  "ramps": [
+    {
+      "name": "ROOTS ORBIT",
+      "maxError": 3.552713678800501e-15,
+      "maxGrade": 0.16149536210069082,
+      "steps": 427
+    },
+    {
+      "name": "SKANK RAMP",
+      "maxError": 3.552713678800501e-15,
+      "maxGrade": 0.3195194278109472,
+      "steps": 446
+    }
+  ],
+  "lamps": 43,
+  "sizes": [
+    {
+      "W": 25.94,
+      "H": 48.94,
+      "crossingClearance": 3.1035121951219513,
+      "overlapClearance": 2.017625728362709,
+      "rearUnderpass": 2.266280341391838
+    },
+    {
+      "W": 26,
+      "H": 45,
+      "crossingClearance": 2.48163378742731,
+      "overlapClearance": 1.8738572805021776,
+      "rearUnderpass": 2.06887472967459
+    },
+    {
+      "W": 20,
+      "H": 36,
+      "crossingClearance": 2.282926829268293,
+      "overlapClearance": 1.475655532247742,
+      "rearUnderpass": 1.6611272507375714
+    }
+  ],
+  "glassGap": 5.067307387033986,
+  "spinner": {
+    "angle": 21.37275919957991,
+    "speed": 9.765239772087728,
+    "scoredSwitches": 6
+  },
+  "basketJoins": "All semicircular tie ends match their rails",
+  "failures": [],
+  "controls": "PLAY, charged plunge, both flippers passed",
+  "hardware": "Spinner mesh rotates, tiki jaw reacts, drop target retracts and resets",
+  "liveResize": {
+    "before": [
+      25.94,
+      48.94
+    ],
+    "resized": [
+      26,
+      45,
+      43
+    ],
+    "restored": [
+      25.94,
+      48.94
+    ]
+  },
+  "browserErrors": []
+}

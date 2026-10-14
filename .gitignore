@@ -1,0 +1,12 @@
+# Local audit backup of the whole project.
+# Everything is committed EXCEPT these rebuildable/cached trees:
+
+# the Python virtual environment the dev suites run under — recreate with
+#   python -m venv dev/.venv-playfield
+#   dev/.venv-playfield/Scripts/python -m pip install playwright numpy pillow
+# and playwright install msedge
+dev/.venv-playfield/
+
+# bytecode caches (rebuild instantly)
+**/__pycache__/
+*.pyc

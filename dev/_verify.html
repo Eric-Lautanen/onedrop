@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><base href="/"><title>physics containment check</title>
+<style>html,body{margin:0;background:#0d0f11;color:#cfe;font:12px/1.45 monospace}
+#o{padding:8px;white-space:pre-wrap}</style>
+</head><body><div id="o">running…</div>
+<script src="src/js/vendor/three.min.js"></script>
+<script src="src/js/table.js"></script>
+<script src="src/js/physics.js"></script>
+<script>
+/* Containment battery for the playfield boundary.
+   A ball is OUT when its centre leaves the artwork box by more than 0.4 u
+   while it is not riding a wireform. Every start point below is INSIDE the
+   rails (art x 9..90) and clear of the arch (art y >= 6) so a start can
+   never itself be the reason a ball is outside. */
+(function () {
+  var out = [];
+  function log(s) { out.push(s); document.getElementById('o').textContent = out.join('\n'); }
+  var T = PB.buildTable(PB.PF_SIZE), FIXED = 1 / 180;
+  var X0 = T.artX(0), X1 = T.artX(100), Y0 = T.artY(0), Y1 = T.artY(100);
+  function pct(x, y) {
+    return [ +(((x - X0) / (X1 - X0)) * 100).toFixed(1),
+             +(((Y0 - y) / (Y0 - Y1)) * 100).toFixed(1) ];
+  }
+  function gone(x, y) { return x < X0 - 0.4 || x > X1 + 0.4 || y > Y0 + 0.4 || y < Y1 - 0.4; }
+  function how(x, y) { return x < X0 - 0.4 ? 'LEFT' : x > X1 + 0.4 ? 'RIGHT' : y > Y0 + 0.4 ? 'TOP' : 'BELOW'; }
+
+  function shot(table, x, y, vx, vy, secs, onStart) {
+    var w = new PB.World(table), b = w.addBall(x, y, vx, vy, 0.62);
+    if (onStart) onStart(w, b);
+    var top = 1e9, stuck = 0, rest = null;
+    for (var i = 0; i < 180 * secs; i++) {
+      w.step(FIXED);
+      if ((i & 1) === 0) w.pollZones();
+      if (b.rampI !== undefined) { stuck = 0; continue; }
+      if (b.y < top) top = b.y;
+      if (gone(b.x, b.y)) return { escaped: how(b.x, b.y), at: pct(b.x, b.y) };
+      var sp = Math.sqrt(b.vx * b.vx + b.vy * b.vy);
+      stuck = sp < 0.6 ? stuck + 1 : 0;
+      if (stuck > 180 * 4) { rest = pct(b.x, b.y); break; }
+      if (b.dead) break;
+    }
+    return { escaped: null, highest: pct(b.x, top), ended: b.dead ? 'drained' : rest ? 'STUCK' : 'alive', rest: rest };
+  }
+
+  log('playfield: ' + T.segments.length + ' wall segments, art box x ' + X0.toFixed(2) + '..' + X1.toFixed(2) +
+      ', y ' + Y0.toFixed(2) + '..' + Y1.toFixed(2));
+
+  /* ---- 1. random shots from valid in-field points ---------------------- */
+  var seed = 987654321, bad = [], n = 0;
+  function rnd() { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff; }
+  for (var k = 0; k < 220; k++) {
+    var gx = 9 + rnd() * 81, gy = 6 + rnd() * 88;
+    var ang = rnd() * Math.PI * 2, sp = 30 + rnd() * 34;
+    n++;
+    var r = shot(T, T.artX(gx), T.artY(gy), Math.cos(ang) * sp, Math.sin(ang) * sp, 5);
+    if (r.escaped) bad.push({ from: [ +gx.toFixed(0), +gy.toFixed(0) ], sp: +sp.toFixed(0), how: r.escaped, at: r.at });
+  }
+  log('\n1. ' + n + ' random shots (30..64 u/s, any direction) from art x 9..90, y 6..94');
+  log('   escaped: ' + bad.length + (bad.length ? '  ' + JSON.stringify(bad.slice(0, 6)) : '  (none)'));
+
+  /* ---- 2. the routes that used to leak --------------------------------- */
+  log('\n2. the four routes that used to leak (ball fired straight up the left column at 55 u/s,');
+  log('   i.e. what the kickback does, and sideways at the seams):');
+  var routes = [];
+  [[8.5, 86], [9.5, 86], [11, 70], [13, 60], [8.5, 40], [12, 25]].forEach(function (p) {
+    var r = shot(T, T.artX(p[0]), T.artY(p[1]), 0, 55, 7);
+    routes.push({ from: p, up: r.escaped ? r.escaped + ' at ' + r.at : 'contained (highest art y ' + r.highest[1] + ', ' + r.ended + ')' });
+  });
+  [[22, 4], [26, 6], [18, 8], [29, 5], [40, 2], [90, 4], [86, 2], [95, 8]].forEach(function (p) {
+    var r = shot(T, T.artX(p[0]), T.artY(p[1]), -34, 0, 6);
+    routes.push({ from: p, left: r.escaped ? r.escaped + ' at ' + r.at : 'contained (' + r.ended + ')' });
+  });
+  routes.forEach(function (r) { log('   ' + JSON.stringify(r)); });
+
+  /* ---- 3. the kickback itself ----------------------------------------- */
+  log('\n3. the kickback: ball in the left outlane, the game fires it at ' + T.kickback.force.toFixed(1) + ' u/s');
+  [86, 88, 90].forEach(function (py) {
+    var T2 = PB.buildTable(PB.PF_SIZE);
+    var w = new PB.World(T2), b = w.addBall(T2.artX(9.5), T2.artY(py), 0, -6, 0.62);
+    var fired = false, top = 1e9, e = null;
+    w.onEvent = function (ev) { if (ev.t === 'kickback') fired = true; };
+    for (var i = 0; i < 180 * 10; i++) {
+      w.step(FIXED); w.pollZones();
+      if (b.rampI === undefined && b.y < top) top = b.y;
+      if (b.rampI === undefined && gone(b.x, b.y)) { e = how(b.x, b.y) + ' at ' + pct(b.x, b.y); break; }
+      if (b.dead) break;
+    }
+    log('   from art (9.5, ' + py + '): fired ' + fired + ', highest art y ' + pct(b.x, top)[1] +
+        ', ' + (e ? 'ESCAPED ' + e : (b.dead ? 'came back down and drained at ' + pct(b.x, b.y) : 'ended at ' + pct(b.x, b.y))));
+  });
+
+  /* ---- 4. ordinary play still works ----------------------------------- */
+  log('\n4. ordinary play (full plunge, then flippers):');
+  var g = [];
+  for (var s = 0; s < 8; s++) {
+    var w2 = new PB.World(T), b2 = w2.addBall(T.spawn.x, T.spawn.y, 0.6, 0, 0.62);
+    var res = null, top2 = 1e9, ramp = 0;
+    for (var j = 0; j < 180 * 30; j++) {
+      if (j === 27) b2.vy = 54;
+      var ph = (j * FIXED * 1.9 + s * 0.211) % 1;
+      w2.flippers[0].active = ph < 0.3;
+      w2.flippers[1].active = ph > 0.25 && ph < 0.6;
+      w2.step(FIXED);
+      if ((j & 1) === 0) w2.pollZones();
+      if (b2.rampI !== undefined) { ramp++; continue; }
+      if (b2.y < top2) top2 = b2.y;
+      if (gone(b2.x, b2.y)) { res = 'ESCAPED ' + how(b2.x, b2.y) + ' at ' + pct(b2.x, b2.y); break; }
+      if (b2.dead) { res = 'drained normally'; break; }
+    }
+    g.push({ seed: s, result: res || 'still in play at ' + pct(b2.x, b2.y), highestArtY: pct(b2.x, top2)[1],
+             rampSteps: ramp });
+  }
+  g.forEach(function (x) { log('   ' + JSON.stringify(x)); });
+
+  /* ---- 5. the arch still delivers, the lane still works --------------- */
+  log('\n5. the arch ride: ball released at the arch terminus (29,5) heading down-left');
+  var lane = shot(T, T.artX(29), T.artY(5), -3, 14, 4);
+  log('   ' + JSON.stringify(lane));
+  log('\n6. the shooter lane still feeds the arch: plunge from the lane');
+  var pl = shot(T, T.spawn.x, T.spawn.y, 0.6, 54, 6, function (w, b) { b.vy = 54; });
+  log('   ' + JSON.stringify(pl));
+  window.__res = out.join('\n');
+  log('\ndone');
+})();
+</script>
+</body></html>

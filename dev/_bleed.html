@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><base href="/"><title>art vs physics walls</title>
+<style>
+html,body{margin:0;background:#0b0b0c;color:#ddd;font:12px/1.4 monospace}
+canvas{display:block;image-rendering:pixelated;background:#111}
+#bar{padding:6px 8px}
+#bar b{color:#f6c445}
+</style></head><body>
+<div id="bar">playfield art (sheet 500,28 318x584) with <b>physics segments</b> drawn over it.
+  <span style="color:#6cf">cyan = rail</span>,
+  <span style="color:#f66">red = other</span>,
+  <span style="color:#3f6">green = gate</span>.
+  x0..x60, y0..y34, 2.6x.</div>
+<canvas id="c"></canvas>
+<script src="src/js/vendor/three.min.js"></script>
+<script src="src/js/assets.js"></script>
+<script src="src/js/table.js"></script>
+<script>
+var Q = location.hash.slice(1).split(',').map(Number);
+var PX0 = Q[0] || 0, PX1 = Q[1] || 60, PY0 = Q[2] || 0, PY1 = Q[3] || 34;
+var ZOOM = Q[4] || 2.6;                         /* _bleed.html#x0,x1,y0,y1,zoom */
+var PF = PB.PF_SIZE, T = PB.buildTable(PF);
+var R = PB.assets.rectPx('playfield');          /* 500,28 318x584 */
+/* art percent -> sheet pixel */
+function sheetPx(px, py){
+  return { x: R.sx + px / 100 * R.sw, y: R.sy + py / 100 * R.sh };
+}
+/* world -> art percent (inverse of table.artX/artY) */
+function pctOf(x, y){
+  var px = (x - T.artX(0)) / (T.artX(100) - T.artX(0)) * 100;
+  var py = (T.artY(0) - y) / (T.artY(0) - T.artY(100)) * 100;
+  return { px: px, py: py };
+}
+var c = document.getElementById('c');
+var W = Math.round((PX1 - PX0) / 100 * R.sw * ZOOM);
+var H = Math.round((PY1 - PY0) / 100 * R.sh * ZOOM);
+c.width = W; c.height = H;
+var g = c.getContext('2d');
+
+PB.assets.load(function () {
+  var img = PB.assets.image;
+  var s0 = sheetPx(PX0, PY0), s1 = sheetPx(PX1, PY1);
+  g.imageSmoothingEnabled = false;
+  g.drawImage(img, s0.x, s0.y, s1.x - s0.x, s1.y - s0.y, 0, 0, W, H);
+
+  function toC(pct){
+    return { x: (pct.px - PX0) / (PX1 - PX0) * W, y: (pct.py - PY0) / (PY1 - PY0) * H };
+  }
+  T.segments.forEach(function (s, i) {
+    var a = toC(pctOf(s.ax, s.ay)), b = toC(pctOf(s.bx, s.by));
+    g.strokeStyle = s.gate ? '#3ff37a' : (s.kind === 'rail' || s.kind === 'arch' || s.kind === 'lane' ? '#5cc8ff' : '#ff6b6b');
+    g.lineWidth = 1.2;
+    g.beginPath(); g.moveTo(a.x, a.y); g.lineTo(b.x, b.y); g.stroke();
+  });
+  /* the field's own edges: art 0..100 in x, 0..100 in y */
+  var L = toC({px:0,py:0}), Rt = toC({px:100,py:0}), Tt = toC({px:0,py:0}), Bt = toC({px:0,py:100});
+  g.strokeStyle = '#ffffff'; g.lineWidth = 1; g.setLineDash([5,4]);
+  g.strokeRect(toC({px:0,py:0}).x, toC({px:0,py:0}).y,
+               toC({px:100,py:0}).x - toC({px:0,py:0}).x,
+               toC({px:0,py:100}).y - toC({px:0,py:0}).y);
+  g.setLineDash([]);
+  window.__done = { w: W, h: H, segs: T.segments.length };
+});
+/* keep the compositor awake so the page can be screenshotted */
+(function tick() { document.getElementById('bar').dataset.t = ++window.__t || (window.__t = 1); requestAnimationFrame(tick); })();
+</script>
+</body></html>

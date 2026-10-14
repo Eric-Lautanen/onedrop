@@ -1,0 +1,45 @@
+{
+  "tapState": {
+    "state": "running",
+    "rate": 48000,
+    "ready": true,
+    "muted": false
+  },
+  "sfx": {
+    "flipper": 0,
+    "bumper": 0,
+    "sling": 0,
+    "bash": 0,
+    "post": 0,
+    "target": 0,
+    "standup": 0,
+    "rollover": 0,
+    "spinner": 0,
+    "drain": 0,
+    "rampup": 0,
+    "ramp": 0,
+    "launch": 0,
+    "kickback": 0,
+    "ballsave": 0,
+    "multiball": 0,
+    "jackpot": 0,
+    "bonus": 0,
+    "tilt": 0.00456,
+    "start": 0,
+    "gameover": 0.00118,
+    "charge": 0,
+    "nudge": 0,
+    "coin": 0
+  },
+  "music": {
+    "music": 0.27868,
+    "master": 0.25638
+  },
+  "silence": {
+    "sfx": 0,
+    "music": 0,
+    "master": 0
+  },
+  "sfxFlurry": 0.11428,
+  "errors": []
+}

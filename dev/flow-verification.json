@@ -1,0 +1,124 @@
+{
+  "sizes": [
+    {
+      "W": 25.94,
+      "H": 48.94,
+      "restProbes": 447,
+      "stuck": [],
+      "flipperShots": [
+        {
+          "side": 0,
+          "tested": 30,
+          "rampHits": 14,
+          "contactPositions": [
+            0.2,
+            0.35,
+            0.5,
+            0.65
+          ]
+        },
+        {
+          "side": 1,
+          "tested": 30,
+          "rampHits": 15,
+          "contactPositions": [
+            0.2,
+            0.35,
+            0.5,
+            0.65
+          ]
+        }
+      ],
+      "sweptEntryCases": 96,
+      "clearances": {
+        "ballDiameter": 1.4801365853658537,
+        "bumperGaps": [
+          1.696015609756099,
+          2.073778755615038,
+          2.0737787556150384
+        ],
+        "topLaneWidth": 2.594000000000001
+      }
+    },
+    {
+      "W": 26,
+      "H": 45,
+      "restProbes": 452,
+      "stuck": [],
+      "flipperShots": [
+        {
+          "side": 0,
+          "tested": 30,
+          "rampHits": 12,
+          "contactPositions": [
+            0.2,
+            0.35,
+            0.5
+          ]
+        },
+        {
+          "side": 1,
+          "tested": 30,
+          "rampHits": 12,
+          "contactPositions": [
+            0.2,
+            0.35,
+            0.5
+          ]
+        }
+      ],
+      "sweptEntryCases": 96,
+      "clearances": {
+        "ballDiameter": 1.3609756097560977,
+        "bumperGaps": [
+          1.8086829268292692,
+          1.9641437889557476,
+          1.9641437889557485
+        ],
+        "topLaneWidth": 2.6000000000000005
+      }
+    },
+    {
+      "W": 20,
+      "H": 36,
+      "restProbes": 449,
+      "stuck": [],
+      "flipperShots": [
+        {
+          "side": 0,
+          "tested": 30,
+          "rampHits": 13,
+          "contactPositions": [
+            0.2,
+            0.35,
+            0.5,
+            0.65
+          ]
+        },
+        {
+          "side": 1,
+          "tested": 30,
+          "rampHits": 13,
+          "contactPositions": [
+            0.2,
+            0.35,
+            0.5,
+            0.65
+          ]
+        }
+      ],
+      "sweptEntryCases": 96,
+      "clearances": {
+        "ballDiameter": 1.0887804878048781,
+        "bumperGaps": [
+          1.3541463414634158,
+          1.5495834804116355,
+          1.5495834804116364
+        ],
+        "topLaneWidth": 2.000000000000001
+      }
+    }
+  ],
+  "failures": [],
+  "browserErrors": []
+}

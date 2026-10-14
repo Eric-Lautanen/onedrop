@@ -1,0 +1,2801 @@
+{
+  "cues": {
+    "flipper": {
+      "peak": 0.2605150640010834,
+      "peakDb": -11.68,
+      "rmsDb": -32.02,
+      "seconds": 1,
+      "profile": [
+        {
+          "at": 0,
+          "peak": 0.07026832550764084,
+          "hiLo": -16.25363268331804
+        },
+        {
+          "at": 0.015,
+          "peak": 0.14440003037452698,
+          "hiLo": -40
+        },
+        {
+          "at": 0.045,
+          "peak": 0.2605150640010834,
+          "hiLo": -36.11904168387717
+        },
+        {
+          "at": 0.1,
+          "peak": 0.001715374761261046,
+          "hiLo": -29.828811249336287
+        },
+        {
+          "at": 0.3,
+          "peak": 6.701285019516945e-05,
+          "hiLo": 11.479642060694744
+        }
+      ]
+    },
+    "flipperReturn": {
+      "peak": 0.14023582637310028,
+      "peakDb": -17.06,
+      "rmsDb": -37.96,
+      "seconds": 1,
+      "profile": [
+        {
+          "at": 0,
+          "peak": 0.04325186833739281,
+          "hiLo": -17.70254959585477
+        },
+        {
+          "at": 0.015,
+          "peak": 0.08187707513570786,
+          "hiLo": -39.672525885917636
+        },
+        {
+          "at": 0.045,
+          "peak": 0.14023582637310028,
+          "hiLo": -30.301760939695743
+        },
+        {
+          "at": 0.1,
+          "peak": 9.964377386495471e-05,
+          "hiLo": -11.675106512072826
+        },
+        {
+          "at": 0.3,
+          "peak": 6.53749011689797e-05,
+          "hiLo": 1.2149882938406964
+        }
+      ]
+    },
+    "bumper": {
+      "peak": 0.23254715651273727,
+      "peakDb": -12.67,
+      "rmsDb": -30.8,
+      "seconds": 1,
+      "profile": [
+        {
+          "at": 0,
+          "peak": 0.05060551315546036,
+          "hiLo": -17.990716659478178
+        },
+        {
+          "at": 0.015,
+          "peak": 0.1208738386631012,
+          "hiLo": -38.46689378316077
+        },
+        {
+          "at": 0.045,
+          "peak": 0.23254716396331787,
+          "hiLo": -29.71647065860737
+        },
+        {
+          "at": 0.1,
+          "peak": 0.05553086847066879,
+          "hiLo": -31.706913600570303
+        },
+        {
+          "at": 0.3,
+          "peak": 0.00116417882964015,
+          "hiLo": -5.597184654095094
+        }
+      ]
+    },
+    "sling": {
+      "peak": 0.16153985261917114,
+      "peakDb": -15.83,
+      "rmsDb": -36,
+      "seconds": 1,
+      "profile": [
+        {
+          "at": 0,
+          "peak": 0.05802476033568382,
+          "hiLo": -12.329387821265085
+        },
+        {
+          "at": 0.015,
+          "peak": 0.14235562086105347,
+          "hiLo": -31.793292680055558
+        },
+        {
+          "at": 0.045,
+          "peak": 0.16153985261917114,
+          "hiLo": -40
+        },
+        {
+          "at": 0.1,
+          "peak": 0.0005382107337936759,
+          "hiLo": -32.234772992905484
+        },
+        {
+          "at": 0.3,
+          "peak": 6.413495430024341e-05,
+          "hiLo": 4.686538233224585
+        }
+      ]
+    },
+    "bash": {
+      "peak": 0.19866859912872314,
+      "peakDb": -14.04,
+      "rmsDb": -30.98,
+      "seconds": 1,
+      "profile": [
+        {
+          "at": 0,
+          "peak": 0.018849872052669525,
+          "hiLo": -27.097662830519667
+        },
+        {
+          "at": 0.015,
+          "peak": 0.07476134598255157,
+          "hiLo": -32.8764666519944
+        },
+        {
+          "at": 0.045,
+          "peak": 0.19866859912872314,
+          "hiLo": -40
+        },
+        {
+          "at": 0.1,
+          "peak": 0.18540289998054504,
+          "hiLo": -39.046794351446934
+        },
+        {
+          "at": 0.3,
+          "peak": 0.003239667508751154,
+          "hiLo": -40
+        }
+      ]
+    },
+    "target": {
+      "peak": 0.1753966137766838,
+      "peakDb": -15.12,
+      "rmsDb": -36.43,
+      "seconds": 1,
+      "profile": [
+        {
+          "at": 0,
+          "peak": 0.05739377439022064,
+          "hiLo": -14.799646010855698
+        },
+        {
+          "at": 0.015,
+          "peak": 0.11371929198503494,
+          "hiLo": -40
+        },
+        {
+          "at": 0.045,
+          "peak": 0.1753966212272644,
+          "hiLo": -38.802270206211674
+        },
+        {
+          "at": 0.1,
+          "peak": 0.0039597973227500916,
+          "hiLo": -20.348775355469893
+        },
+        {
+          "at": 0.3,
+          "peak": 0.0009603952057659626,
+          "hiLo": 11.116932231130448
+        }
+      ]
+    },
+    "standup": {
+      "peak": 0.1492489129304886,
+      "peakDb": -16.52,
+      "rmsDb": -38.72,
+      "seconds": 1,
+      "profile": [
+        {
+          "at": 0,
+          "peak": 0.07997117191553116,
+          "hiLo": 12.708748133466017
+        },
+        {
+          "at": 0.015,
+          "peak": 0.1468406617641449,
+          "hiLo": -10.60139460421659
+        },
+        {
+          "at": 0.045,
+          "peak": 0.1492489129304886,
+          "hiLo": -13.269200609626965
+        },
+        {
+          "at": 0.1,
+          "peak": 0.018650270998477936,
+          "hiLo": 1.3470906725550753
+        },
+        {
+          "at": 0.3,
+          "peak": 0.002687860280275345,
+          "hiLo": 40
+        }
+      ]
+    },
+    "rollover": {
+      "peak": 0.1248469240963459,
+      "peakDb": -18.07,
+      "rmsDb": -36.47,
+      "seconds": 1,
+      "profile": [
+        {
+          "at": 0,
+          "peak": 0.030820738524198532,
+          "hiLo": 13.576128768690728
+        },
+        {
+          "at": 0.015,
+          "peak": 0.04514225944876671,
+          "hiLo": 27.17466539705051
+        },
+        {
+          "at": 0.045,
+          "peak": 0.1248469203710556,
+          "hiLo": 3.8533879903182715
+        },
+        {
+          "at": 0.1,
+          "peak": 0.06985623389482498,
+          "hiLo": -3.66807773289423
+        },
+        {
+          "at": 0.3,
+          "peak": 0.0025147905107587576,
+          "hiLo": 30.980868805742382
+        }
+      ]
+    },
+    "spinner": {
+      "peak": 0.16167251765727997,
+      "peakDb": -15.83,
+      "rmsDb": -37.22,
+      "seconds": 1,
+      "profile": [
+        {
+          "at": 0,
+          "peak": 0.14404964447021484,
+          "hiLo": 15.308977232158721
+        },
+        {
+          "at": 0.015,
+          "peak": 0.12656956911087036,
+          "hiLo": 8.259325948948119
+        },
+        {
+          "at": 0.045,
+          "peak": 0.12175721675157547,
+          "hiLo": 20.504944424191326
+        },
+        {
+          "at": 0.1,
+          "peak": 0.16167251765727997,
+          "hiLo": 14.987947149731118
+        },
+        {
+          "at": 0.3,
+          "peak": 6.235493492567912e-05,
+          "hiLo": 8.0480833718457
+        }
+      ]
+    },
+    "drain": {
+      "peak": 0.2273547723889351,
+      "peakDb": -12.87,
+      "rmsDb": -24.55,
+      "seconds": 1,
+      "profile": [
+        {
+          "at": 0,
+          "peak": 0.002115780720487237,
+          "hiLo": -31.56907004311823
+        },
+        {
+          "at": 0.015,
+          "peak": 0.02089099958539009,
+          "hiLo": -15.204437643719901
+        },
+        {
+          "at": 0.045,
+          "peak": 0.06310195475816727,
+          "hiLo": -19.19143352846081
+        },
+        {
+          "at": 0.1,
+          "peak": 0.17175781726837158,
+          "hiLo": -25.35867385125265
+        },
+        {
+          "at": 0.3,
+          "peak": 0.2273547649383545,
+          "hiLo": -40
+        }
+      ]
+    },
+    "rampup": {
+      "peak": 0.19096989184617996,
+      "peakDb": -14.38,
+      "rmsDb": -30.34,
+      "seconds": 1,
+      "profile": [
+        {
+          "at": 0,
+          "peak": 0.003571747802197933,
+          "hiLo": -20.54868204003219
+        },
+        {
+          "at": 0.015,
+          "peak": 0.032899219542741776,
+          "hiLo": -23.530687518232757
+        },
+        {
+          "at": 0.045,
+          "peak": 0.11218276619911194,
+          "hiLo": -18.284388646269864
+        },
+        {
+          "at": 0.1,
+          "peak": 0.19096988439559937,
+          "hiLo": -3.4096750926431136
+        },
+        {
+          "at": 0.3,
+          "peak": 0.142417311668396,
+          "hiLo": 6.924861707225118
+        }
+      ]
+    },
+    "ramp": {
+      "peak": 0.2080383002758026,
+      "peakDb": -13.64,
+      "rmsDb": -33.52,
+      "seconds": 1,
+      "profile": [
+        {
+          "at": 0,
+          "peak": 0.012958412058651447,
+          "hiLo": -17.1227416683133
+        },
+        {
+          "at": 0.015,
+          "peak": 0.04611758142709732,
+          "hiLo": -29.909980899625292
+        },
+        {
+          "at": 0.045,
+          "peak": 0.15817338228225708,
+          "hiLo": -40
+        },
+        {
+          "at": 0.1,
+          "peak": 0.2080383002758026,
+          "hiLo": -15.878521399022043
+        },
+        {
+          "at": 0.3,
+          "peak": 0.017104502767324448,
+          "hiLo": 2.3890035270621364
+        }
+      ]
+    },
+    "launch": {
+      "peak": 0.1969437077641487,
+      "peakDb": -14.11,
+      "rmsDb": -31.74,
+      "seconds": 1,
+      "profile": [
+        {
+          "at": 0,
+          "peak": 0.0009168933611363173,
+          "hiLo": -25.97472549248435
+        },
+        {
+          "at": 0.015,
+          "peak": 0.02330961264669895,
+          "hiLo": -29.53066176084309
+        },
+        {
+          "at": 0.045,
+          "peak": 0.16364362835884094,
+          "hiLo": -33.24466306543198
+        },
+        {
+          "at": 0.1,
+          "peak": 0.19694370031356812,
+          "hiLo": -39.1888401384351
+        },
+        {
+          "at": 0.3,
+          "peak": 0.0003896954585798085,
+          "hiLo": 10.004191917131656
+        }
+      ]
+    },
+    "kickback": {
+      "peak": 0.24968834221363068,
+      "peakDb": -12.05,
+      "rmsDb": -29.07,
+      "seconds": 1,
+      "profile": [
+        {
+          "at": 0,
+          "peak": 0.016619188711047173,
+          "hiLo": -37.79883023467925
+        },
+        {
+          "at": 0.015,
+          "peak": 0.07379355281591415,
+          "hiLo": -40
+        },
+        {
+          "at": 0.045,
+          "peak": 0.19935250282287598,
+          "hiLo": -7.855253222309633
+        },
+        {
+          "at": 0.1,
+          "peak": 0.24968834221363068,
+          "hiLo": -17.21073616016141
+        },
+        {
+          "at": 0.3,
+          "peak": 0.0003087517980020493,
+          "hiLo": -1.563747331790275
+        }
+      ]
+    },
+    "ballsave": {
+      "peak": 0.18205074220895767,
+      "peakDb": -14.8,
+      "rmsDb": -37.45,
+      "seconds": 1,
+      "profile": [
+        {
+          "at": 0,
+          "peak": 0.012870409525930882,
+          "hiLo": -4.718072845817592
+        },
+        {
+          "at": 0.015,
+          "peak": 0.03185364603996277,
+          "hiLo": -14.10561996596205
+        },
+        {
+          "at": 0.045,
+          "peak": 0.03408116102218628,
+          "hiLo": -18.62015236069156
+        },
+        {
+          "at": 0.1,
+          "peak": 0.18205073475837708,
+          "hiLo": 12.459160554844358
+        },
+        {
+          "at": 0.3,
+          "peak": 0.004758396185934544,
+          "hiLo": -0.4493698574224972
+        }
+      ]
+    },
+    "multiball": {
+      "peak": 0.3273339569568634,
+      "peakDb": -9.7,
+      "rmsDb": -25.1,
+      "seconds": 1,
+      "profile": [
+        {
+          "at": 0,
+          "peak": 0.012635722756385803,
+          "hiLo": -21.042321403594354
+        },
+        {
+          "at": 0.015,
+          "peak": 0.03334902971982956,
+          "hiLo": -7.462506077388119
+        },
+        {
+          "at": 0.045,
+          "peak": 0.15841272473335266,
+          "hiLo": -15.484981271601805
+        },
+        {
+          "at": 0.1,
+          "peak": 0.31746482849121094,
+          "hiLo": -7.902481951771372
+        },
+        {
+          "at": 0.3,
+          "peak": 0.3273339569568634,
+          "hiLo": -2.0851020368057447
+        }
+      ]
+    },
+    "jackpot": {
+      "peak": 0.33740562200546265,
+      "peakDb": -9.44,
+      "rmsDb": -24.08,
+      "seconds": 1,
+      "profile": [
+        {
+          "at": 0,
+          "peak": 0.00792999193072319,
+          "hiLo": -25.109140111671948
+        },
+        {
+          "at": 0.015,
+          "peak": 0.04619363695383072,
+          "hiLo": -36.85311657337899
+        },
+        {
+          "at": 0.045,
+          "peak": 0.19233891367912292,
+          "hiLo": -40
+        },
+        {
+          "at": 0.1,
+          "peak": 0.31977787613868713,
+          "hiLo": -35.3584766408749
+        },
+        {
+          "at": 0.3,
+          "peak": 0.33740562200546265,
+          "hiLo": -12.355432716378106
+        }
+      ]
+    },
+    "bonus": {
+      "peak": 0.1486932337284088,
+      "peakDb": -16.55,
+      "rmsDb": -43.79,
+      "seconds": 1,
+      "profile": [
+        {
+          "at": 0,
+          "peak": 0.1486932337284088,
+          "hiLo": 14.512093837035597
+        },
+        {
+          "at": 0.015,
+          "peak": 0.12962934374809265,
+          "hiLo": 8.889008109137976
+        },
+        {
+          "at": 0.045,
+          "peak": 0.010615921579301357,
+          "hiLo": 2.4996403192366476
+        },
+        {
+          "at": 0.1,
+          "peak": 0.00014735276636201888,
+          "hiLo": -2.5085302883440628
+        },
+        {
+          "at": 0.3,
+          "peak": 6.342412962112576e-05,
+          "hiLo": 14.99824712202986
+        }
+      ]
+    },
+    "tilt": {
+      "peak": 0.4525926113128662,
+      "peakDb": -6.89,
+      "rmsDb": -18.12,
+      "seconds": 1,
+      "profile": [
+        {
+          "at": 0,
+          "peak": 0.015602375380694866,
+          "hiLo": -27.85250080316449
+        },
+        {
+          "at": 0.015,
+          "peak": 0.06084318831562996,
+          "hiLo": -35.06256444366559
+        },
+        {
+          "at": 0.045,
+          "peak": 0.29400870203971863,
+          "hiLo": -27.139131157861534
+        },
+        {
+          "at": 0.1,
+          "peak": 0.4525926113128662,
+          "hiLo": -28.37262302031634
+        },
+        {
+          "at": 0.3,
+          "peak": 0.44670170545578003,
+          "hiLo": -26.04239366962451
+        }
+      ]
+    },
+    "start": {
+      "peak": 0.2608991488814354,
+      "peakDb": -11.67,
+      "rmsDb": -29.19,
+      "seconds": 1,
+      "profile": [
+        {
+          "at": 0,
+          "peak": 0.010307248681783676,
+          "hiLo": -36.547753751906924
+        },
+        {
+          "at": 0.015,
+          "peak": 0.04027470201253891,
+          "hiLo": -21.868972230608286
+        },
+        {
+          "at": 0.045,
+          "peak": 0.09647476673126221,
+          "hiLo": -26.592725208360047
+        },
+        {
+          "at": 0.1,
+          "peak": 0.260899156332016,
+          "hiLo": -6.580200263235641
+        },
+        {
+          "at": 0.3,
+          "peak": 0.18990033864974976,
+          "hiLo": -27.73258720035853
+        }
+      ]
+    },
+    "gameover": {
+      "peak": 0.20150507241487503,
+      "peakDb": -13.91,
+      "rmsDb": -27.34,
+      "seconds": 1,
+      "profile": [
+        {
+          "at": 0,
+          "peak": 0.008472323417663574,
+          "hiLo": -38.20418780307603
+        },
+        {
+          "at": 0.015,
+          "peak": 0.02716277912259102,
+          "hiLo": -18.786641134814687
+        },
+        {
+          "at": 0.045,
+          "peak": 0.06192760169506073,
+          "hiLo": -34.367503196394026
+        },
+        {
+          "at": 0.1,
+          "peak": 0.18298104405403137,
+          "hiLo": -37.17832238772901
+        },
+        {
+          "at": 0.3,
+          "peak": 0.20150506496429443,
+          "hiLo": -40
+        }
+      ]
+    },
+    "nudge": {
+      "peak": 0.17604206502437592,
+      "peakDb": -15.09,
+      "rmsDb": -33.61,
+      "seconds": 1,
+      "profile": [
+        {
+          "at": 0,
+          "peak": 0.02233573980629444,
+          "hiLo": -33.84888770998272
+        },
+        {
+          "at": 0.015,
+          "peak": 0.12542051076889038,
+          "hiLo": -39.774100814808556
+        },
+        {
+          "at": 0.045,
+          "peak": 0.17604206502437592,
+          "hiLo": -40
+        },
+        {
+          "at": 0.1,
+          "peak": 0.02580476552248001,
+          "hiLo": -40
+        },
+        {
+          "at": 0.3,
+          "peak": 6.420021236408502e-05,
+          "hiLo": -6.425395974658748
+        }
+      ]
+    },
+    "coin": {
+      "peak": 0.1439007893204689,
+      "peakDb": -16.84,
+      "rmsDb": -37.72,
+      "seconds": 1,
+      "profile": [
+        {
+          "at": 0,
+          "peak": 0.013157489709556103,
+          "hiLo": 14.397490240761503
+        },
+        {
+          "at": 0.015,
+          "peak": 0.01787005364894867,
+          "hiLo": 9.718278087514271
+        },
+        {
+          "at": 0.045,
+          "peak": 0.101517453789711,
+          "hiLo": 8.699617055684957
+        },
+        {
+          "at": 0.1,
+          "peak": 0.1439007818698883,
+          "hiLo": -16.231960652399927
+        },
+        {
+          "at": 0.3,
+          "peak": 0.008449512533843517,
+          "hiLo": -3.8188308606476538
+        }
+      ]
+    }
+  },
+  "all cues audible": {
+    "pass": true,
+    "detail": "quietest rollover at -18.1 dB; 23 cues rendered"
+  },
+  "core cues mix-solid": {
+    "pass": true,
+    "detail": "all >= -20 dB except none"
+  },
+  "unknown cue is safe": {
+    "pass": true,
+    "detail": "sfx(\"no-such-cue\") did not throw"
+  },
+  "tilt outranks flipper": {
+    "pass": true,
+    "detail": "tilt -6.9 dB vs flipper -11.7 dB"
+  },
+  "flipper release is softer": {
+    "pass": true,
+    "detail": "fire -11.7 dB, return -17.1 dB"
+  },
+  "character": {
+    "standup": {
+      "median": -13.498432451669387,
+      "all": [
+        -16.662285265074004,
+        -13.498432451669387,
+        -12.709195077807806
+      ]
+    },
+    "rollover": {
+      "median": 18.039633257585606,
+      "all": [
+        17.399757739348075,
+        18.039633257585606,
+        18.95042639651605
+      ]
+    },
+    "spinner": {
+      "median": 24.818808616050532,
+      "all": [
+        23.382404490864644,
+        24.818808616050532,
+        26.365496766856992
+      ]
+    },
+    "flipper": {
+      "median": -20.1568753915073,
+      "all": [
+        -21.711298064346607,
+        -20.1568753915073,
+        -19.527364210273248
+      ]
+    },
+    "bumper": {
+      "median": -17.68731523208833,
+      "all": [
+        -18.43778388025661,
+        -17.68731523208833,
+        -16.079210585251005
+      ]
+    },
+    "target": {
+      "median": -21.187060696804814,
+      "all": [
+        -22.896789291233475,
+        -21.187060696804814,
+        -18.74233771377604
+      ]
+    },
+    "kickback": {
+      "median": -27.698207085946308,
+      "all": [
+        -29.106579644208985,
+        -27.698207085946308,
+        -25.555752411786074
+      ]
+    }
+  },
+  "kit spans bright to deep": {
+    "pass": true,
+    "detail": "attack brightness spans 53 dB across the kit: spinner +24.8 dB at the top, kickback -27.7 dB at the bottom, both in the group they belong to"
+  },
+  "characterExtremes": {
+    "spinner": {
+      "median": 22.199581434669625,
+      "all": [
+        20.97866140929908,
+        21.010539667843418,
+        22.199581434669625,
+        28.845829458700976,
+        31.676978748588724
+      ]
+    },
+    "kickback": {
+      "median": -27.532455621190742,
+      "all": [
+        -28.930347125242776,
+        -28.4353299569677,
+        -27.532455621190742,
+        -26.894012691237606,
+        -25.196673517864298
+      ]
+    }
+  },
+  "the extremes hold up render to render": {
+    "pass": true,
+    "detail": "spinner over five renders ['+21.0', '+21.0', '+22.2', '+28.8', '+31.7'] (every one above +10); kickback over five ['-28.9', '-28.4', '-27.5', '-26.9', '-25.2'] (every one below -25); widest spread among the rest 4.2 dB (target)"
+  },
+  "modes": {
+    "f0": -43.605595998686596,
+    "octave": -137.77829995718503,
+    "mode2_76": -55.49094312668238,
+    "mode5_4": -67.2461751982726,
+    "inharmonicOverOctave": 82.28735683050265
+  },
+  "metal rings inharmonically": {
+    "pass": true,
+    "detail": "mode 2.76f beats the octave by 82.3 dB (f0 -43.6, 2f -137.8, 2.76f -55.5)"
+  },
+  "playlist has songs": {
+    "pass": true,
+    "detail": "6 songs: ['ONE DROP', 'DUB CHAMBER', 'ROCKERS', 'SKANK RAIL', 'NYABINGHI', 'STEPPERS']"
+  },
+  "songs differ in tempo": {
+    "pass": true,
+    "detail": "bpms [78, 86, 96, 106, 118, 138]"
+  },
+  "songs differ in feel": {
+    "pass": true,
+    "detail": "feels ['binghi', 'dub', 'onedrop', 'rockers', 'ska', 'steppers']"
+  },
+  "no song drags": {
+    "pass": true,
+    "detail": "slowest is ONE DROP at 78 bpm (it was 66); the set spans 78-138 bpm"
+  },
+  "songs are long enough to be songs": {
+    "pass": true,
+    "detail": "shortest NYABINGHI at 28 bars / 57 s, longest STEPPERS at 97 s; the whole set is 7.5 minutes"
+  },
+  "songs vary inside themselves": {
+    "pass": true,
+    "detail": "ONE DROP 7 sections / 6 shapes / 2 breaks / 3 with the lead; DUB CHAMBER 7 sections / 6 shapes / 1 breaks / 2 with the lead; ROCKERS 7 sections / 5 shapes / 1 breaks / 3 with the lead; SKANK RAIL 7 sections / 6 shapes / 1 breaks / 4 with the lead; NYABINGHI 7 sections / 5 shapes / 1 breaks / 3 with the lead; STEPPERS 7 sections / 6 shapes / 1 breaks / 4 with the lead"
+  },
+  "bed": {
+    "peak": 0.03941571898807375,
+    "mean": 0.01786747129074563,
+    "samples": 581,
+    "meanDb": -34.96,
+    "peakDb": -28.09,
+    "fader": 0.5
+  },
+  "band plays": {
+    "pass": true,
+    "detail": "music bed at the master: mean -35.0 dB, peak -28.1 dB over 581 samples (ctx running)"
+  },
+  "cueOverBed": {
+    "flipper": 23.3,
+    "flipperReturn": 17.9,
+    "bumper": 22.3,
+    "sling": 19.1,
+    "bash": 20.9,
+    "target": 19.8,
+    "standup": 18.4,
+    "rollover": 16.9,
+    "spinner": 19.1,
+    "drain": 22.1,
+    "rampup": 20.6,
+    "ramp": 21.3,
+    "launch": 20.8,
+    "kickback": 22.9,
+    "ballsave": 20.2,
+    "multiball": 25.3,
+    "jackpot": 25.5,
+    "bonus": 18.4,
+    "tilt": 28.1,
+    "start": 23.3,
+    "gameover": 21.0,
+    "nudge": 19.9,
+    "coin": 18.1
+  },
+  "cues ride above the band": {
+    "pass": true,
+    "detail": "smallest margin rollover +16.9 dB over the bed; median +20.8 dB"
+  },
+  "impactOverBedPeak": {
+    "flipper": 16.4,
+    "bumper": 15.4,
+    "sling": 12.3,
+    "bash": 14.0,
+    "target": 13.0,
+    "kickback": 16.0,
+    "drain": 15.2,
+    "launch": 14.0,
+    "multiball": 18.4,
+    "jackpot": 18.6,
+    "tilt": 21.2
+  },
+  "impact cues beat the bed at its peak": {
+    "pass": true,
+    "detail": "weakest sling +12.3 dB above the bed's loudest transient {}"
+  },
+  "set runs the playlist in order": {
+    "pass": true,
+    "detail": "15 handovers, 8053 notes scheduled, first ['DUB CHAMBER', 'ROCKERS', 'SKANK RAIL', 'NYABINGHI', 'STEPPERS', 'ONE DROP', 'DUB CHAMBER']"
+  },
+  "handovers land on bar lines": {
+    "pass": true,
+    "detail": "every song runs a whole number of 16-step bars: [448, 448, 448, 448, 448, 896]"
+  },
+  "dub delay retimed per song": {
+    "pass": true,
+    "detail": "echo retimed to [0.3261, 0.3814, 0.4245, 0.4688, 0.5233, 0.5769], one per song, on handover"
+  },
+  "songs": {
+    "ONE DROP": {
+      "peak": 0.07717832177877426,
+      "peakDb": -22.25,
+      "rmsDb": -31.09,
+      "seconds": 14,
+      "profile": [
+        {
+          "at": 0,
+          "peak": 2.507082399461069e-06,
+          "hiLo": -16.787337862106988
+        },
+        {
+          "at": 0.015,
+          "peak": 1.1221666682104114e-05,
+          "hiLo": -21.07024064664708
+        },
+        {
+          "at": 0.045,
+          "peak": 3.233071765862405e-05,
+          "hiLo": -15.018875175560456
+        },
+        {
+          "at": 0.1,
+          "peak": 0.06439977139234543,
+          "hiLo": -29.55574128165373
+        },
+        {
+          "at": 0.3,
+          "peak": 0.07401908934116364,
+          "hiLo": -27.371274222721958
+        }
+      ],
+      "pulse": {
+        "lag": 3.08,
+        "beats": 4,
+        "impliedBpm": 77.92207792207792,
+        "strength": 0.00031738270536290833,
+        "rawLag": 3.08,
+        "beat": 0.7692307692307693,
+        "onGrid": true
+      }
+    },
+    "DUB CHAMBER": {
+      "peak": 0.1521313488483429,
+      "peakDb": -16.36,
+      "rmsDb": -28.87,
+      "seconds": 14,
+      "profile": [
+        {
+          "at": 0,
+          "peak": 2.8492761430243263e-06,
+          "hiLo": -15.811028731935577
+        },
+        {
+          "at": 0.015,
+          "peak": 1.1937012459384277e-05,
+          "hiLo": -18.0167561836367
+        },
+        {
+          "at": 0.045,
+          "peak": 4.514658940024674e-05,
+          "hiLo": -9.035769395123683
+        },
+        {
+          "at": 0.1,
+          "peak": 0.06776882708072662,
+          "hiLo": -33.97418317907147
+        },
+        {
+          "at": 0.3,
+          "peak": 0.14753201603889465,
+          "hiLo": -36.41370907416654
+        }
+      ],
+      "pulse": {
+        "lag": 2.79,
+        "beats": 4,
+        "impliedBpm": 86.02150537634408,
+        "strength": 0.0004889833034686424,
+        "rawLag": 2.79,
+        "beat": 0.6976744186046512,
+        "onGrid": true
+      }
+    },
+    "ROCKERS": {
+      "peak": 0.14484555274248123,
+      "peakDb": -16.78,
+      "rmsDb": -29.91,
+      "seconds": 14,
+      "profile": [
+        {
+          "at": 0,
+          "peak": 2.609446482892963e-06,
+          "hiLo": -18.218510384447274
+        },
+        {
+          "at": 0.015,
+          "peak": 8.799152965366375e-06,
+          "hiLo": -20.48297697969161
+        },
+        {
+          "at": 0.045,
+          "peak": 3.543931234162301e-05,
+          "hiLo": -28.764787509109233
+        },
+        {
+          "at": 0.1,
+          "peak": 0.0668589323759079,
+          "hiLo": -40
+        },
+        {
+          "at": 0.3,
+          "peak": 0.14484554529190063,
+          "hiLo": -35.646829386790074
+        }
+      ],
+      "pulse": {
+        "lag": 2.5,
+        "beats": 4,
+        "impliedBpm": 96,
+        "strength": 0.0003304628741105379,
+        "rawLag": 2.5,
+        "beat": 0.625,
+        "onGrid": true
+      }
+    },
+    "SKANK RAIL": {
+      "peak": 0.13583777844905853,
+      "peakDb": -17.34,
+      "rmsDb": -28.72,
+      "seconds": 14,
+      "profile": [
+        {
+          "at": 0,
+          "peak": 2.856029595932341e-06,
+          "hiLo": -22.877660954813837
+        },
+        {
+          "at": 0.015,
+          "peak": 1.1601613550737966e-05,
+          "hiLo": -14.668812076073614
+        },
+        {
+          "at": 0.045,
+          "peak": 3.056296918657608e-05,
+          "hiLo": -15.227854380535089
+        },
+        {
+          "at": 0.1,
+          "peak": 0.11972986161708832,
+          "hiLo": -40
+        },
+        {
+          "at": 0.3,
+          "peak": 0.13583777844905853,
+          "hiLo": -38.648233966615095
+        }
+      ],
+      "pulse": {
+        "lag": 3.395,
+        "beats": 6,
+        "impliedBpm": 106.03829160530191,
+        "strength": 0.0003689779991462817,
+        "rawLag": 3.395,
+        "beat": 0.5660377358490566,
+        "onGrid": true
+      }
+    },
+    "NYABINGHI": {
+      "peak": 0.11161855235695839,
+      "peakDb": -19.05,
+      "rmsDb": -30.36,
+      "seconds": 14,
+      "profile": [
+        {
+          "at": 0,
+          "peak": 3.193587872374337e-06,
+          "hiLo": -19.169379868104517
+        },
+        {
+          "at": 0.015,
+          "peak": 1.4534922229358926e-05,
+          "hiLo": -21.179623522309683
+        },
+        {
+          "at": 0.045,
+          "peak": 3.2915599149418995e-05,
+          "hiLo": -15.2034356091465
+        },
+        {
+          "at": 0.1,
+          "peak": 0.07059098035097122,
+          "hiLo": -39.66645460956102
+        },
+        {
+          "at": 0.3,
+          "peak": 0.1067194938659668,
+          "hiLo": -30.9096562062799
+        }
+      ],
+      "pulse": {
+        "lag": 2.0300000000000002,
+        "beats": 4,
+        "impliedBpm": 118.22660098522167,
+        "strength": 0.00038787358167629985,
+        "rawLag": 2.0300000000000002,
+        "beat": 0.5084745762711864,
+        "onGrid": true
+      }
+    },
+    "STEPPERS": {
+      "peak": 0.1413739249110222,
+      "peakDb": -16.99,
+      "rmsDb": -27.58,
+      "seconds": 14,
+      "profile": [
+        {
+          "at": 0,
+          "peak": 3.471748414085596e-06,
+          "hiLo": -16.878265510756915
+        },
+        {
+          "at": 0.015,
+          "peak": 1.577645707584452e-05,
+          "hiLo": -21.766090509855015
+        },
+        {
+          "at": 0.045,
+          "peak": 3.7349578633438796e-05,
+          "hiLo": -23.22415918837641
+        },
+        {
+          "at": 0.1,
+          "peak": 0.12302333116531372,
+          "hiLo": -40
+        },
+        {
+          "at": 0.3,
+          "peak": 0.12817397713661194,
+          "hiLo": -40
+        }
+      ],
+      "pulse": {
+        "lag": 1.74,
+        "beats": 4,
+        "impliedBpm": 137.93103448275863,
+        "strength": 0.0005282610152127702,
+        "rawLag": 1.74,
+        "beat": 0.43478260869565216,
+        "onGrid": true
+      }
+    }
+  },
+  "every song renders": {
+    "pass": true,
+    "detail": "quietest none"
+  },
+  "each song pulses at its own tempo": {
+    "pass": true,
+    "detail": "ONE DROP 77.9 bpm over 4 beats; DUB CHAMBER 86.0 bpm over 4 beats; ROCKERS 96.0 bpm over 4 beats; SKANK RAIL 106.0 bpm over 6 beats; NYABINGHI 118.2 bpm over 4 beats; STEPPERS 137.9 bpm over 4 beats"
+  },
+  "the set changes tempo between songs": {
+    "pass": true,
+    "detail": "measured [78, 86, 96, 106, 118, 138] bpm across the four songs"
+  },
+  "sectionCounts": [
+    {
+      "song": "ONE DROP",
+      "sections": [
+        {
+          "name": "intro",
+          "flags": {
+            "name": "intro",
+            "d": false,
+            "k": true,
+            "o": true,
+            "b": true,
+            "l": false,
+            "x": false,
+            "p": false,
+            "w": 0.6
+          },
+          "total": 44,
+          "drums": 0,
+          "bass": 28,
+          "lead": 0,
+          "skank": 16,
+          "organ": 0
+        },
+        {
+          "name": "verse",
+          "flags": {
+            "name": "verse",
+            "d": true,
+            "k": true,
+            "o": true,
+            "b": true,
+            "l": false,
+            "x": false,
+            "p": false,
+            "w": 0.8
+          },
+          "total": 88,
+          "drums": 44,
+          "bass": 28,
+          "lead": 0,
+          "skank": 16,
+          "organ": 0
+        },
+        {
+          "name": "verse 2",
+          "flags": {
+            "name": "verse 2",
+            "d": true,
+            "k": true,
+            "o": true,
+            "b": true,
+            "l": true,
+            "x": false,
+            "p": false,
+            "w": 1
+          },
+          "total": 108,
+          "drums": 44,
+          "bass": 28,
+          "lead": 20,
+          "skank": 16,
+          "organ": 0
+        },
+        {
+          "name": "chorus",
+          "flags": {
+            "name": "chorus",
+            "d": true,
+            "k": true,
+            "o": true,
+            "b": true,
+            "l": true,
+            "x": true,
+            "p": true,
+            "w": 1.2
+          },
+          "total": 192,
+          "drums": 108,
+          "bass": 28,
+          "lead": 40,
+          "skank": 16,
+          "organ": 0
+        },
+        {
+          "name": "break",
+          "flags": {
+            "name": "break",
+            "d": false,
+            "k": false,
+            "o": true,
+            "b": true,
+            "l": false,
+            "x": false,
+            "p": false,
+            "w": 1.7
+          },
+          "total": 28,
+          "drums": 0,
+          "bass": 28,
+          "lead": 0,
+          "skank": 0,
+          "organ": 0
+        },
+        {
+          "name": "chorus 2",
+          "flags": {
+            "name": "chorus 2",
+            "d": true,
+            "k": true,
+            "o": true,
+            "b": true,
+            "l": true,
+            "x": true,
+            "p": true,
+            "w": 1.2
+          },
+          "total": 192,
+          "drums": 108,
+          "bass": 28,
+          "lead": 40,
+          "skank": 16,
+          "organ": 0
+        },
+        {
+          "name": "outro",
+          "flags": {
+            "name": "outro",
+            "d": true,
+            "k": false,
+            "o": true,
+            "b": true,
+            "l": false,
+            "x": false,
+            "p": false,
+            "w": 1.4
+          },
+          "total": 76,
+          "drums": 44,
+          "bass": 28,
+          "lead": 0,
+          "skank": 0,
+          "organ": 0
+        }
+      ]
+    },
+    {
+      "song": "DUB CHAMBER",
+      "sections": [
+        {
+          "name": "intro",
+          "flags": {
+            "name": "intro",
+            "d": true,
+            "k": false,
+            "o": true,
+            "b": true,
+            "l": false,
+            "x": false,
+            "p": false,
+            "w": 1.5
+          },
+          "total": 112,
+          "drums": 96,
+          "bass": 16,
+          "lead": 0,
+          "skank": 0,
+          "organ": 0
+        },
+        {
+          "name": "verse",
+          "flags": {
+            "name": "verse",
+            "d": true,
+            "k": true,
+            "o": true,
+            "b": true,
+            "l": false,
+            "x": false,
+            "p": false,
+            "w": 1.2
+          },
+          "total": 116,
+          "drums": 96,
+          "bass": 16,
+          "lead": 0,
+          "skank": 4,
+          "organ": 0
+        },
+        {
+          "name": "chant",
+          "flags": {
+            "name": "chant",
+            "d": true,
+            "k": true,
+            "o": true,
+            "b": true,
+            "l": true,
+            "x": false,
+            "p": false,
+            "w": 1.2
+          },
+          "total": 122,
+          "drums": 96,
+          "bass": 16,
+          "lead": 6,
+          "skank": 4,
+          "organ": 0
+        },
+        {
+          "name": "pressure",
+          "flags": {
+            "name": "pressure",
+            "d": true,
+            "k": true,
+            "o": true,
+            "b": true,
+            "l": false,
+            "x": false,
+            "p": true,
+            "w": 1.4
+          },
+          "total": 180,
+          "drums": 160,
+          "bass": 16,
+          "lead": 0,
+          "skank": 4,
+          "organ": 0
+        },
+        {
+          "name": "break",
+          "flags": {
+            "name": "break",
+            "d": false,
+            "k": false,
+            "o": true,
+            "b": true,
+            "l": false,
+            "x": false,
+            "p": false,
+            "w": 1.9
+          },
+          "total": 16,
+          "drums": 0,
+          "bass": 16,
+          "lead": 0,
+          "skank": 0,
+          "organ": 0
+        },
+        {
+          "name": "chant 2",
+          "flags": {
+            "name": "chant 2",
+            "d": true,
+            "k": true,
+            "o": true,
+            "b": true,
+            "l": true,
+            "x": true,
+            "p": true,
+            "w": 1.3
+          },
+          "total": 192,
+          "drums": 160,
+          "bass": 16,
+          "lead": 12,
+          "skank": 4,
+          "organ": 0
+        },
+        {
+          "name": "outro",
+          "flags": {
+            "name": "outro",
+            "d": true,
+            "k": false,
+            "o": true,
+            "b": true,
+            "l": false,
+            "x": false,
+            "p": false,
+            "w": 1.6
+          },
+          "total": 116,
+          "drums": 96,
+          "bass": 16,
+          "lead": 0,
+          "skank": 0,
+          "organ": 0
+        }
+      ]
+    },
+    {
+      "song": "ROCKERS",
+      "sections": [
+        {
+          "name": "intro",
+          "flags": {
+            "name": "intro",
+            "d": true,
+            "k": false,
+            "o": true,
+            "b": true,
+            "l": false,
+            "x": false,
+            "p": false,
+            "w": 0.7
+          },
+          "total": 116,
+          "drums": 56,
+          "bass": 28,
+          "lead": 0,
+          "skank": 0,
+          "organ": 32
+        },
+        {
+          "name": "verse",
+          "flags": {
+            "name": "verse",
+            "d": true,
+            "k": true,
+            "o": true,
+            "b": true,
+            "l": false,
+            "x": false,
+            "p": false,
+            "w": 0.9
+          },
+          "total": 132,
+          "drums": 56,
+          "bass": 28,
+          "lead": 0,
+          "skank": 16,
+          "organ": 32
+        },
+        {
+          "name": "verse 2",
+          "flags": {
+            "name": "verse 2",
+            "d": true,
+            "k": true,
+            "o": true,
+            "b": true,
+            "l": true,
+            "x": false,
+            "p": false,
+            "w": 1
+          },
+          "total": 148,
+          "drums": 56,
+          "bass": 28,
+          "lead": 16,
+          "skank": 16,
+          "organ": 32
+        },
+        {
+          "name": "chorus",
+          "flags": {
+            "name": "chorus",
+            "d": true,
+            "k": true,
+            "o": true,
+            "b": true,
+            "l": true,
+            "x": true,
+            "p": true,
+            "w": 1.1
+          },
+          "total": 228,
+          "drums": 120,
+          "bass": 28,
+          "lead": 32,
+          "skank": 16,
+          "organ": 32
+        },
+        {
+          "name": "break",
+          "flags": {
+            "name": "break",
+            "d": false,
+            "k": false,
+            "o": true,
+            "b": true,
+            "l": false,
+            "x": false,
+            "p": false,
+            "w": 1.6
+          },
+          "total": 60,
+          "drums": 0,
+          "bass": 28,
+          "lead": 0,
+          "skank": 0,
+          "organ": 32
+        },
+        {
+          "name": "chorus 2",
+          "flags": {
+            "name": "chorus 2",
+            "d": true,
+            "k": true,
+            "o": true,
+            "b": true,
+            "l": true,
+            "x": true,
+            "p": true,
+            "w": 1.1
+          },
+          "total": 228,
+          "drums": 120,
+          "bass": 28,
+          "lead": 32,
+          "skank": 16,
+          "organ": 32
+        },
+        {
+          "name": "outro",
+          "flags": {
+            "name": "outro",
+            "d": true,
+            "k": false,
+            "o": true,
+            "b": true,
+            "l": false,
+            "x": false,
+            "p": false,
+            "w": 1.3
+          },
+          "total": 120,
+          "drums": 56,
+          "bass": 28,
+          "lead": 0,
+          "skank": 0,
+          "organ": 32
+        }
+      ]
+    },
+    {
+      "song": "SKANK RAIL",
+      "sections": [
+        {
+          "name": "intro",
+          "flags": {
+            "name": "intro",
+            "d": true,
+            "k": false,
+            "o": true,
+            "b": true,
+            "l": false,
+            "x": false,
+            "p": false,
+            "w": 0.7
+          },
+          "total": 96,
+          "drums": 64,
+          "bass": 32,
+          "lead": 0,
+          "skank": 0,
+          "organ": 0
+        },
+        {
+          "name": "verse",
+          "flags": {
+            "name": "verse",
+            "d": true,
+            "k": true,
+            "o": true,
+            "b": true,
+            "l": false,
+            "x": false,
+            "p": false,
+            "w": 0.9
+          },
+          "total": 112,
+          "drums": 64,
+          "bass": 32,
+          "lead": 0,
+          "skank": 16,
+          "organ": 0
+        },
+        {
+          "name": "horns",
+          "flags": {
+            "name": "horns",
+            "d": true,
+            "k": true,
+            "o": true,
+            "b": true,
+            "l": true,
+            "x": false,
+            "p": false,
+            "w": 1
+          },
+          "total": 128,
+          "drums": 64,
+          "bass": 32,
+          "lead": 16,
+          "skank": 16,
+          "organ": 0
+        },
+        {
+          "name": "chorus",
+          "flags": {
+            "name": "chorus",
+            "d": true,
+            "k": true,
+            "o": true,
+            "b": true,
+            "l": true,
+            "x": true,
+            "p": true,
+            "w": 1.1
+          },
+          "total": 208,
+          "drums": 128,
+          "bass": 32,
+          "lead": 32,
+          "skank": 16,
+          "organ": 0
+        },
+        {
+          "name": "break",
+          "flags": {
+            "name": "break",
+            "d": true,
+            "k": true,
+            "o": true,
+            "b": false,
+            "l": false,
+            "x": false,
+            "p": false,
+            "w": 1.5
+          },
+          "total": 80,
+          "drums": 64,
+          "bass": 0,
+          "lead": 0,
+          "skank": 16,
+          "organ": 0
+        },
+        {
+          "name": "chorus 2",
+          "flags": {
+            "name": "chorus 2",
+            "d": true,
+            "k": true,
+            "o": true,
+            "b": true,
+            "l": true,
+            "x": true,
+            "p": true,
+            "w": 1.1
+          },
+          "total": 208,
+          "drums": 128,
+          "bass": 32,
+          "lead": 32,
+          "skank": 16,
+          "organ": 0
+        },
+        {
+          "name": "outro",
+          "flags": {
+            "name": "outro",
+            "d": true,
+            "k": false,
+            "o": true,
+            "b": true,
+            "l": true,
+            "x": false,
+            "p": false,
+            "w": 1.2
+          },
+          "total": 116,
+          "drums": 64,
+          "bass": 32,
+          "lead": 16,
+          "skank": 0,
+          "organ": 0
+        }
+      ]
+    },
+    {
+      "song": "NYABINGHI",
+      "sections": [
+        {
+          "name": "drums",
+          "flags": {
+            "name": "drums",
+            "d": true,
+            "k": false,
+            "o": true,
+            "b": true,
+            "l": false,
+            "x": false,
+            "p": true,
+            "w": 1.2
+          },
+          "total": 156,
+          "drums": 140,
+          "bass": 16,
+          "lead": 0,
+          "skank": 0,
+          "organ": 0
+        },
+        {
+          "name": "verse",
+          "flags": {
+            "name": "verse",
+            "d": true,
+            "k": true,
+            "o": true,
+            "b": true,
+            "l": false,
+            "x": false,
+            "p": true,
+            "w": 1.2
+          },
+          "total": 172,
+          "drums": 140,
+          "bass": 16,
+          "lead": 0,
+          "skank": 16,
+          "organ": 0
+        },
+        {
+          "name": "chant",
+          "flags": {
+            "name": "chant",
+            "d": true,
+            "k": true,
+            "o": true,
+            "b": true,
+            "l": true,
+            "x": false,
+            "p": true,
+            "w": 1.3
+          },
+          "total": 186,
+          "drums": 140,
+          "bass": 16,
+          "lead": 14,
+          "skank": 16,
+          "organ": 0
+        },
+        {
+          "name": "fire",
+          "flags": {
+            "name": "fire",
+            "d": true,
+            "k": true,
+            "o": true,
+            "b": true,
+            "l": true,
+            "x": true,
+            "p": true,
+            "w": 1.4
+          },
+          "total": 200,
+          "drums": 140,
+          "bass": 16,
+          "lead": 28,
+          "skank": 16,
+          "organ": 0
+        },
+        {
+          "name": "break",
+          "flags": {
+            "name": "break",
+            "d": true,
+            "k": false,
+            "o": true,
+            "b": false,
+            "l": false,
+            "x": false,
+            "p": false,
+            "w": 1.6
+          },
+          "total": 76,
+          "drums": 76,
+          "bass": 0,
+          "lead": 0,
+          "skank": 0,
+          "organ": 0
+        },
+        {
+          "name": "chant 2",
+          "flags": {
+            "name": "chant 2",
+            "d": true,
+            "k": true,
+            "o": true,
+            "b": true,
+            "l": true,
+            "x": true,
+            "p": true,
+            "w": 1.3
+          },
+          "total": 200,
+          "drums": 140,
+          "bass": 16,
+          "lead": 28,
+          "skank": 16,
+          "organ": 0
+        },
+        {
+          "name": "outro",
+          "flags": {
+            "name": "outro",
+            "d": true,
+            "k": false,
+            "o": true,
+            "b": true,
+            "l": false,
+            "x": false,
+            "p": true,
+            "w": 1.2
+          },
+          "total": 160,
+          "drums": 140,
+          "bass": 16,
+          "lead": 0,
+          "skank": 0,
+          "organ": 0
+        }
+      ]
+    },
+    {
+      "song": "STEPPERS",
+      "sections": [
+        {
+          "name": "intro",
+          "flags": {
+            "name": "intro",
+            "d": true,
+            "k": false,
+            "o": true,
+            "b": true,
+            "l": false,
+            "x": false,
+            "p": false,
+            "w": 0.8
+          },
+          "total": 240,
+          "drums": 112,
+          "bass": 48,
+          "lead": 0,
+          "skank": 0,
+          "organ": 64
+        },
+        {
+          "name": "verse",
+          "flags": {
+            "name": "verse",
+            "d": true,
+            "k": true,
+            "o": true,
+            "b": true,
+            "l": false,
+            "x": false,
+            "p": false,
+            "w": 1
+          },
+          "total": 272,
+          "drums": 112,
+          "bass": 48,
+          "lead": 0,
+          "skank": 32,
+          "organ": 64
+        },
+        {
+          "name": "verse 2",
+          "flags": {
+            "name": "verse 2",
+            "d": true,
+            "k": true,
+            "o": true,
+            "b": true,
+            "l": true,
+            "x": false,
+            "p": false,
+            "w": 1
+          },
+          "total": 304,
+          "drums": 112,
+          "bass": 48,
+          "lead": 0,
+          "skank": 32,
+          "organ": 96
+        },
+        {
+          "name": "chorus",
+          "flags": {
+            "name": "chorus",
+            "d": true,
+            "k": true,
+            "o": true,
+            "b": true,
+            "l": true,
+            "x": true,
+            "p": true,
+            "w": 1.2
+          },
+          "total": 432,
+          "drums": 240,
+          "bass": 48,
+          "lead": 0,
+          "skank": 32,
+          "organ": 96
+        },
+        {
+          "name": "break",
+          "flags": {
+            "name": "break",
+            "d": true,
+            "k": true,
+            "o": true,
+            "b": false,
+            "l": false,
+            "x": false,
+            "p": false,
+            "w": 1.5
+          },
+          "total": 224,
+          "drums": 112,
+          "bass": 0,
+          "lead": 0,
+          "skank": 32,
+          "organ": 64
+        },
+        {
+          "name": "chorus 2",
+          "flags": {
+            "name": "chorus 2",
+            "d": true,
+            "k": true,
+            "o": true,
+            "b": true,
+            "l": true,
+            "x": true,
+            "p": true,
+            "w": 1.2
+          },
+          "total": 432,
+          "drums": 240,
+          "bass": 48,
+          "lead": 0,
+          "skank": 32,
+          "organ": 96
+        },
+        {
+          "name": "outro",
+          "flags": {
+            "name": "outro",
+            "d": true,
+            "k": false,
+            "o": true,
+            "b": true,
+            "l": true,
+            "x": false,
+            "p": false,
+            "w": 1.2
+          },
+          "total": 276,
+          "drums": 112,
+          "bass": 48,
+          "lead": 0,
+          "skank": 0,
+          "organ": 96
+        }
+      ]
+    }
+  ],
+  "every song breaks its own arrangement": {
+    "pass": true,
+    "detail": "ONE DROP break: 28 voices vs 192 in chorus (6.9x); DUB CHAMBER break: 16 voices vs 192 in chant 2 (12.0x); ROCKERS break: 60 voices vs 228 in chorus (3.8x); SKANK RAIL break: 80 voices vs 208 in chorus (2.6x); NYABINGHI break: 76 voices vs 200 in fire (2.6x); STEPPERS break: 224 voices vs 432 in chorus (1.9x)"
+  },
+  "sections": {
+    "ONE DROP": {
+      "break": {
+        "section": "break",
+        "peakDb": -20.4,
+        "rmsDb": -30.9
+      },
+      "busy": {
+        "section": "chorus",
+        "peakDb": -15.7,
+        "rmsDb": -30.2
+      },
+      "deltaRms": 0.7,
+      "deltaPeak": 4.6,
+      "delta": 4.6,
+      "breakSounding": true
+    },
+    "DUB CHAMBER": {
+      "break": {
+        "section": "break",
+        "peakDb": -20.8,
+        "rmsDb": -29.1
+      },
+      "busy": {
+        "section": "chant 2",
+        "peakDb": -16.0,
+        "rmsDb": -28.6
+      },
+      "deltaRms": 0.4,
+      "deltaPeak": 4.8,
+      "delta": 4.8,
+      "breakSounding": true
+    },
+    "ROCKERS": {
+      "break": {
+        "section": "break",
+        "peakDb": -20.8,
+        "rmsDb": -31.1
+      },
+      "busy": {
+        "section": "chorus",
+        "peakDb": -15.9,
+        "rmsDb": -29.7
+      },
+      "deltaRms": 1.4,
+      "deltaPeak": 4.8,
+      "delta": 4.8,
+      "breakSounding": true
+    },
+    "SKANK RAIL": {
+      "break": {
+        "section": "break",
+        "peakDb": -17.4,
+        "rmsDb": -34.7
+      },
+      "busy": {
+        "section": "chorus",
+        "peakDb": -17.2,
+        "rmsDb": -28.9
+      },
+      "deltaRms": 5.8,
+      "deltaPeak": 0.2,
+      "delta": 5.8,
+      "breakSounding": true
+    },
+    "NYABINGHI": {
+      "break": {
+        "section": "break",
+        "peakDb": -21.7,
+        "rmsDb": -39.5
+      },
+      "busy": {
+        "section": "fire",
+        "peakDb": -19.2,
+        "rmsDb": -30.5
+      },
+      "deltaRms": 9.0,
+      "deltaPeak": 2.4,
+      "delta": 9.0,
+      "breakSounding": true
+    },
+    "STEPPERS": {
+      "break": {
+        "section": "break",
+        "peakDb": -17.4,
+        "rmsDb": -31.0
+      },
+      "busy": {
+        "section": "chorus",
+        "peakDb": -16.9,
+        "rmsDb": -27.7
+      },
+      "deltaRms": 3.3,
+      "deltaPeak": 0.5,
+      "delta": 3.3,
+      "breakSounding": true
+    }
+  },
+  "the break is audibly a break": {
+    "pass": true,
+    "detail": "ONE DROP break vs chorus: 4.6 dB (level 0.7, peak 4.6); DUB CHAMBER break vs chant 2: 4.8 dB (level 0.4, peak 4.8); ROCKERS break vs chorus: 4.8 dB (level 1.4, peak 4.8); SKANK RAIL break vs chorus: 5.8 dB (level 5.8, peak 0.2); NYABINGHI break vs fire: 9.0 dB (level 9.0, peak 2.4); STEPPERS break vs chorus: 3.3 dB (level 3.3, peak 0.5)"
+  },
+  "a break is quiet, not empty": {
+    "pass": true,
+    "detail": "every break still sounds: ONE DROP break peak -20.4 dB, DUB CHAMBER break peak -20.8 dB, ROCKERS break peak -20.8 dB, SKANK RAIL break peak -17.4 dB, NYABINGHI break peak -21.7 dB, STEPPERS break peak -17.4 dB"
+  },
+  "insertsMeta": [
+    {
+      "name": "SKANK RIOT",
+      "bpm": 132,
+      "feel": "ska",
+      "run": 128,
+      "bars": 8,
+      "seconds": 14.545454545454545,
+      "sections": 4
+    },
+    {
+      "name": "IRIE MASTER",
+      "bpm": 100,
+      "feel": "rockers",
+      "run": 128,
+      "bars": 8,
+      "seconds": 19.2,
+      "sections": 4
+    },
+    {
+      "name": "MISSION VAMP",
+      "bpm": 112,
+      "feel": "onedrop",
+      "run": 64,
+      "bars": 4,
+      "seconds": 8.571428571428571,
+      "sections": 2
+    }
+  ],
+  "there is mission music for the big moments": {
+    "pass": true,
+    "detail": "3 inserts: SKANK RIOT (8 bars, 15 s), IRIE MASTER (8 bars, 19 s), MISSION VAMP (4 bars, 9 s)"
+  },
+  "inserts are vamps, not songs": {
+    "pass": true,
+    "detail": "insert lengths in bars: [8, 8, 4]"
+  },
+  "inserts": {
+    "SKANK RIOT": {
+      "peak": 0.13938596844673157,
+      "peakDb": -17.12,
+      "rmsDb": -28.64,
+      "seconds": 15.545458333333332,
+      "profile": [
+        {
+          "at": 0,
+          "peak": 2.7095370569441e-06,
+          "hiLo": -20.605210212074695
+        },
+        {
+          "at": 0.015,
+          "peak": 9.713309736980591e-06,
+          "hiLo": -17.252179744218193
+        },
+        {
+          "at": 0.045,
+          "peak": 3.185481909895316e-05,
+          "hiLo": -11.540930315321082
+        },
+        {
+          "at": 0.1,
+          "peak": 0.11803820729255676,
+          "hiLo": -40
+        },
+        {
+          "at": 0.3,
+          "peak": 0.12080448865890503,
+          "hiLo": -33.949691917154546
+        }
+      ],
+      "pulse": {
+        "lag": 3.6350000000000002,
+        "beats": 8,
+        "impliedBpm": 132.04951856946354,
+        "strength": 0.000328951163846352,
+        "rawLag": 3.6350000000000002,
+        "beat": 0.45454545454545453,
+        "onGrid": true
+      }
+    },
+    "IRIE MASTER": {
+      "peak": 0.14991983771324158,
+      "peakDb": -16.48,
+      "rmsDb": -29.16,
+      "seconds": 20,
+      "profile": [
+        {
+          "at": 0,
+          "peak": 3.1871156807028456e-06,
+          "hiLo": -16.59699208420814
+        },
+        {
+          "at": 0.015,
+          "peak": 1.2287767276575323e-05,
+          "hiLo": -24.75009530516872
+        },
+        {
+          "at": 0.045,
+          "peak": 3.229880894650705e-05,
+          "hiLo": -22.258604949256405
+        },
+        {
+          "at": 0.1,
+          "peak": 0.06610560417175293,
+          "hiLo": -39.94980694858623
+        },
+        {
+          "at": 0.3,
+          "peak": 0.14991983771324158,
+          "hiLo": -40
+        }
+      ],
+      "pulse": {
+        "lag": 2.4,
+        "beats": 4,
+        "impliedBpm": 100,
+        "strength": 0.0003723341351138707,
+        "rawLag": 2.4,
+        "beat": 0.6,
+        "onGrid": true
+      }
+    },
+    "MISSION VAMP": {
+      "peak": 0.1457991972565651,
+      "peakDb": -16.72,
+      "rmsDb": -30.62,
+      "seconds": 9.5714375,
+      "profile": [
+        {
+          "at": 0,
+          "peak": 2.8353604193398496e-06,
+          "hiLo": -16.856430428497102
+        },
+        {
+          "at": 0.015,
+          "peak": 1.1040504432457965e-05,
+          "hiLo": -18.800803620655113
+        },
+        {
+          "at": 0.045,
+          "peak": 3.568791362340562e-05,
+          "hiLo": -16.571685390860356
+        },
+        {
+          "at": 0.1,
+          "peak": 0.06705214083194733,
+          "hiLo": -40
+        },
+        {
+          "at": 0.3,
+          "peak": 0.14328858256340027,
+          "hiLo": -39.951605835396876
+        }
+      ],
+      "pulse": {
+        "lag": 2.145,
+        "beats": 4,
+        "impliedBpm": 111.8881118881119,
+        "strength": 0.00035457951561447727,
+        "rawLag": 2.145,
+        "beat": 0.5357142857142857,
+        "onGrid": true
+      }
+    }
+  },
+  "every insert renders": {
+    "pass": true,
+    "detail": "quietest none"
+  },
+  "inserts play the tempo they claim": {
+    "pass": true,
+    "detail": "SKANK RIOT 132.0 bpm; IRIE MASTER 100.0 bpm; MISSION VAMP 111.9 bpm"
+  },
+  "insertFlow": {
+    "steps": 3152,
+    "runs": [
+      {
+        "song": "ROCKERS",
+        "n": 208,
+        "firstLocal": 40,
+        "lastLocal": 247,
+        "firstGlobal": 0,
+        "times": [
+          0.5
+        ]
+      },
+      {
+        "song": "IRIE MASTER",
+        "n": 128,
+        "firstLocal": 0,
+        "lastLocal": 127,
+        "firstGlobal": 208,
+        "times": [
+          33
+        ]
+      },
+      {
+        "song": "ROCKERS",
+        "n": 200,
+        "firstLocal": 248,
+        "lastLocal": 447,
+        "firstGlobal": 336,
+        "times": [
+          52.19999999999982
+        ]
+      },
+      {
+        "song": "SKANK RAIL",
+        "n": 448,
+        "firstLocal": 0,
+        "lastLocal": 447,
+        "firstGlobal": 536,
+        "times": [
+          83.44999999999982
+        ]
+      },
+      {
+        "song": "NYABINGHI",
+        "n": 24,
+        "firstLocal": 0,
+        "lastLocal": 23,
+        "firstGlobal": 984,
+        "times": [
+          146.84622641509478
+        ]
+      },
+      {
+        "song": "MISSION VAMP",
+        "n": 64,
+        "firstLocal": 0,
+        "lastLocal": 63,
+        "firstGlobal": 1008,
+        "times": [
+          149.8970738727218
+        ]
+      },
+      {
+        "song": "NYABINGHI",
+        "n": 424,
+        "firstLocal": 24,
+        "lastLocal": 447,
+        "firstGlobal": 1072,
+        "times": [
+          158.46850244415114
+        ]
+      },
+      {
+        "song": "STEPPERS",
+        "n": 896,
+        "firstLocal": 0,
+        "lastLocal": 895,
+        "firstGlobal": 1496,
+        "times": [
+          212.36680752889507
+        ]
+      },
+      {
+        "song": "ONE DROP",
+        "n": 448,
+        "firstLocal": 0,
+        "lastLocal": 447,
+        "firstGlobal": 2392,
+        "times": [
+          309.7581118767297
+        ]
+      },
+      {
+        "song": "DUB CHAMBER",
+        "n": 312,
+        "firstLocal": 0,
+        "lastLocal": 311,
+        "firstGlobal": 2840,
+        "times": [
+          395.91195803056996
+        ]
+      }
+    ],
+    "retimes": [
+      {
+        "name": "IRIE MASTER",
+        "at": 208
+      },
+      {
+        "name": "ROCKERS",
+        "at": 335
+      },
+      {
+        "name": "SKANK RAIL",
+        "at": 535
+      },
+      {
+        "name": "NYABINGHI",
+        "at": 983
+      },
+      {
+        "name": "MISSION VAMP",
+        "at": 1008
+      },
+      {
+        "name": "NYABINGHI",
+        "at": 1071
+      },
+      {
+        "name": "STEPPERS",
+        "at": 1495
+      },
+      {
+        "name": "ONE DROP",
+        "at": 2391
+      },
+      {
+        "name": "DUB CHAMBER",
+        "at": 2839
+      }
+    ],
+    "asked": [
+      200,
+      1000
+    ],
+    "insertLen": {
+      "IRIE MASTER": 128,
+      "MISSION VAMP": 64
+    },
+    "paused": 312,
+    "songIdx": 1,
+    "nowPlaying": "DUB CHAMBER",
+    "insertLeft": null,
+    "pending": null
+  },
+  "an insert takes over on a bar line": {
+    "pass": true,
+    "detail": "2 inserts, each asked for mid-song and each taking over on a bar line at global step [208, 1008], playing its whole length {'IRIE MASTER': 128, 'MISSION VAMP': 64}; the set was asked at steps [200, 1000] and came out ['ROCKERS', 'IRIE MASTER', 'ROCKERS', 'SKANK RAIL', 'NYABINGHI', 'MISSION VAMP', 'NYABINGHI', 'STEPPERS', 'ONE DROP', 'DUB CHAMBER']"
+  },
+  "insertResumes": [
+    {
+      "song": "ROCKERS",
+      "paused": 247,
+      "resumed": 248,
+      "same": true,
+      "insert": "IRIE MASTER",
+      "insertSteps": 128
+    },
+    {
+      "song": "NYABINGHI",
+      "paused": 23,
+      "resumed": 24,
+      "same": true,
+      "insert": "MISSION VAMP",
+      "insertSteps": 64
+    }
+  ],
+  "the set is handed back where it paused": {
+    "pass": true,
+    "detail": "ROCKERS interrupted at step 247, back on 248 after 128 steps of IRIE MASTER; NYABINGHI interrupted at step 23, back on 24 after 64 steps of MISSION VAMP; nothing left playing: None"
+  },
+  "the echo is retimed on both sides of an insert": {
+    "pass": true,
+    "detail": "9 retimes, one into each vamp and one back to the set: IRIE MASTER at step 208, ROCKERS at step 335, SKANK RAIL at step 535, NYABINGHI at step 983, MISSION VAMP at step 1008, NYABINGHI at step 1071, STEPPERS at step 1495, ONE DROP at step 2391, DUB CHAMBER at step 2839"
+  },
+  "insertCut": {
+    "runs": [
+      {
+        "song": "ROCKERS",
+        "n": 208,
+        "firstLocal": 40,
+        "lastLocal": 247,
+        "firstGlobal": 0
+      },
+      {
+        "song": "IRIE MASTER",
+        "n": 16,
+        "firstLocal": 0,
+        "lastLocal": 15,
+        "firstGlobal": 208
+      },
+      {
+        "song": "ROCKERS",
+        "n": 200,
+        "firstLocal": 248,
+        "lastLocal": 447,
+        "firstGlobal": 224
+      },
+      {
+        "song": "SKANK RAIL",
+        "n": 448,
+        "firstLocal": 0,
+        "lastLocal": 447,
+        "firstGlobal": 424
+      },
+      {
+        "song": "NYABINGHI",
+        "n": 448,
+        "firstLocal": 0,
+        "lastLocal": 447,
+        "firstGlobal": 872
+      },
+      {
+        "song": "STEPPERS",
+        "n": 896,
+        "firstLocal": 0,
+        "lastLocal": 895,
+        "firstGlobal": 1320
+      },
+      {
+        "song": "ONE DROP",
+        "n": 448,
+        "firstLocal": 0,
+        "lastLocal": 447,
+        "firstGlobal": 2216
+      },
+      {
+        "song": "DUB CHAMBER",
+        "n": 448,
+        "firstLocal": 0,
+        "lastLocal": 447,
+        "firstGlobal": 2664
+      },
+      {
+        "song": "ROCKERS",
+        "n": 10,
+        "firstLocal": 0,
+        "lastLocal": 9,
+        "firstGlobal": 3112
+      }
+    ],
+    "retimes": [
+      {
+        "name": "IRIE MASTER",
+        "at": 208
+      },
+      {
+        "name": "ROCKERS",
+        "at": 224
+      },
+      {
+        "name": "SKANK RAIL",
+        "at": 423
+      },
+      {
+        "name": "NYABINGHI",
+        "at": 871
+      },
+      {
+        "name": "STEPPERS",
+        "at": 1319
+      },
+      {
+        "name": "ONE DROP",
+        "at": 2215
+      },
+      {
+        "name": "DUB CHAMBER",
+        "at": 2663
+      },
+      {
+        "name": "ROCKERS",
+        "at": 3111
+      }
+    ],
+    "insertLen": 128,
+    "askedAt": 200,
+    "cutAt": 224,
+    "playing": null,
+    "pending": null
+  },
+  "a mission vamp cut short gives the set back": {
+    "pass": true,
+    "detail": "IRIE MASTER is 128 steps long; cut after 16 of them it stopped, and ROCKERS came back on step 248 (paused at 247) with the echo retimed back at step 224; nothing left playing: None"
+  },
+  "volumeDefault": {
+    "slider": "50",
+    "label": "50%",
+    "engine": 0.5,
+    "gain": 0.5,
+    "stored": null
+  },
+  "fader starts at 50%": {
+    "pass": true,
+    "detail": "slider 50 / label 50% / engine 0.50 / master gain 0.50"
+  },
+  "volumeMoved": {
+    "gain": 0.8500000238418579,
+    "label": "85%",
+    "stored": "0.85"
+  },
+  "fader drives the master gain": {
+    "pass": true,
+    "detail": "set 85% -> master 0.85, label 85%"
+  },
+  "volumeReloaded": {
+    "gain": 0.8500000238418579,
+    "slider": "85",
+    "label": "85%"
+  },
+  "fader survives a reload": {
+    "pass": true,
+    "detail": "after reload: master 0.85, slider 85, label 85%"
+  },
+  "faderKeyboard": {
+    "slider": "84",
+    "label": "84%",
+    "gain": 0.8399999737739563,
+    "leftFlipper": false,
+    "focused": true
+  },
+  "fader answers the arrow keys": {
+    "pass": true,
+    "detail": "focus the fader, press ArrowLeft: 84% (master 0.84), flipper untouched: True"
+  },
+  "mute": {
+    "was": 0.8500000238418579,
+    "muted": true,
+    "during": 0,
+    "back": false,
+    "after": 0.8500000238418579,
+    "vol": 0.85
+  },
+  "mute silences, unmute restores": {
+    "pass": true,
+    "detail": "mute -> 0.00, unmute -> 0.85 (the fader's 0.85, not a fixed default)"
+  },
+  "scheduler": {
+    "read": {
+      "peak": 0.07865684758562445,
+      "mean": 0.03307834579328378,
+      "samples": 821
+    },
+    "local": 22,
+    "song": "ONE DROP",
+    "idx": 0
+  },
+  "live scheduler advances": {
+    "pass": true,
+    "detail": "advanced 22 steps in 4 s (expected ~21 at 0.192s/step); playing ONE DROP"
+  },
+  "live output present at 100%": {
+    "pass": true,
+    "detail": "master bus peak 0.0787"
+  },
+  "gameInsert": {
+    "asked": {
+      "asked": "SKANK RIOT",
+      "playing": null,
+      "pending": "SKANK RIOT",
+      "song": "ONE DROP"
+    },
+    "mid": {
+      "playing": "SKANK RIOT",
+      "nowPlaying": "SKANK RIOT",
+      "song": "ONE DROP"
+    },
+    "afterReset": {
+      "playing": null,
+      "pending": null,
+      "nowPlaying": "ONE DROP",
+      "music": false
+    }
+  },
+  "the game hands the music its vamp, and takes it back": {
+    "pass": true,
+    "detail": "multiball asked for SKANK RIOT (queued while ONE DROP played), and after 5 s it was the music playing; resetting the game left ONE DROP playing with nothing queued"
+  },
+  "volumeZero": {
+    "live": {
+      "gain": 0,
+      "engine": 0
+    },
+    "offline": {
+      "zero": 0,
+      "full": 0.6116054654121399
+    }
+  },
+  "fader at 0 is silence": {
+    "pass": true,
+    "detail": "live master gain 0.00; the same programme through the fader: 0.0000 at 0%, 0.612 at 100%"
+  },
+  "errors": []
+}
