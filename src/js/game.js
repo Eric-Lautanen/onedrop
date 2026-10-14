@@ -291,8 +291,17 @@
       global.console.warn('[playfield] ' + msg);
     }
   }
+  /* a mark is a few microseconds and it is what makes the boot's shape
+     measurable from the outside: performance.getEntriesByType('mark')
+     then says exactly where the fresh-load time went, without a profile
+     and without touching the game. */
+  function mark(name) {
+    try { performance.mark(name); } catch (e) { /* no marks, no colour */ }
+  }
+  global.PB.mark = mark;
   function buildCabinet() {
     if (machine) return;
+      mark('boot:machine-start');
     try {
       var built = global.PB.buildMachine
         ? global.PB.buildMachine({ table: table, tilt: TILT, glowTex: glowTex })
@@ -308,6 +317,7 @@
       pfWarn('machine.js threw while building the cabinet; the playfield ' +
              'still works. ' + ((err && err.message) ? err.message : err));
     }
+    mark('boot:machine-done');
 
     if (machine) {
       /* The cabinet carries a lot of painted art -- the backglass, the dot
@@ -315,7 +325,8 @@
          as the playfield: reproduce it, don't regrade it. This runs after
          buildMachine so it survives that module being rewritten, and it is
          art-only, so a failure here must not stop the build. */
-      try { global.PB.vibrance.sweep(machine.root); } catch (e) { /* cosmetic */ }
+      try { global.PB.vibrance.sweep(machine.root);      } catch (e) { /* cosmetic */ }
+      mark('boot:vibrance-done');
 
       /* machine.js sizes the DMD canvas to the painted plate's aspect and
          builds the band window off the same numbers -- tell the display
@@ -335,6 +346,12 @@
     computeFitCorners();
     buildFloor();
     fitCamera();
+    mark('boot:cabinet-done');
+    /* tell the world out loud, so a slow boot can be told apart from a
+       hung one from the console alone */
+    pfWarn('boot marks: ' + performance.getEntriesByType('mark').map(function (m) {
+      return m.name + '@' + Math.round(m.startTime);
+    }).join(' '));
   }
   /* ---- does the playfield still fit the cabinet it was handed? ----
      The cabinet is rebuilt on its own schedule, so the two can drift
@@ -2254,13 +2271,18 @@
 
     /* ---- rebuild everything that reads the frame ---- */
     assets.load(function () {
+      mark('boot:refreshart-start');
       PF.refreshArt();
+      mark('boot:refreshart-done');
       global.PB.vibrance.sweep(PF.group);
+      mark('boot:pfsweep-done');
       buildCabinet();
       ldStage(80);            /* cabinet built: unlock the next stride */
       newBall();
+      mark('boot:newball-done');
       computeFitCorners();
       fitCamera();
+      mark('boot:refit-done');
       /* the sprite sheet has settled: bring the machine and the menu in.
          The loader fades, the panel above the screen drops back in with
          its bounce, and PLAY goes live. */

@@ -1,0 +1,29 @@
+[
+  {
+    "run": 0,
+    "DCL": 1.38,
+    "loadEvent": 6.2,
+    "assetsReadyOs": 9.08,
+    "loaderGoneOs": 10.71,
+    "sheet": "sprite2.webp",
+    "errors": []
+  },
+  {
+    "run": 1,
+    "DCL": 1.0,
+    "loadEvent": 4.61,
+    "assetsReadyOs": 7.78,
+    "loaderGoneOs": 10.46,
+    "sheet": "sprite2.webp",
+    "errors": []
+  },
+  {
+    "run": 2,
+    "DCL": 0.84,
+    "loadEvent": 5.91,
+    "assetsReadyOs": 13.87,
+    "loaderGoneOs": 13.87,
+    "sheet": "sprite2.webp",
+    "errors": []
+  }
+]

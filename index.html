@@ -5,6 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#05070a">
 <title>ONE DROP &mdash; Reggae Pinball</title>
+<!-- The sprite sheet is the page's one big asset (263 KB webp, and the only
+     thing every surface samples, so it gates the first paint of the machine).
+     Being declared up here with a preload makes it start downloading right
+     away, in parallel with the scripts below, instead of after the last
+     script's own parse has finished. The png fallback is not preloaded: it
+     is only for a browser without webp, and preloading both would double
+     the payload for nobody. -->
+<link rel="preload" href="assets/sprite2.webp" as="image" type="image/webp">
 <link rel="stylesheet" href="src/css/style.css">
 </head>
 <body>
@@ -91,16 +99,21 @@
   <button id="touchRight" aria-label="right flipper">FLIP</button>
 </div>
 
-<script src="src/js/vendor/three.min.js"></script>
-<script src="src/js/table.js"></script>
-<script src="src/js/physics.js"></script>
-<script src="src/js/art.js"></script>
-<script src="src/js/assets.js"></script>
-<script src="src/js/playfield.js"></script>
-<script src="src/js/machine.js"></script>
-<script src="src/js/vibrance.js"></script>
-<script src="src/js/audio.js"></script>
-<script src="src/js/dmd.js"></script>
-<script src="src/js/game.js"></script>
+<!-- Every script here is deferred: the paint is not held up by parsing,
+     the files stream in parallel, and they still run in document order.
+     They run only after the whole document is parsed, so the loader and
+     the menu are on screen the whole time, instead of a blank body with
+     1.3 MB of synchronous script execution stacked behind it. -->
+<script defer src="src/js/vendor/three.min.js"></script>
+<script defer src="src/js/table.js"></script>
+<script defer src="src/js/physics.js"></script>
+<script defer src="src/js/art.js"></script>
+<script defer src="src/js/assets.js"></script>
+<script defer src="src/js/playfield.js"></script>
+<script defer src="src/js/machine.js"></script>
+<script defer src="src/js/vibrance.js"></script>
+<script defer src="src/js/audio.js"></script>
+<script defer src="src/js/dmd.js"></script>
+<script defer src="src/js/game.js"></script>
 </body>
 </html>
