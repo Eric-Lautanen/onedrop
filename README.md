@@ -57,7 +57,7 @@ the physics layout and the artwork can never drift apart.
 | `M`                      | Sound on/off                          |
 | `P`                      | Pause                                 |
 | `F`                      | Fullscreen                            |
-| Mouse / touch            | Drag to orbit the view, wheel to zoom |
+| Mouse / touch            | Drag to orbit; wheel or two-finger pinch to zoom |
 
 The plunger has to come **all the way back**: let go early and the spring simply  
 returns, the ball stays in the lane and the panel says so. The same is true of  

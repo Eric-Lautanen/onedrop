@@ -863,33 +863,108 @@ import './guard.js';
   (function bindOrbit() {
     var dom = renderer.domElement;
     dom.style.touchAction = 'none';
+
+    /* ---- PINCH: two fingers on the glass pull the camera in and out
+       A touch player has no wheel, so before this the only way to change
+       the distance was to leave the table and press RESET VIEW. Pointer
+       events already deliver every finger as its own pointer, so the ones
+       that are down are kept in a map: while exactly two are, the change
+       in their separation drives the SAME orbit.dist the wheel does
+       (fingers apart = closer), and the orbit's yaw/pitch is held still so
+       a pinch never also spins the table out from under the hands. Lift
+       one finger and the orbit resumes from WHERE THAT FINGER IS -- not
+       from its old anchor, which would jump the view by the gap the two
+       fingers had between them. */
+    var down = {};        /* pointerId -> { x, y }, the fingers on the glass */
+    var downCount = 0;
+    var pinchGap = 0;     /* their separation in px at the last move */
+    var ZOOM_MIN = 24, ZOOM_MAX = 320;   /* the wheel's own band */
+
+    function gap() {
+      var a = null, b = null;
+      for (var id in down) {
+        if (!a) a = down[id]; else { b = down[id]; break; }
+      }
+      return (a && b) ? Math.hypot(a.x - b.x, a.y - b.y) : 0;
+    }
+    function zoomBy(scale) {
+      if (!isFinite(scale) || scale <= 0) return;
+      orbit.dist = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, orbit.dist * scale));
+    }
+
     dom.addEventListener('pointerdown', function (e) {
       if (paused) return;   /* a paused table must not swallow the camera:
                                clicks while frozen would otherwise grab the
                                orbit rig and the resume would land tilted */
       enterOrbit();
-      orbit.drag = true; orbit.px = e.clientX; orbit.py = e.clientY;
+      if (down[e.pointerId]) return;        /* a repeat of one we hold */
+      down[e.pointerId] = { x: e.clientX, y: e.clientY };
+      downCount++;
+      if (downCount === 1) {
+        orbit.drag = true; orbit.px = e.clientX; orbit.py = e.clientY;
+      } else {
+        /* the second finger takes over: stop orbiting and start measuring */
+        orbit.drag = false;
+        pinchGap = gap();
+      }
       if (dom.setPointerCapture) { try { dom.setPointerCapture(e.pointerId); } catch (err) { /* pointer already gone */ } }
     });
+
     dom.addEventListener('pointermove', function (e) {
-      if (!orbit.drag) return;
+      var p = down[e.pointerId];
+      if (p) { p.x = e.clientX; p.y = e.clientY; }
+      if (downCount >= 2) {
+        /* three or more fingers is nobody's gesture: hold the view rather
+           than letting the pair that happens to be listed first fight the
+           one that just landed */
+        if (downCount !== 2) return;
+        var g = gap();
+        /* a degenerate separation (fingers crossed over each other, a
+           pointer we never saw move) is a divide-by-almost-zero, so it is
+           skipped rather than allowed to slam the camera to a clamp */
+        if (pinchGap > 8 && g > 8) zoomBy(pinchGap / g);
+        pinchGap = g;
+        return;
+      }
+      if (!orbit.drag || !p) return;
       orbit.yaw -= (e.clientX - orbit.px) * 0.006;
       orbit.pitch = Math.max(0.08, Math.min(1.45, orbit.pitch + (e.clientY - orbit.py) * 0.005));
       orbit.px = e.clientX; orbit.py = e.clientY;
     });
+
     function endDrag(e) {
-      orbit.drag = false;
+      if (down[e.pointerId]) { delete down[e.pointerId]; downCount--; if (downCount < 0) downCount = 0; }
+      if (downCount === 1) {
+        var rest = null;
+        for (var id in down) { rest = down[id]; break; }
+        if (rest) { orbit.drag = true; orbit.px = rest.x; orbit.py = rest.y; }
+      } else if (downCount === 0) {
+        orbit.drag = false;
+      }
       if (dom.releasePointerCapture && e.pointerId !== undefined) {
         try { dom.releasePointerCapture(e.pointerId); } catch (err) { /* already released */ }
       }
     }
     dom.addEventListener('pointerup', endDrag);
     dom.addEventListener('pointercancel', endDrag);
+    /* a finger can also come up OUTSIDE the canvas -- pointer capture routes
+       that to us, but on a browser without it the release would be missed
+       and the finger would sit in the map for good, leaving the view stuck
+       in pinch mode. Listening on the window catches the release wherever
+       it happens; endDrag ignores ids it is not holding. */
+    global.addEventListener('pointerup', endDrag);
+    global.addEventListener('pointercancel', endDrag);
+    /* a gesture the OS takes away (a swipe from the edge, a call arriving)
+       can swallow the pointerup entirely: drop every finger rather than
+       pinching with a hand that has already let go */
+    global.addEventListener('blur', function () {
+      down = {}; downCount = 0; pinchGap = 0; orbit.drag = false;
+    });
     dom.addEventListener('wheel', function (e) {
       e.preventDefault();
       if (paused) return;
       enterOrbit();
-      orbit.dist = Math.max(24, Math.min(320, orbit.dist * Math.exp(e.deltaY * 0.0012)));
+      zoomBy(Math.exp(e.deltaY * 0.0012));
     }, { passive: false });
   })();
 
@@ -1970,7 +2045,7 @@ import './guard.js';
      That is deliberate: a player who has dragged the table round to a
      view they like must be able to plunge, flip and nudge without the
      view snapping back under them. The camera is moved by the MOUSE
-     (drag to orbit, wheel to zoom) and reset by the RESET VIEW button,
+     (drag to orbit, wheel or pinch to zoom) and reset by RESET VIEW,
      and by nothing else. */
   global.addEventListener('keydown', function (e) {
     if (e.repeat) return;
