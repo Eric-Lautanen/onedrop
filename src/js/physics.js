@@ -14,6 +14,8 @@
    ramp mouth is lifted off the surface and carried along the
    path at the ramp's own height until it is released.
    ============================================================ */
+import './table.js';
+
 (function (global) {
   'use strict';
 

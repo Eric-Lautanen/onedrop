@@ -125,7 +125,7 @@ This puts **ONE DROP Pinball** on your Desktop, pointed at
 ## Project layout
 
 ```
-index.html          the page: loader, menu, DMD canvas, script tags
+index.html          the page: loader, menu, DMD canvas, module entry
 src/css/style.css   all styling
 src/js/             the game (see below)
 assets/             the sprite sheet + artwork (sprite2.webp with .png fallback)
@@ -145,6 +145,14 @@ The JavaScript, in load order:
 | `audio.js`                           | the riddim engine                                     |
 | `game.js`                            | renderer, camera, rules, input, HUD and the main loop |
 | `art.js`, `assets.js`, `vibrance.js` | texture/art helpers and post-processing               |
+| `vendor/three.module.js`, `vendor/three.core.js` | three.js **r186**, unmodified           |
+
+The game is one ES module. `game.js` imports the file before it, that chain
+ends at the two vendored three.js modules, and the browser fetches the graph in
+parallel while evaluating it in the original document order — so there is still
+no build step and no bundler. The vendored files are the official `build/`
+output of `three@0.186.0`: since r161 three.js ships no UMD/global build, which
+is why the old stack of `<script defer>` tags sharing one `THREE` global is gone.
 
 ## Special thanks
 

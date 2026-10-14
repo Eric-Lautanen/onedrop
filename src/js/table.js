@@ -34,8 +34,14 @@
      x  3 .. 20      left slingshot      (mirror 80 .. 97)
      x 30 / 70       flipper pivots
    ============================================================ */
+import * as THREE from './vendor/three.module.js';
+
 (function (global) {
   'use strict';
+
+  /* r186 ships no UMD/global build, so THREE is a module import now. Keep
+     window.THREE too: the dev probes and the console still use it. */
+  global.THREE = THREE;
 
   /* ---- artwork-derived frame ----------------------------------
      The artwork occupies a 453 x 817 px rectangle of the sheet, so its
@@ -112,6 +118,27 @@
   };
 
   global.PB = global.PB || {};
+
+  /* ---- r186 compatibility: light units -------------------------------
+     One renderer default changed between r149 (what this machine was
+     written against) and r186, and it is visible on screen: r149's
+     default renderer multiplied every light intensity by PI
+     (physicallyCorrectLights === false), where r155+ always works in
+     physical units -- so the same numbers come out PI times dimmer.
+     LIT() puts that factor back, so the intensities in game.js and
+     playfield.js keep meaning what they were tuned to mean. Every light
+     intensity in the project goes through it, and it is defined here
+     once so the creation sites and the per-frame ones cannot drift.
+
+     COLOUR needs no shim. r152 turned ColorManagement on by default,
+     which is precisely what the manual `convertSRGBToLinear()` calls in
+     this project were hand-rolling against r149's legacy mode (see the
+     notes in playfield.js and machine.js about hexes reading washed
+     out). Those calls are therefore redundant now and have been
+     removed: a hex means its sRGB value everywhere, and the painted
+     canvas art and the 3D materials that share the same PALETTE finally
+     agree with each other. */
+  global.PB.LIT = function (v) { return v * Math.PI; };
 
   /* Derive a playfield size from a cabinet outer box, so a change to
      machine.js is a one-line re-derivation instead of a guess. The box
@@ -524,8 +551,8 @@
     /* Sample once by planar arc length. Physics and all ramp hardware
        consume these same points, rather than drawing a different spline. */
     ramps.forEach(function (r) {
-      var curve = new global.THREE.CatmullRomCurve3(r.pts.map(function (p) {
-        return new global.THREE.Vector3(p[0], p[1], 0);
+      var curve = new THREE.CatmullRomCurve3(r.pts.map(function (p) {
+        return new THREE.Vector3(p[0], p[1], 0);
       }), false, 'centripetal');
       curve.arcLengthDivisions = 512;
       var count = 240;

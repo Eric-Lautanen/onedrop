@@ -26,6 +26,8 @@
    verb (0..1 reverb send)  and  pluck (lowpass envelope, the
    plucked-string shape a skank needs).
    ============================================================ */
+import './vibrance.js';
+
 (function (global) {
   'use strict';
 

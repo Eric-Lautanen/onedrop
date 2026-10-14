@@ -15,12 +15,20 @@
        jackpots, combos, bonus, ball save, skill shot, kickback, tilt
      - input, HUD and the main loop
    ============================================================ */
+import './dmd.js';
+import * as THREE from './vendor/three.module.js';
+
 (function (global) {
   'use strict';
 
-  if (!global.THREE) { alert('three.js failed to load'); return; }
+  /* the import is resolved before this module evaluates, so this is a sanity
+     check rather than a load-order guard now */
+  if (!THREE) { alert('three.js failed to load'); return; }
 
   var PAL = global.PB.PALETTE;
+  /* light intensities below are authored in r149's units -- see the note
+     on PB.LIT in table.js */
+  var LIT = global.PB.LIT;
   var table = global.PB.buildTable(global.PB.PF_SIZE);
   var world = new global.PB.World(table);
   var audio = new global.PB.AudioEngine();
@@ -54,7 +62,7 @@
   var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
   renderer.setPixelRatio(Math.min(global.devicePixelRatio || 1, 2));
   renderer.setSize(global.innerWidth, global.innerHeight);
-  if ('outputEncoding' in renderer) renderer.outputEncoding = THREE.sRGBEncoding;
+  if ('outputColorSpace' in renderer) renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.20;
   document.getElementById('stage').appendChild(renderer.domElement);
@@ -73,9 +81,9 @@
   envTex.dispose();
 
   /* ================= lights ================= */
-  scene.add(new THREE.HemisphereLight(0xaee0ff, 0x3a2408, 0.70));
-  scene.add(new THREE.AmbientLight(0x445566, 0.50));
-  var key = new THREE.DirectionalLight(0xfff3d0, 1.35);
+  scene.add(new THREE.HemisphereLight(0xaee0ff, 0x3a2408, LIT(0.70)));
+  scene.add(new THREE.AmbientLight(0x445566, LIT(0.50)));
+  var key = new THREE.DirectionalLight(0xfff3d0, LIT(1.35));
   key.position.set(14, 60, 46);
   scene.add(key);
   var mood = [
@@ -84,7 +92,7 @@
     { c: PAL.green, p: [30, 30, 14] }
   ];
   var moodLights = mood.map(function (m) {
-    var l = new THREE.PointLight(m.c, 0.75, 90, 2);
+    var l = new THREE.PointLight(m.c, LIT(0.75), 90, 2);
     l.position.set(m.p[0], m.p[1], m.p[2]);
     scene.add(l);
     return l;
@@ -447,7 +455,7 @@
     gridTex = new THREE.CanvasTexture(gc);
     gridTex.wrapS = gridTex.wrapT = THREE.RepeatWrapping;
     gridTex.repeat.set(76, 76);
-    if ('encoding' in gridTex) gridTex.encoding = THREE.sRGBEncoding;
+    if ('colorSpace' in gridTex) gridTex.colorSpace = THREE.SRGBColorSpace;
     var grid = new THREE.Mesh(
       new THREE.PlaneGeometry(900, 900),
       new THREE.MeshBasicMaterial({
@@ -2175,7 +2183,7 @@
     if (machine && machine.update) machine.update(t, multiballActive);
     if (gridTex) gridTex.offset.y = (t * 0.006) % 1;
     for (var mi = 0; mi < moodLights.length; mi++) {
-      moodLights[mi].intensity = 0.5 + 0.5 * (0.5 + 0.5 * Math.sin(t * (1.1 + mi * 0.3) + mi));
+      moodLights[mi].intensity = LIT(0.5 + 0.5 * (0.5 + 0.5 * Math.sin(t * (1.1 + mi * 0.3) + mi)));
     }
 
     /* heartbeat: when served by scripts\serve.ps1 -WaitWindow (the desktop

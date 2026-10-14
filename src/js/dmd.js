@@ -15,6 +15,8 @@
      dmd.render(t);            // once a frame
      dmd.say('MULTIBALL!', 3); // a timed banner
    ============================================================ */
+import './audio.js';
+
 (function (global) {
   'use strict';
 

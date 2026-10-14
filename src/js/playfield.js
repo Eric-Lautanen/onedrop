@@ -25,10 +25,15 @@
    The returned group is added to game.js's tilted table group, so
    children are positioned relative to (centerX, centerY).
    ============================================================ */
+import './assets.js';
+import * as THREE from './vendor/three.module.js';
+
 (function (global) {
   'use strict';
 
-  var T = global.THREE;
+  var T = THREE;
+  /* light intensities are authored in r149's units -- see PB.LIT in table.js */
+  var LIT = global.PB.LIT;
   var UP = new T.Vector3(0, 0, 1);
   var YAXIS = new T.Vector3(0, 1, 0);
   var ZERO = new T.Vector3(0, 0, 0);
@@ -121,9 +126,11 @@
        bodies came back mid grey and the red rubber came back mauve.
        Converting once, at build time, makes each hex mean what it says. */
     function srgb(c) {
-      var col = new T.Color(c);
-      if (col.convertSRGBToLinear) col.convertSRGBToLinear();
-      return col;
+      /* r186 converts a hex from sRGB to working space on construction,
+         which is what this used to have to do by hand -- the function is
+         kept because "this hex is its sRGB value" is worth saying at the
+         call site, but there is nothing left to convert. */
+      return new T.Color(c);
     }
 
     /* ---------- materials ---------- */
@@ -509,7 +516,7 @@
         glow.renderOrder = 6;
         g.add(glow);
 
-        var light = new T.PointLight(srgb(glowCol), 0, 16 * K, 2);
+        var light = new T.PointLight(srgb(glowCol), LIT(0), 16 * K, 2);
         light.position.z = 2.2 * K;
         g.add(light);
 
@@ -563,7 +570,7 @@
         }
         draw();
         var tx = ownT(new T.CanvasTexture(c));
-        if ('encoding' in tx) tx.encoding = T.sRGBEncoding;
+        if ('colorSpace' in tx) tx.colorSpace = T.SRGBColorSpace;
         faceJobs.push({ draw: draw, tex: tx });
         return tx;
       }
@@ -913,7 +920,7 @@
         badgeCtx.fillStyle=c;badgeCtx.fillRect(0,136+i*8,256,8);
       });
       badgeCtx.fillStyle='#ffe3a0';badgeCtx.textAlign='center';badgeCtx.font='bold 66px sans-serif';badgeCtx.fillText('DUB',128,96);
-      var badgeTex=ownT(new T.CanvasTexture(badgeCanvas));badgeTex.encoding=T.sRGBEncoding;
+      var badgeTex=ownT(new T.CanvasTexture(badgeCanvas));badgeTex.colorSpace=T.SRGBColorSpace;
       var badgeMat=std(0xffffff,{map:badgeTex,metalness:0.1,roughness:0.35});
       [-1,1].forEach(function (side) {
         var badge=new T.Mesh(own(new T.PlaneGeometry(1.60*K,0.93*K)),badgeMat);
@@ -1038,7 +1045,7 @@
 
       /* one real light for the single brightest lit insert, so big
          moments actually throw light onto the playfield */
-      var hotLight = new T.PointLight(0xffffff, 0, 22 * K, 2);
+      var hotLight = new T.PointLight(0xffffff, LIT(0), 22 * K, 2);
       hotLight.position.set(0, 0, 3.4 * K);
       group.add(hotLight);
 
@@ -1250,7 +1257,6 @@
         l.cur += (want - l.cur) * Math.min(1, dt * (l.hot > 0 ? 18 : 9));
         var v = clamp(l.cur + boost * 0.35, 0, 1.4);
         tmpCol.setHex(lampSys.colors[l.kind] || 0xffffff);
-        if (tmpCol.convertSRGBToLinear) tmpCol.convertSRGBToLinear();
         tmpCol.multiplyScalar(v);
         lens.setColorAt(i, tmpCol);
         halo.setColorAt(i, tmpCol);
@@ -1262,12 +1268,9 @@
         var hl = L[brightI];
         lampSys.hotLight.position.set(hl.x - CX, hl.y - CY, hl.z + 2.4 * K);
         lampSys.hotLight.color.setHex(lampSys.colors[hl.kind] || 0xffffff);
-        if (lampSys.hotLight.color.convertSRGBToLinear) {
-          lampSys.hotLight.color.convertSRGBToLinear();
-        }
-        lampSys.hotLight.intensity = Math.max(0, bright - 0.75) * 5.0;
+        lampSys.hotLight.intensity = LIT(Math.max(0, bright - 0.75) * 5.0);
       } else {
-        lampSys.hotLight.intensity = 0;
+        lampSys.hotLight.intensity = LIT(0);
       }
 
       /* ---- walls: rasta chase ---- */
@@ -1300,7 +1303,7 @@
         bo.skirt.emissiveIntensity = 0.12 + energy * 0.55;
         bo.cap.emissiveIntensity = 0.14 + energy * 0.65;
         bo.glow.material.opacity = bo.flash * 0.32;
-        bo.light.intensity = bo.flash * 6.5;
+        bo.light.intensity = LIT(bo.flash * 6.5);
         var s2 = 1 + bo.flash * 0.10;
         bo.group.scale.set(s2, s2, 1);
       }

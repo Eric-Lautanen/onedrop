@@ -137,21 +137,13 @@
   <button id="touchRight" aria-label="right flipper">FLIP</button>
 </div>
 
-<!-- Every script here is deferred: the paint is not held up by parsing,
-     the files stream in parallel, and they still run in document order.
-     They run only after the whole document is parsed, so the loader and
-     the menu are on screen the whole time, instead of a blank body with
-     1.3 MB of synchronous script execution stacked behind it. -->
-<script defer src="src/js/vendor/three.min.js"></script>
-<script defer src="src/js/table.js"></script>
-<script defer src="src/js/physics.js"></script>
-<script defer src="src/js/art.js"></script>
-<script defer src="src/js/assets.js"></script>
-<script defer src="src/js/playfield.js"></script>
-<script defer src="src/js/machine.js"></script>
-<script defer src="src/js/vibrance.js"></script>
-<script defer src="src/js/audio.js"></script>
-<script defer src="src/js/dmd.js"></script>
-<script defer src="src/js/game.js"></script>
+<!-- ONE DROP boots as one ES module. three.js dropped its UMD / global build
+     in r161 (this project is on r186 now), so the old stack of <script defer>
+     tags sharing a single global THREE is gone: src/js/game.js imports the
+     file before it, that chain ends at the three.js modules, and the browser
+     fetches the whole graph in parallel while evaluating it in the original
+     document order. Module scripts are deferred by default, so the loader and
+     the menu still paint first, before any game code runs. -->
+<script type="module" src="src/js/game.js"></script>
 </body>
 </html>

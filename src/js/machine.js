@@ -46,6 +46,9 @@
    playfield plane. See dev/3dref-match.md section 3.
 
    ============================================================ */
+import './playfield.js';
+import * as THREE from './vendor/three.module.js';
+
 (function (global) {
   'use strict';
 
@@ -73,7 +76,7 @@
     t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping;
     t.minFilter = THREE.LinearMipmapLinearFilter;
     t.anisotropy = 8;
-    if (srgb !== false && 'encoding' in t) t.encoding = THREE.sRGBEncoding;
+    if (srgb !== false && 'colorSpace' in t) t.colorSpace = THREE.SRGBColorSpace;
     return t;
   }
 
@@ -238,7 +241,7 @@
     var s1 = side(), s2 = side(), s3 = side(), s4 = side();
     var t = new THREE.CubeTexture([s1, s2, up(), down(), s3, s4]);
     t.needsUpdate = true;
-    if ('encoding' in t) t.encoding = THREE.sRGBEncoding;
+    if ('colorSpace' in t) t.colorSpace = THREE.SRGBColorSpace;
     return t;
   }
 
@@ -474,7 +477,7 @@
       name: 'live silver mirror',
       uniforms: { reflection: { value: target.texture }, textureMatrix: { value: textureMatrix } },
       vertexShader: 'uniform mat4 textureMatrix; varying vec4 mirrorCoord; void main(){ mirrorCoord=textureMatrix*vec4(position,1.0); gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }',
-      fragmentShader: 'uniform sampler2D reflection; varying vec4 mirrorCoord; void main(){ vec3 reflected=texture2DProj(reflection,mirrorCoord).rgb; gl_FragColor=vec4(reflected*0.96,1.0);\n#include <tonemapping_fragment>\n#include <encodings_fragment>\n}',
+      fragmentShader: 'uniform sampler2D reflection; varying vec4 mirrorCoord; void main(){ vec3 reflected=texture2DProj(reflection,mirrorCoord).rgb; gl_FragColor=vec4(reflected*0.96,1.0);\n#include <tonemapping_fragment>\n#include <colorspace_fragment>\n}',
       toneMapped: true
     });
     mesh.material = material;
@@ -610,9 +613,9 @@
          darker base and a much smaller glow to keep it reading red rather
          than washed. */
       redBtn: new THREE.MeshStandardMaterial({
-        color: new THREE.Color(0xc20b08).convertSRGBToLinear(),
+        color: new THREE.Color(0xc20b08),
         metalness: 0, roughness: 0.65, envMapIntensity: 0,
-        emissive: new THREE.Color(0xa00603).convertSRGBToLinear(), emissiveIntensity: 0.12
+        emissive: new THREE.Color(0xa00603), emissiveIntensity: 0.12
       }),
 
       /* MIRROR BLADES. The inside of a real cabinet is not bare plywood: it
@@ -675,7 +678,7 @@
           glassF0: { value: 0.04 }
         },
         vertexShader: 'varying vec2 paneUV; varying vec3 paneNormal; varying vec3 paneView; void main(){paneUV=uv; vec4 world=modelMatrix*vec4(position,1.0); paneNormal=normalize(mat3(modelMatrix)*normal); paneView=cameraPosition-world.xyz; gl_Position=projectionMatrix*viewMatrix*world;}',
-        fragmentShader: 'uniform samplerCube glassEnv; uniform sampler2D glassScuffs; uniform float glassGain; uniform float glassF0; varying vec2 paneUV; varying vec3 paneNormal; varying vec3 paneView; void main(){ vec3 n=normalize(paneNormal); vec3 v=normalize(paneView); float NoV=clamp(dot(n,v),0.0,1.0); float F=glassF0+(1.0-glassF0)*pow(1.0-NoV,5.0); vec3 r=reflect(-v,n); float scuff=texture2D(glassScuffs,paneUV).r; vec3 smear=normalize(r+vec3(scuff*0.045,scuff*0.030,scuff*0.018)); vec3 refl=mix(textureCube(glassEnv,r).rgb,textureCube(glassEnv,smear).rgb,scuff); gl_FragColor=vec4(refl*glassGain,F);\n#include <tonemapping_fragment>\n#include <encodings_fragment>\n}'
+        fragmentShader: 'uniform samplerCube glassEnv; uniform sampler2D glassScuffs; uniform float glassGain; uniform float glassF0; varying vec2 paneUV; varying vec3 paneNormal; varying vec3 paneView; void main(){ vec3 n=normalize(paneNormal); vec3 v=normalize(paneView); float NoV=clamp(dot(n,v),0.0,1.0); float F=glassF0+(1.0-glassF0)*pow(1.0-NoV,5.0); vec3 r=reflect(-v,n); float scuff=texture2D(glassScuffs,paneUV).r; vec3 smear=normalize(r+vec3(scuff*0.045,scuff*0.030,scuff*0.018)); vec3 refl=mix(textureCube(glassEnv,r).rgb,textureCube(glassEnv,smear).rgb,scuff); gl_FragColor=vec4(refl*glassGain,F);\n#include <tonemapping_fragment>\n#include <colorspace_fragment>\n}'
       })
     };
     for (var mk in M) if (M.hasOwnProperty(mk)) owned.mat.push(M[mk]);
@@ -1084,7 +1087,7 @@
       var t = new THREE.CanvasTexture(c);
       t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping;
       t.minFilter = THREE.LinearMipmapLinearFilter;
-      if ('encoding' in t) t.encoding = THREE.sRGBEncoding;
+      if ('colorSpace' in t) t.colorSpace = THREE.SRGBColorSpace;
       return t;
     }
 
@@ -1473,7 +1476,7 @@
       dmdSrc.height = Math.max(96, Math.round(512 / PLATE_ASPECT));
       var dmdTex = ownTex(new THREE.CanvasTexture(dmdSrc));
       dmdTex.minFilter = THREE.LinearFilter;
-      if ('encoding' in dmdTex) dmdTex.encoding = THREE.sRGBEncoding;
+      if ('colorSpace' in dmdTex) dmdTex.colorSpace = THREE.SRGBColorSpace;
       var winW = bandW * BAND_WIN.w;
       var winH = winW * dmdSrc.height / dmdSrc.width;
       var winY = bandY + bandH / 2 - bandH * (BAND_WIN.y + BAND_WIN.h / 2);
@@ -1508,7 +1511,7 @@
 
     /* Black reference surround: broad outer rails with recessed neutral
        bevels framing the glass and score band, without gold trim. */
-    var frameMat = new THREE.MeshStandardMaterial({ color: new THREE.Color(0x101215).convertSRGBToLinear(), metalness: 0.05, roughness: 0.62, envMapIntensity: 0.12 });
+    var frameMat = new THREE.MeshStandardMaterial({ color: new THREE.Color(0x101215), metalness: 0.05, roughness: 0.62, envMapIntensity: 0.12 });
     owned.mat.push(frameMat);
     var trimTop = new THREE.Mesh(boxGeo(HEAD_W + 0.4, 0.42, 0.42), frameMat);
     trimTop.position.set(0, HEAD_H + 0.06, 0.2);

@@ -43,10 +43,13 @@
    and is skipped on the next pass, so it is safe to call again after
    a late texture load, a hot resize, or a rebuild.
    ============================================================ */
+import './machine.js';
+import * as THREE from './vendor/three.module.js';
+
 (function (global) {
   'use strict';
 
-  if (!global.THREE) return;
+  if (!THREE) return;
 
   /* Anything at or below this metalness and carrying a map is treated
      as paint. The art panels run 0.06 - 0.25; the first real metal is

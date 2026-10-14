@@ -4,6 +4,9 @@
    game ships with zero binary assets. The playfield texture is
    painted to match table.js coordinates exactly.
    ============================================================ */
+import './physics.js';
+import * as THREE from './vendor/three.module.js';
+
 (function (global) {
   'use strict';
 
@@ -276,7 +279,7 @@
 
     var tex = new THREE.CanvasTexture(c);
     tex.anisotropy = 8;
-    if ('encoding' in tex) tex.encoding = THREE.sRGBEncoding;
+    if ('colorSpace' in tex) tex.colorSpace = THREE.SRGBColorSpace;
 
     /* The sprite atlas (assets.js) replaces this canvas once it decodes;
        this painted canvas stays as the zero-asset fallback. */
@@ -296,7 +299,7 @@
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, 128, 128);
     var gt = new THREE.CanvasTexture(c);
-    if ('encoding' in gt) gt.encoding = THREE.sRGBEncoding;
+    if ('colorSpace' in gt) gt.colorSpace = THREE.SRGBColorSpace;
     return gt;
   }
 
@@ -380,7 +383,7 @@
 
     var tex = new THREE.CanvasTexture(c);
     tex.anisotropy = 4;
-    if ('encoding' in tex) tex.encoding = THREE.sRGBEncoding;
+    if ('colorSpace' in tex) tex.colorSpace = THREE.SRGBColorSpace;
     return tex;
   }
 
@@ -434,7 +437,7 @@
 
     var tex = new THREE.CanvasTexture(c);
     tex.anisotropy = 4;
-    if ('encoding' in tex) tex.encoding = THREE.sRGBEncoding;
+    if ('colorSpace' in tex) tex.colorSpace = THREE.SRGBColorSpace;
     return tex;
   }
 
@@ -459,7 +462,7 @@
     }
     var tex = new THREE.CanvasTexture(c);
     tex.mapping = THREE.EquirectangularReflectionMapping;
-    if ('encoding' in tex) tex.encoding = THREE.sRGBEncoding;
+    if ('colorSpace' in tex) tex.colorSpace = THREE.SRGBColorSpace;
     return tex;
   }
 

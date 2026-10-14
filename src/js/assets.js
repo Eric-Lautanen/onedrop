@@ -10,6 +10,9 @@
    includes gutter pixels, which used to show up as grey edging on the
    cabinet. Every box was then checked by rendering its crop.
    ============================================================ */
+import './art.js';
+import * as THREE from './vendor/three.module.js';
+
 (function (global) {
   'use strict';
 
@@ -163,7 +166,7 @@
          sampler knob that buys anything back on the oblique hero view;
          three.js clamps it to whatever the GPU actually supports. */
       texture.anisotropy = 16;
-      if ('encoding' in texture) texture.encoding = THREE.sRGBEncoding;
+      if ('colorSpace' in texture) texture.colorSpace = THREE.SRGBColorSpace;
       texture.needsUpdate = true;
       settle(true);
     }
@@ -296,7 +299,7 @@
     var t = new THREE.CanvasTexture(c);
     t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping;
     t.minFilter = THREE.LinearFilter;
-    if ('encoding' in t) t.encoding = THREE.sRGBEncoding;
+    if ('colorSpace' in t) t.colorSpace = THREE.SRGBColorSpace;
     return t;
   }
 
@@ -320,7 +323,7 @@
     var t = new THREE.CanvasTexture(c);
     t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping;
     t.minFilter = THREE.LinearMipmapLinearFilter;
-    if ('encoding' in t) t.encoding = THREE.sRGBEncoding;
+    if ('colorSpace' in t) t.colorSpace = THREE.SRGBColorSpace;
     return t;
   }
 
