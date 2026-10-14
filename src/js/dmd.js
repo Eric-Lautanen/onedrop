@@ -233,7 +233,6 @@ import './audio.js';
       wizard: false, wizardTimer: 0,
       tick: 0
     };
-    var spinners = { ring: 0 };
     var marqueeX = 0;
     var attractPage = 0, attractTimer = 0;
 
@@ -310,8 +309,6 @@ import './audio.js';
         }
       }
     }
-    function spriteW(name, scale) { return SPR[name] ? SPR[name][0].length * (scale || 1) : 0; }
-    function spriteH(name, scale) { return SPR[name] ? SPR[name].length * (scale || 1) : 0; }
 
     /* ---------------- bar / pip helpers ---------------- */
     function bar(x, y, w, h, frac, cap) {

@@ -85,8 +85,11 @@ import * as THREE from './vendor/three.module.js';
      The cabinet is NOT resized by any of them -- machine.js sizes
      itself from its own real-world numbers. If the cabinet changes,
      re-derive PF_SIZE from its new opening and pass it in. */
-  var ART_W = 453, ART_H = 817;
-  var ART_ASPECT = ART_W / ART_H;                 /* 0.55447 */
+  /* the artwork's source sheet is 453 x 817 art pixels -- an aspect of
+     0.55447 -- and every art coordinate in here is a fraction of that
+     rectangle. No live code needs the two numbers (the playfield is sized
+     from the CABINET's opening below, not from the picture), so they live
+     in this comment rather than in variables nothing reads. */
 
   /* ================= the cabinet's inner opening =================
      machine.js owns the cabinet. These numbers are its current outer

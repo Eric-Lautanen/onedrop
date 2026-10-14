@@ -36,7 +36,6 @@ import * as THREE from './vendor/three.module.js';
   var LIT = global.PB.LIT;
   var UP = new T.Vector3(0, 0, 1);
   var YAXIS = new T.Vector3(0, 1, 0);
-  var ZERO = new T.Vector3(0, 0, 0);
 
   /* ---------- small helpers ---------- */
   function clamp(v, a, b) { return v < a ? a : (v > b ? b : v); }
@@ -82,14 +81,6 @@ import * as THREE from './vendor/three.module.js';
     function torGeo(r, t, a, b) {
       var k = 't' + r + '_' + t + '_' + a + '_' + b;
       return cache[k] || (cache[k] = own(new T.TorusGeometry(r, t, a, b)));
-    }
-    function circGeo(r, s) {
-      var k = 'i' + r + '_' + s;
-      return cache[k] || (cache[k] = own(new T.CircleGeometry(r, s)));
-    }
-    function ringGeo(a, b, s) {
-      var k = 'r' + a + '_' + b + '_' + s;
-      return cache[k] || (cache[k] = own(new T.RingGeometry(a, b, s)));
     }
 
     /* ---------- orientation ----------

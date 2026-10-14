@@ -51,13 +51,18 @@ import './guard.js';
 
   /* ================= DOM ================= */
   var D = {};
-  ['score', 'highscore', 'ball', 'mult', 'message', 'lamps', 'spins', 'fps',
+  /* the score/highscore/ball/mult/spins ids are NOT in the markup any more:
+     the scoreboard lives on the 3D backbox and every write to them goes
+     through setText(), which ignores a missing node. They are looked up
+     anyway so a DOM HUD could be dropped back in. `message`, `lamps` and
+     `hint` were looked up but never read by anything -- deleted. */
+  ['score', 'highscore', 'ball', 'mult', 'spins', 'fps',
     'menu', 'menuTab', 'menuStatus', 'menuHigh', 'playBtn', 'resetGameBtn',
     'lockCamBtn',
     'keyLeft', 'keyRight', 'keyPlunge', 'keyNudgeL', 'keyNudgeR', 'keyReset',
     'soundBtn', 'pauseBtn', 'fsBtn', 'fxBtn', 'vol', 'volVal',
     'touchLeft', 'touchRight', 'touchLaunch', 'touchNudgeL', 'touchNudgeR',
-    'hint', 'dmd', 'flash', 'floats',
+    'dmd', 'flash', 'floats',
     'loader', 'ldFill', 'ldMsg'
   ].forEach(function (id) { D[id] = document.getElementById(id); });
 
@@ -366,6 +371,23 @@ import './guard.js';
       global.console.warn('[playfield] ' + msg);
     }
   }
+  /* ---- WHAT THE GAME MAY PRINT, AND WHEN -----------------------------
+     Everything here is one-shot, and nothing is called from the frame loop
+     or from inside a per-ball branch -- a healthy load must be silent, and
+     a long game must not fill the console. The failures that a player or a
+     developer needs (the WebGL context going away, the cabinet throwing,
+     the field not fitting the machine, the frame governor dying) each warn
+     ONCE, on the thing going wrong, and stay.
+     The one healthy-load diagnostic -- the boot-mark dump -- is opt-in:
+     `?debug` on the URL, or localStorage onedrop.debug = '1'. The marks are
+     always RECORDED (see mark()); printing them is only a convenience, and
+     the boot timeline is meant to be read from the outside anyway
+     (performance.getEntriesByType('mark'), which is what dev/_bootshape.py
+     does), so nothing depends on the line. */
+  function debugOn() {
+    if (stored('onedrop.debug') === '1') return true;
+    return /[?&]debug\b/.test(global.location.search || '');
+  }
   /* a mark is a few microseconds and it is what makes the boot's shape
      measurable from the outside: performance.getEntriesByType('mark')
      then says exactly where the fresh-load time went, without a profile
@@ -422,11 +444,14 @@ import './guard.js';
     buildFloor();
     fitCamera();
     mark('boot:cabinet-done');
-    /* tell the world out loud, so a slow boot can be told apart from a
-       hung one from the console alone */
-    pfWarn('boot marks: ' + performance.getEntriesByType('mark').map(function (m) {
-      return m.name + '@' + Math.round(m.startTime);
-    }).join(' '));
+    /* tell the world out loud, so a slow boot can be told apart from a hung
+       one -- but only when asked (see debugOn): this is the one line that
+       healthy production load would otherwise print every single time */
+    if (debugOn()) {
+      pfWarn('boot marks: ' + performance.getEntriesByType('mark').map(function (m) {
+        return m.name + '@' + Math.round(m.startTime);
+      }).join(' '));
+    }
 
     /* ---- sequence: the cabinet is the last thing the loader waits on ---- */
     bootCabinetDone = true;
@@ -979,6 +1004,11 @@ import './guard.js';
         var rest = null;
         for (var id in down) { rest = down[id]; break; }
         if (rest) { orbit.drag = true; orbit.px = rest.x; orbit.py = rest.y; }
+      } else if (downCount === 2) {
+        /* back from three fingers to two: re-measure before the next move,
+           or the pair is scaled by the gap they had before the third finger
+           landed -- which arrives as one big jump in the zoom */
+        pinchGap = gap();
       } else if (downCount === 0) {
         orbit.drag = false;
       }
@@ -1024,7 +1054,13 @@ import './guard.js';
        sway clock in one leap */
     var udt = lastUC < 0 ? 0.016 : Math.min(0.05, Math.max(0, t - lastUC));
     lastUC = t;
-    if (!camFly.on) {
+    if (!camFly.on && !camLocked) {
+      /* the locked view does not BREATHE either: the idle sway is movement,
+         and a lock that still drifts a unit a second would read as the
+         camera wandering off on its own. The sway CLOCK is frozen rather
+         than the terms zeroed, so unlocking resumes from the same phase
+         instead of snapping to the origin (and the hit shake is a separate
+         term, so a locked cabinet still jolts when the ball hits it). */
       wobbleAmp = Math.min(1, wobbleAmp + udt * 0.5);
       swayT += udt;
     }
@@ -2293,11 +2329,21 @@ import './guard.js';
      not the theatrical drop, which is for reveal and game over. Opening
      and closing the panel says nothing about the pause. */
   if (D.menuTab) {
+    /* THE HANDLE IS A TOGGLE. Tabbed: pull the panel back down. Already
+       down: park it, exactly as PLAY does when it closes the panel. It used
+       to be one-way -- with the menu down the press did NOTHING except
+       focus the handle, and a focused handle sits 1px past the panel's own
+       scroll edge, which is what threw a scrollbar up and narrowed the
+       panel under the player's finger (see #menuTab:active in the CSS). */
     var tabFn = function (e) {
       e.preventDefault();
       if (D.menu.classList.contains('tabbed')) {
         menuDown = true;
         menuSlide('down', false);
+      } else {
+        menuDown = false;
+        menuSlide('up', false);
+        D.menu.classList.add('ingame');
       }
       D.menuTab.blur();  /* a focused handle would eat Space as a click */
     };
