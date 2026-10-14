@@ -241,13 +241,21 @@ TOOLS = r"""
     return { median: vals[Math.floor(vals.length / 2)], all: vals };
   };
 
-  /* ---- arrangement: ONE section of a song, rendered and measured ---- */
+  /* ---- arrangement: ONE section of a song, rendered and measured ----
+     Schedules EXACTLY secLen steps. The first version computed the step
+     count from the seconds passed in (`round(secs / stepDur)`), which
+     overran the section boundary by a step or two whenever the seconds and
+     the tempo did not divide evenly -- and one of those leaked steps is the
+     NEXT section's opening bar, which is fine while it is quiet and a
+     measurement-wrecking spike the moment any section starts with a kick
+     (the dub bar now opens on one). The `secs` argument still sets the
+     render LENGTH, so the section's own reverb tail is kept; only the
+     voices stop where the section stops. */
   window.__section = async (i, secIdx, secs) => {
     const song = PBx.AudioEngine.SONGS[i];
     const secLen = (song.secBars || 4) * 16;
     const buf = await window.__off((e) => {
-      const n = Math.round(secs / song.stepDur);
-      for (let k = 0; k < n; k++) {
+      for (let k = 0; k < secLen; k++) {
         e._scheduleSongStep(song, secIdx * secLen + k, 0.1 + k * song.stepDur);
       }
     }, secs);

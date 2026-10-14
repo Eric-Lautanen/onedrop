@@ -141,18 +141,64 @@ Also measured while in there, **reported as candidates, not changed**:
 
 **NOTE on `dev/verify-audio.py` and the audio engine:** an *uncommitted*
 change to [src/js/audio.js](src/js/audio.js) landed in the working tree
-during this audit -- tempos (88/92), a zerofied-dub feel and comments --
-which this session did NOT write and has not committed. It was checked to
-boot clean (no page errors), but it is not part of any audit commit and is
-for its own author to review/commit; the audio suite should be re-run over
-it before it ships.
+during this audit -- tempos (88/92), a denser dub feel and comments --
+which this session did NOT write. It was checked to boot clean, but it is
+not part of any audit commit and is for its own author to review/commit.
+The re-run it needs found **one real defect, at its cause**:
+
+* the re-run FAILED one check, `the break is audibly a break`, on
+  DUB CHAMBER only: the break was 0.8 dB from its busiest section, under
+  the 2.5 dB bar. **Two causes, both fixed:**
+* (a) the edit had dropped arrangement flags it never commented on. Diffed
+  against `HEAD`, section by section: DUB CHAMBER's break lost
+  `k: 0` (its own still-present comment says "the break drops to bass and
+  echo: the rhythm section OUT"), ONE DROP's break lost `d: 0` (its
+  comment: "the break taking everything but the bass away"), and ONE
+  DROP's and DUB CHAMBER's outros lost `k: 0`. Keeping a chop in a break
+  made ONE DROP's break not a break at all (all flags on, drums included)
+  and DUB CHAMBER's merely wet. All four flags were restored; nothing
+  else in the edit is touched, so the tempos, the pulse, the intro and
+  the dub scheduler changes all stand.
+* (b) a defect in this suite's own `__section` probe, exposed by the same
+  edit: it scheduled `round(secs / stepDur)` steps, which overruns a
+  section by a step or two whenever the tempo does not divide the window
+  evenly -- and the leaked steps are the NEXT section's opening bar. That
+  used to be harmless because the committed dub bar began on a rest; the
+  edit made it open on a kick, so every break render had a foreign
+  transient in its window (a +4.5 dB lie on a 16-voice break). The probe
+  now schedules EXACTLY `secLen` steps and uses `secs` only for the
+  render length, so the section's own tail is kept and nothing foreign
+  is. `__count`, which schedules exactly secLen already, was clean all
+  along -- which is exactly why the two checks disagreed.
+
+After both fixes the suite is green end to end: **43 checks, 0 failing,
+no page errors**, and the breaks measure further apart than they ever
+did before the fix (ONE DROP 6.5, DUB CHAMBER 5.9, ROCKERS 7.7,
+SKANK RAIL 7.1, NYABINGHI 13.3, STEPPERS 4.0 dB) because the foreign
+transients were suppressing every diff, not just the one that tripped.
+
+**NOTE on `scripts/serve.py` and a second external batch.** The working
+tree also carries an uncommitted desktop-launcher change in `scripts/`
+(`serve.py`/`serve.ps1` modified, `launch-app.ps1`, `onedrop.bat`,
+`onedrop.ico` new). That edit seams `serve.py`'s banner docstring into
+`def main():` -- the file would not even parse. The one merge line was
+repaired (banner close + blank line before `def main`); the launcher work
+itself is untouched and uncommitted, for its own author.
+
+The 12 resource 404s that showed up in the audio suite's error list
+during the re-run are explained by this too, and are environmental, not
+leaks: the page pings `/ping` every 5 s for `scripts/serve.ps1`'s idle
+watchdog, and the server process that had been up since before that
+handler existed answered 404 until the page noticed and gave up. The
+server was restarted with the repaired `serve.py`; `/ping` now returns
+`200`, and a fresh boot with the heartbeat allowed to fire reports an
+empty console-error list.
 
 ## Remaining / not done
 
-* `verify-audio.py` (~20 min in this environment) has not been re-run
-  since the pass 2-4 `game.js` frame-loop edit. Its assertions are the only
-  ones that would catch a regression in the DMD *content* path, so it
-  should be re-run before this audit is called fully closed.
+* `verify-audio.py` has been re-run over the final working tree (the
+  game.js frame-loop edit was covered); its last complete result and the
+  one defect it found and fixed are recorded above.
 * Cut-short-insert install schedule-ahead (Pass 2) left as reported.
 * DMD raster, as above.
 * `three.min.js` (594 KB) is vendored unmodified; splitting the parts the
