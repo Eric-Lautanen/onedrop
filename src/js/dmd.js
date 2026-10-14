@@ -322,14 +322,6 @@ import './audio.js';
         o.fillRect(x + i * (size + 2), y, size, size);
       }
     }
-    function rastaBars(t, alpha) {
-      for (var b = 0; b < 4; b++) {
-        var y = Math.floor((b * 8 + t * 26) % (ROWS + 8)) - 8;
-        o.fillStyle = 'rgba(255,255,255,' + alpha + ')';
-        o.fillRect(0, y, COLS, 2);
-      }
-    }
-
     /* ---------------- the two palms ----------------
        The artwork paints a palm either side of the display, and the panel
        now covers that paint (see BAND_WIN in machine.js), so the pair lives
@@ -465,11 +457,6 @@ import './audio.js';
         bar(mx + m * mw, 20, Math.max(6, mw - 3), 4, (mprog[m] || 0) / 3);
       }
 
-      /* a slow radar sweep keeps the panel alive */
-      var sw = (t * 26) % (COLS + 30) - 15;
-      o.fillStyle = 'rgba(255,255,255,0.16)';
-      o.fillRect(sw, 0, 2, ROWS);
-
       /* the skill-shot window callout, on the one free line left */
       if (S.skill) {
         textC('SKILL SHOT!', COLS / 2, 26, 6);
@@ -488,7 +475,6 @@ import './audio.js';
         o.lineWidth = 1;
         o.beginPath(); o.arc(COLS / 2, ROWS / 2, 6 + rr, 0, Math.PI * 2); o.stroke();
       }
-      if (m.kind === 'multiball') rastaBars(t, 0.22);
       if (m.kind === 'wizard') {
         for (var i = 0; i < 3; i++) {
           o.fillStyle = 'rgba(255,255,255,' + (0.16 + 0.2 * (0.5 + 0.5 * Math.sin(t * 6 + i))) + ')';
@@ -500,7 +486,6 @@ import './audio.js';
 
     /* ---- multiball light show ---- */
     function drawMultiball(t) {
-      rastaBars(t, 0.30);
       var msgs = ['MULTIBALL!', 'SHOOT THE TIKI', 'JACKPOT ARMED', 'ALL DAY!'];
       var i = Math.floor(t * 1.8) % msgs.length;
       textC(msgs[i], COLS / 2, 4, 17, BIG);
@@ -519,7 +504,6 @@ import './audio.js';
        had reached the end of the rules. Everything lit, IRIE called
        out, and a bar running down the 30-second clock. */
     function drawWizard(t) {
-      rastaBars(t, 0.34);
       textC('WIZARD MODE', COLS / 2, 0, 15, BIG);          /* rows 0..15 */
       var msgs = ['IRIE MASTER!', 'EVERY SHOT PAYS', 'JACKPOT DOUBLED', 'ALL DAY!'];
       var i = Math.floor(t * 1.6) % msgs.length;

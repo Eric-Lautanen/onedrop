@@ -35,6 +35,10 @@ the physics layout and the artwork can never drift apart.
   screen, showing scores, missions and callouts.
 - **A living riddim.** All music and sound effects are generated in the browser  
   with the Web Audio API — no audio files to download.
+- **A demo that plays.** After a few seconds on the attract screen the machine  
+  takes itself on — plunger, flippers and all — and any key or touch hands it  
+  back with the ball still in the lane. `PB.game.demo` in the console drives it  
+  (`demo.start()`, `demo.stop()`, `demo.wait`).
 - **Made to be watched.** A hand-built 3D cabinet, backbox and legs, an  
   orbit/zoom camera, and hit effects (particles, trails, flashes, floating  
   scores) that can be toggled.
@@ -55,7 +59,9 @@ the physics layout and the artwork can never drift apart.
 | Mouse / touch            | Drag to orbit the view, wheel to zoom |
 
 Keys are rebindable from the side menu — click a keycap, then press the key  
-you want. The menu also has volume, FX, fullscreen and reset controls.
+you want. The menu also has volume, FX, fullscreen and reset controls. Opening  
+the menu does **not** pause the table (you can reach the volume mid-ball):  
+pausing is `P`, or the menu's own PAUSE button.
 
 ## Running it on your machine
 

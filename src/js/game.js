@@ -961,20 +961,19 @@ import './guard.js';
                             the tabbed/up position keeps it false so PLAY and
                             the handle can act as close-and-resume */
   function showOverlay(on) {
-    /* on = menu fully shown, hidden-with-handle otherwise. While a game
-       is live this is the PAUSE TOGGLE: sliding the menu down pauses the
-       table, sliding it back up closes the menu and resumes. Attract and
-       game-over have nothing to pause, so those pass untouched. */
+    /* on = menu fully shown, hidden-with-handle otherwise. Opening the menu
+       is NOT a pause: the menu is a panel over a table that keeps running
+       (the volume fader and the key caps are worth reaching mid-ball), and
+       pausing is its own deliberate act -- P, or the PAUSE button. */
     if (!D.menu) return;
     D.menu.classList.toggle('ingame', !on);
-    menuPause(on);
     menuDown = on;
     menuSlide(on ? 'down' : 'up');
   }
   function menuPause(on) {
-    /* an open menu over a live ball pauses; re-tabbing it resumes.
-       Pause takes the riddim with it -- the band stops on the beat it is
-       at (startMusic later resumes from there) -- and restarts on open. */
+    /* Pause, and only ever from P or the PAUSE button.
+       It takes the riddim with it -- the band stops on the beat it is at
+       (startMusic later resumes from there) -- and restarts on resume. */
     if (!(state === 'ready' || state === 'play' || state === 'ballover')) return;
     if (paused === on) return;
     paused = on;
@@ -1608,6 +1607,184 @@ import './guard.js';
     }
   }
 
+  /* ================= the demo player =================
+     The attract screen's machine plays ITSELF: it draws the plunger back,
+     lets it go and works both flippers, so the cabinet is alive while it
+     waits and the rules can be watched running with nobody at the glass.
+
+     It drives the same inputs a human does -- the charge, launch(),
+     pressLeft/pressRight, nudge -- and never touches the rules, so what you
+     watch is exactly the game a player gets. And it plays like a person,
+     not like a solver: it takes the ball on the side the ball is on, waits
+     for the ball to come DOWN to the blade instead of swinging at air,
+     gives each shot a quick stab rather than a held bat, and misses the odd
+     ball. A demo that never missed would never come off the table.
+
+     Any other key or touch stops it and hands over the live game, ball
+     still in the lane, so the player's own press is their own plunge. */
+  var demo = {
+    on: false,
+    idle: 0,          /* seconds of attract before it takes the machine */
+    wait: 6,
+    chargeTo: 0.8,    /* how far it draws the spring back, per ball */
+    entered: false,   /* has this plunge reached the table proper yet? */
+    plunged: false,   /* and was it one of ours that is being judged? */
+    lastState: '',
+    hold: [0, 0],     /* seconds left on each flipper's stab */
+    nudgeCool: 0,
+    still: 0,         /* seconds the ball has been sitting motionless */
+    shakeCool: 0,
+    overHold: 0       /* how long the final score sits before attract */
+  };
+  function demoFlipper(i, on) { if (i === 0) pressLeft(on); else pressRight(on); }
+  function demoStop() {
+    if (!demo.on) return;
+    demo.on = false;
+    demo.hold[0] = demo.hold[1] = 0;
+    pressLeft(false); pressRight(false);
+  }
+  function demoStart() {
+    if (demo.on || state !== 'attract') return;
+    /* never take the machine over with a bat already up: a raised flipper
+       left over from the last hand would hold the new ball where it sits */
+    pressLeft(false); pressRight(false);
+    demo.on = true;
+    demo.idle = 0;
+    demo.hold[0] = demo.hold[1] = 0;
+    demo.nudgeCool = 0;
+    demo.still = 0;
+    demo.shakeCool = 0;
+    demo.overHold = 0;
+    demo.entered = false;
+    demo.plunged = false;
+    /* a different draw every ball, like a hand on a real plunger. A soft
+       one sometimes fails to clear the arch and rolls back -- that is the
+       machine being honest, not a bug. */
+    demo.chargeTo = 0.5 + Math.random() * 0.5;
+    startGame();
+    demo.lastState = state;      /* 'ready': the first ball is in the lane */
+  }
+  /* one frame of it */
+  function demoPlay(raw) {
+    var i;
+    /* the stabs run on their own clock, so a flipper is always let go even
+       when the ball drains or the state changes mid-swing */
+    for (i = 0; i < demo.hold.length; i++) {
+      if (demo.hold[i] <= 0) continue;
+      demo.hold[i] -= raw;
+      if (demo.hold[i] <= 0) { demo.hold[i] = 0; demoFlipper(i, false); }
+    }
+    /* ---- its game is over: back to attract, and round again ---- */
+    if (state === 'gameover') {
+      demo.overHold += raw;
+      if (demo.overHold < 3) return;      /* let the final score sit a beat */
+      demoStop();                         /* hands off the bats as it goes */
+      demo.idle = 0;
+      charge = 0; charging = false;
+      PF.setPlunger(0); PF.snapPlunger();
+      attractTimer = 0;
+      state = 'attract';
+      showOverlay(true);
+      return;
+    }
+    /* a ball that came back to the lane: judge the plunge that put it there
+       and draw the next one. Too soft to reach the table means pull harder
+       next time -- which is what a person does, and without it a demo whose
+       first draw was soft would plunge that same weak shot forever. */
+    if (state === 'ready' && demo.lastState !== 'ready') {
+      if (demo.plunged) {
+        if (demo.entered) demo.chargeTo = 0.5 + Math.random() * 0.5;
+        else demo.chargeTo = Math.min(1, demo.chargeTo + 0.22);
+      }
+      demo.plunged = false;
+      demo.entered = false;
+    }
+    demo.lastState = state;
+
+    /* ---- the plunge ---- */
+    if (state === 'ready') {
+      charging = true;                    /* the frame loop below charges it */
+      if (charge >= demo.chargeTo) { charging = false; demo.plunged = true; launch(); }
+      return;
+    }
+    if (state !== 'play') return;
+    /* up into the table proper? (the lane and the arch are the bottom
+       sixth of it, so anything above that means the shot went in) */
+    if (!demo.entered && world.balls.length && world.balls[0].y > table.H * 0.55) {
+      demo.entered = true;
+    }
+
+    /* ---- the flippers ---- */
+    var geo = table.flippers, live = world.flippers;
+    /* the blade's own line across the table. Below it the ball is the
+       flippers' to lose; above it, a swing is a swing at air. */
+    var zoneY = Math.max(geo[0].py, geo[1].py) + 4.5;
+    var midX = (geo[0].px + geo[1].px) / 2;
+    var busy = [demo.hold[0] > 0, demo.hold[1] > 0];
+    for (var bi = 0; bi < world.balls.length; bi++) {
+      var b = world.balls[bi];
+      if (b.y > zoneY) continue;          /* still up the table */
+      var side = b.x < midX ? 0 : 1;      /* the hand nearest the ball */
+      if (busy[side]) continue;           /* that hand is mid-stab */
+      var f = geo[side], lf = live[side];
+      /* A BAT THAT IS UP IS NOT PRESSED AGAIN. Every stab has to come all
+         the way back down before the next one, or the demo re-presses on
+         the very next frame, the bat never rests, and a ball that ends up
+         on the raised blade is pinned there with the flipper flapping at
+         it forever. A swing also has to start from the bottom of its
+         travel or it is not a swing at all. */
+      if (lf.active || Math.abs(lf.curA - lf.restA) > 0.06) continue;
+      /* the blade sweeps INWARD from its pivot, so it owns the table from
+         its own edge inward; the outlane outside that edge is the nudge's
+         business, and a ball behind the root is nobody's */
+      var inward = side === 0 ? b.x - f.px : f.px - b.x;
+      if (inward < 0.35 || inward > f.len + 1.4) continue;
+      if (b.vy > 5) continue;             /* climbing away: let it come */
+      demo.hold[side] = 0.08 + Math.random() * 0.12;
+      busy[side] = true;
+      demoFlipper(side, true);
+    }
+
+    /* ---- the odd nudge ----
+       Only for a ball already past the blade's outside edge -- an outlane
+       ball -- only while it is falling, and never twice inside a tilt
+       window, so the demo can save a ball without ever tilting itself. */
+    if (demo.nudgeCool > 0) demo.nudgeCool -= raw;
+    if (demo.nudgeCool <= 0 && tiltWarn === 0 && !tilted) {
+      for (var ni = 0; ni < world.balls.length; ni++) {
+        var nb = world.balls[ni];
+        if (nb.y > zoneY || nb.vy > 0) continue;
+        var out = nb.x < geo[0].px - 1.2 ? -1 : (nb.x > geo[1].px + 1.2 ? 1 : 0);
+        if (!out) continue;
+        demo.nudgeCool = 1.6;
+        nudge(-out);                      /* shove the ball back inboard */
+        break;
+      }
+    }
+
+    /* ---- a ball nobody can reach ----
+       Real cabinets run a ball search for exactly this: a ball come to rest
+       out of the flippers' reach -- an outlane mouth, a ledge -- where
+       every swing is wasted and the game would sit there for ever. The demo
+       does what a player would: shake the table back toward the middle,
+       and if the ball is still there, fire both bats with it. Both are
+       things a player can do, and the tilt rule still governs. */
+    var stillAt = null;
+    for (var si = 0; si < world.balls.length; si++) {
+      var sb = world.balls[si];
+      if (Math.abs(sb.vx) + Math.abs(sb.vy) < 1.5) stillAt = sb.x;
+    }
+    demo.still = stillAt === null ? 0 : demo.still + raw;
+    if (demo.shakeCool > 0) demo.shakeCool -= raw;
+    if (demo.still > 4 && demo.shakeCool <= 0 && !tilted) {
+      demo.still = 0;
+      demo.shakeCool = 3;
+      demoFlipper(0, true); demoFlipper(1, true);
+      demo.hold[0] = demo.hold[1] = 0.12;   /* and let them both go again */
+      if (tiltWarn === 0 && stillAt !== null) nudge(stillAt < midX ? 1 : -1);
+    }
+  }
+
   /* ============ rebindable keys + reset game ============
      The menu's key caps are buttons: click one, press a key, done. The
      bindings live in localStorage so they survive a reload, and the
@@ -1755,6 +1932,7 @@ import './guard.js';
      and by nothing else. */
   global.addEventListener('keydown', function (e) {
     if (e.repeat) return;
+    demoStop();     /* a hand on the machine: the demo is over, the game is theirs */
     /* capture mode: the next key becomes the binding being listened for.
        Escape cancels without changing anything. Return before the gameplay
        switch so the key that SETS a binding cannot also FIRE one. */
@@ -1797,7 +1975,17 @@ import './guard.js';
     if (e.code === keys.reset) { requestReset(); return; }
 
     if (state === 'attract' || state === 'gameover') {
-      if (e.code === keys.plunge || e.code === 'Enter') { startGame(); return; }
+      if (e.code === keys.plunge || e.code === 'Enter') {
+        startGame();
+        /* THE SAME PRESS KEEPS GOING. The ball is in the lane by now and the
+           callout on the panel says HOLD SPACE TO PLUNGE, so the key that
+           started the game must already be drawing the spring back. With a
+           bare return here the hold was swallowed: the player pressed and
+           held, nothing charged, and the release fired nothing -- the ball
+           just sat in the lane with a dead plunger. */
+        if (e.code === keys.plunge) { charging = true; charge = 0; }
+        return;
+      }
     }
     if (e.code === keys.left) pressLeft(true);
     if (e.code === keys.right) pressRight(true);
@@ -1812,12 +2000,18 @@ import './guard.js';
   });
 
   function launch() {
-    if (state !== 'ready' || !world.balls.length) return;
+    /* 25% more launch power than the original 26..54 band. */
+    var power = (26 + charge * 28) * 1.25;
+    if (state !== 'ready' || !world.balls.length) {
+      /* the spring still lets go. With no ball to throw, the handle has to
+         come home anyway: this is the only thing that ever releases a
+         charge, so an early return left the plunger drawn back for good. */
+      dropCharge();
+      return;
+    }
     /* deliberately NOT exitOrbit(): plunging is gameplay, and the player
        keeps whatever view they set. */
     var b = world.balls[0];
-    /* 25% more launch power than the original 26..54 band. */
-    var power = (26 + charge * 28) * 1.25;
     b.vy = power;
     b.vx = 0.6;
     if (PF.releasePlunger) PF.releasePlunger();
@@ -1842,9 +2036,10 @@ import './guard.js';
       audio.resume();
       if (state === 'attract' || state === 'gameover') startGame();
       else if (menuDown && D.menu) {
-        /* mid-game with the menu dropped: PLAY is CLOSE-AND-RESUME */
+        /* mid-game with the menu dropped: PLAY closes the panel. It does
+           not touch the pause -- a paused game stays paused until the
+           player says otherwise. */
         menuDown = false;
-        menuPause(false);
         menuSlide('up', false);
         D.menu.classList.add('ingame');
       }
@@ -1855,16 +2050,14 @@ import './guard.js';
 
   /* the MENU handle that peeks over the top edge while playing: tap it
      and the panel slides back down to the dropped spot -- a plain slide,
-     not the theatrical drop, which is for reveal and game over. With a
-     ball live that same tap is CLOSE-AND-RESUME: the menu opened by
-     pausing, so closing it un-pauses. */
+     not the theatrical drop, which is for reveal and game over. Opening
+     and closing the panel says nothing about the pause. */
   if (D.menuTab) {
     var tabFn = function (e) {
       e.preventDefault();
       if (D.menu.classList.contains('tabbed')) {
         menuDown = true;
         menuSlide('down', false);
-        menuPause(false);   /* closing the menu resumes the live game */
       }
       D.menuTab.blur();  /* a focused handle would eat Space as a click */
     };
@@ -1990,14 +2183,32 @@ import './guard.js';
     for (var i = 0; i < flipIds.length; i++) if (flipIds[i] === id) releaseFlip(i);
     if (chargeId === id) {
       chargeId = null;
-      if (charging) { charging = false; if (fire) launch(); }
+      if (charging) {
+        charging = false;
+        if (fire) launch();
+        else dropCharge();      /* a cancelled grab never fires the shot */
+      }
     }
+  }
+  /* Let the spring go: a charge nobody is holding is not a charge. `charge`
+     is what the plunger's handle follows, every frame, so a charge left
+     behind by a swallowed release parks the handle at the back of its
+     travel and nothing on the machine can bring it home again. */
+  function dropCharge() {
+    charging = false;
+    charge = 0;
+    if (PF.setPlunger) PF.setPlunger(0);
+    if (PF.snapPlunger) PF.snapPlunger();
   }
   function releaseAll() {
     for (var i = 0; i < flipIds.length; i++) releaseFlip(i);
     if (chargeId !== null) { chargeId = null; charging = false; }
+    dropCharge();        /* a lost window must not leave it drawn back */
   }
   global.addEventListener('pointerdown', function (e) {
+    /* any touch or click means a person is here: the demo hands the machine
+       over at once, and lets go of whatever it was holding */
+    demoStop();
     if (e.target !== renderer.domElement) return;
     var hit = pickControl(e);
     if (!hit) return;
@@ -2012,7 +2223,10 @@ import './guard.js';
     }
     var knob = plungerKnob();
     if (hit === knob) {
-      if (state === 'attract' || state === 'gameover') { startGame(); return; }
+      if (state === 'attract' || state === 'gameover') startGame();
+      /* the grab that started the game is also the grab that pulls: the
+         pointer is already on the knob, so the draw begins here rather
+         than waiting for a second press (same fix as the plunge key) */
       if (state === 'ready') {
         chargeId = e.pointerId; charging = true; charge = 0;
         mouseChargeY0 = e.clientY;
@@ -2068,7 +2282,9 @@ import './guard.js';
   var touchCharging = false;
   bindHold(D.touchLaunch, function () {
     audio.resume();
-    if (state === 'attract' || state === 'gameover') { startGame(); return; }
+    if (state === 'attract' || state === 'gameover') startGame();
+    /* this touch both starts the game and holds the spring, so a single
+       press-and-hold plunges on a touch screen */
     if (state === 'ready') { touchCharging = true; charging = true; charge = 0; }
   }, function () { if (touchCharging) { touchCharging = false; charging = false; launch(); } });
 
@@ -2181,7 +2397,13 @@ import './guard.js';
         hints.push('COMPLETE ALL FIVE MISSIONS FOR WIZARD MODE');
         attractMsg = (attractMsg + 1) % hints.length;
       }
+      /* the demo player takes the machine over after a beat of attract, so
+         the screen is readable first and the cabinet is never left cold */
+      demo.idle += raw;
+      if (!demo.on && demo.idle >= demo.wait) demoStart();
     }
+    /* the demo's hands, on the same inputs a player's would be */
+    if (demo.on) demoPlay(raw);
 
     /* ---- charge plunger ----
       Two models: the keyboard/touch hold charges over TIME (hold longer,
@@ -2720,6 +2942,7 @@ import './guard.js';
     get cabinetFit() { return cabinetFit; },
     checkCabinetFit: checkCabinetFit,
     get state() { return state; },
+    get paused() { return paused; },
     get score() { return score; },
     get extraBalls() { return extraBalls; },   /* earned free balls */
     get ballNum() { return ballNum; },         /* debug: current ball number */
@@ -2727,6 +2950,14 @@ import './guard.js';
     get missions() { return missions; },
     setCharge: function (v) { charge = v; charging = true; },
     launch: launch, nudge: nudge,
+    /* the attract-screen demo player: `on` is whether it is driving, and
+       `wait` is how many seconds of attract it gives the screen first */
+    demo: {
+      start: demoStart, stop: demoStop,
+      get on() { return demo.on; },
+      get wait() { return demo.wait; },
+      set wait(v) { demo.wait = Math.max(0, v); }
+    },
     multiball: startMultiball, wizard: startWizard
   };
 })(window);
