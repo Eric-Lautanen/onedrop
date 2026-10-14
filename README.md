@@ -5,6 +5,11 @@
 > The demo is served from GitHub Pages (`main`, `/ (root)`). Everything is  
 > static, so there is no build step between a commit and that URL.
 
+![ONE DROP on first load: the attract screen with the menu down](assets/hero.png)
+
+*The attract screen on first load — menu down, the DMD running its attract  
+page, holding 60 fps. [`dev/_heroshot.py`](dev/_heroshot.py) takes this shot.*
+
 ---
 
 ONE DROP is a full pinball machine rendered in the browser — a 3D cabinet,  
@@ -184,8 +189,9 @@ This puts **ONE DROP Pinball** on your Desktop, pointed at
 index.html          the page: loader, menu, DMD canvas, module entry
 src/css/style.css   all styling
 src/js/             the game (see below)
-assets/             the sprite sheet (sprite2.webp, .png fallback) and the
-                    reference art the machine was measured from
+assets/             the sprite sheet (sprite2.webp, .png fallback), the
+                    reference art the machine was measured from, and the
+                    hero shot above
 server/             local servers + desktop launcher (no dependencies)
 dev/                development and verification scratch (not needed to play)
 ```
