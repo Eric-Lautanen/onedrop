@@ -115,8 +115,11 @@
   var texture = null;
   var ready = false;
   var failed = false;
+  var started = false;
   var queue = [];
   var sources_left = SHEET_SOURCES.slice();
+  var objectUrl = null;
+  var bytes = 0;                 /* 0..1 of the sheet's download, when known */
 
   function settle(ok) {
     ready = ok;
@@ -131,8 +134,75 @@
     }
   }
 
+  function revokeUrl() {
+    if (objectUrl && global.URL && global.URL.revokeObjectURL) {
+      global.URL.revokeObjectURL(objectUrl);
+    }
+    objectUrl = null;
+  }
+
+  /* The image has decoded. Build the one GPU texture off it, then settle.
+     Decode BEFORE settling, and off the main thread: `decoding = 'async'`
+     only hints; without awaiting decode() the rasterisation lands inside the
+     first drawImage -- inside the boot's burst of sheet consumers, on the
+     main thread, with the loader's animation frozen behind it. A decode that
+     REJECTS settles exactly the way onload did before (a texture is built
+     either way; the encoding ladder is only for a fetch that failed). */
+  function onImageLoad() {
+    if (global.PB && global.PB.mark) global.PB.mark('assets:fetch-done');
+    function build() {
+      if (global.PB && global.PB.mark) global.PB.mark('assets:decoded');
+      var src = image;
+      revokeUrl();
+      texture = new THREE.Texture(src);
+      texture.wrapS = texture.wrapT = THREE.ClampToEdgeWrapping;
+      texture.minFilter = THREE.LinearMipmapLinearFilter;
+      texture.magFilter = THREE.LinearFilter;
+      /* The playfield panel is 318 px wide and lands on roughly 600 px of
+         screen, so it is magnified about 2x. Anisotropy is the only
+         sampler knob that buys anything back on the oblique hero view;
+         three.js clamps it to whatever the GPU actually supports. */
+      texture.anisotropy = 16;
+      if ('encoding' in texture) texture.encoding = THREE.sRGBEncoding;
+      texture.needsUpdate = true;
+      settle(true);
+    }
+    if (image.decode) image.decode().then(build, build);
+    else build();
+  }
+
+  /* The fallback path: an <Image> pointed straight at the sheet, walking the
+     webp -> png ladder. Used when the page's inline fetch could not hand us
+     bytes (no fetch, a refused request, or a stream error). */
+  function loadViaImage() {
+    var img = image = new Image();
+    img.decoding = 'async';
+    img.onload = onImageLoad;
+    img.onerror = function () {
+      /* not the last encoding in the ladder: move down it and try again.
+         The queued callbacks keep waiting in `queue`, exactly as before,
+         so a retry after a queued `load()` call still fires them once. */
+      if (sources_left.length > 1) {
+        sources_left.shift();
+        image = null;
+        loadViaImage();
+        return;
+      }
+      image = null;
+      settle(false);
+    };
+    img.src = sources_left[0];
+  }
+
   /* Load the sheet once. Callbacks run exactly once, after the single
-     load settles, and are dropped on failure — no double-fire, no leak.
+     load settles, and are dropped on failure -- no double-fire, no leak.
+
+     Preference order:
+       1. the bytes the page's inline <head> script already streamed, which
+          is what gives the loading bar a real byte count (and means the
+          sheet is only ever fetched once);
+       2. failing that, the image ladder above.
+
      `sources_left` is the webp-then-png ladder: a missing or unsupported
      encoding moves down it and only a last-candidate failure fails, so a
      browser nobody tested still gets the sheet. */
@@ -140,56 +210,29 @@
     if (ready) { if (onReady) onReady(); return; }
     if (failed) return;
     if (onReady) queue.push(onReady);
-    if (image) return;
+    if (started) return;
+    started = true;
 
-    image = new Image();
-    image.decoding = 'async';
-    image.onload = function () {
-      /* Decode BEFORE settling, and off the main thread.
-         `decoding = 'async'` only hints; without this the decode lands
-         inside the first drawImage, which is inside the boot's burst of
-         sheet consumers -- on the main thread, loader animation frozen
-         behind it. Awaiting decode() lets the rasterisation overlap the
-         tail of the script eval, and the burst then starts with a bitmap
-         it can blit straight away. A decode that REJECTS settles exactly
-         the way onload did before (a texture is built either way; the
-         encoding ladder is only for a fetch that failed). */
-      function build() {
-        if (global.PB && global.PB.mark) global.PB.mark('assets:decoded');
-        texture = new THREE.Texture(image);
-        texture.wrapS = texture.wrapT = THREE.ClampToEdgeWrapping;
-        texture.minFilter = THREE.LinearMipmapLinearFilter;
-        texture.magFilter = THREE.LinearFilter;
-        /* The playfield panel is 318 px wide and lands on roughly 600 px of
-           screen, so it is magnified about 2x. Anisotropy is the only
-           sampler knob that buys anything back on the oblique hero view;
-           three.js clamps it to whatever the GPU actually supports. */
-        texture.anisotropy = 16;
-        if ('encoding' in texture) texture.encoding = THREE.sRGBEncoding;
-        texture.needsUpdate = true;
-        settle(true);
-      }
-      if (image.decode) {
-        if (global.PB && global.PB.mark) global.PB.mark('assets:fetch-done');
-        image.decode().then(build, build);
-      } else {
-        build();
-      }
-    };
-    image.onerror = function () {
-      /* not the last encoding in the ladder: move down it and try again.
-         The queued callbacks keep waiting in `queue`, exactly as before,
-         so a retry after a queued `load()` call still fires them once. */
-      if (sources_left.length > 1) {
-        sources_left.shift();
-        image = null;
-        load();
-        return;
-      }
-      image = null;
-      settle(false);
-    };
-    image.src = sources_left[0];
+    var head = global.__PB_SHEET;
+    if (head && head.promise) {
+      head.promise.then(function (h) {
+        /* a queued load() already settled, or the ladder took over */
+        if (ready || failed) return;
+        if (!h || h.failed || !h.blob || !global.URL || !global.URL.createObjectURL) {
+          loadViaImage();
+          return;
+        }
+        bytes = 1;
+        objectUrl = global.URL.createObjectURL(h.blob);
+        var img = image = new Image();
+        img.decoding = 'async';
+        img.onload = onImageLoad;
+        img.onerror = function () { image = null; revokeUrl(); loadViaImage(); };
+        img.src = objectUrl;
+      });
+      return;
+    }
+    loadViaImage();
   }
   function region(name) { return REGIONS[name] || null; }
 
@@ -283,7 +326,9 @@
 
   function dispose() {
     if (texture) { texture.dispose(); texture = null; }
-    ready = false; failed = false; image = null; queue.length = 0;
+    revokeUrl();
+    ready = false; failed = false; image = null; started = false; bytes = 0;
+    queue.length = 0;
     sources_left = SHEET_SOURCES.slice();
   }
 
@@ -300,6 +345,14 @@
     dispose: dispose,
     get texture() { return texture; },
     get image() { return image; },
+    /* 0..1 of the sheet's download. Real bytes when the page's inline script
+       could stream them; otherwise 0 and the bar falls back to its own
+       expectation curve (see the loader in game.js). */
+    progress: function () {
+      var h = global.__PB_SHEET;
+      var p = (h && !h.failed) ? (h.pct || 0) / 100 : 0;
+      return Math.max(bytes, p);
+    },
     /* pixel rect of a region, for canvas compositing */
     rectPx: function (name) {
       var r = REGIONS[name];

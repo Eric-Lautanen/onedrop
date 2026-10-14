@@ -7,12 +7,50 @@
 <title>ONE DROP &mdash; Reggae Pinball</title>
 <!-- The sprite sheet is the page's one big asset (263 KB webp, and the only
      thing every surface samples, so it gates the first paint of the machine).
-     Being declared up here with a preload makes it start downloading right
-     away, in parallel with the scripts below, instead of after the last
-     script's own parse has finished. The png fallback is not preloaded: it
-     is only for a browser without webp, and preloading both would double
-     the payload for nobody. -->
-<link rel="preload" href="assets/sprite2.webp" as="image" type="image/webp">
+     This used to be a <link rel=preload>, which downloads it early but says
+     nothing about HOW the download is going -- a loading bar driven off a
+     preload can only guess, which is why it used to creep, stall and then
+     snap to 100. The download is started here instead, inline and just as
+     early, through fetch() with a streaming reader, which hands the bar real
+     bytes. assets.js consumes the result (window.__PB_SHEET) and falls back
+     to a plain Image, with the original webp -> png ladder, if this script is
+     missing or the stream fails. The png fallback is only fetched when the
+     webp is refused, so the payload is never doubled. -->
+<script>
+(function () {
+  var SOURCES = ['assets/sprite2.webp', 'assets/sprite2.png'];
+  var st = { pct: 0, done: false, failed: false, blob: null };
+  var settleHead;
+  st.promise = new Promise(function (res) { settleHead = res; });
+  window.__PB_SHEET = st;
+  function giveUp() { st.failed = true; settleHead(st); }
+  if (!window.fetch || !window.Blob) { giveUp(); return; }
+  function attempt(i) {
+    if (i >= SOURCES.length) { giveUp(); return; }
+    if (i > 0) st.pct = 0;
+    fetch(SOURCES[i]).then(function (res) {
+      if (!res.ok || !res.body || !res.body.getReader) throw new Error('http ' + res.status);
+      var total = Number(res.headers.get('content-length')) || 0;
+      var reader = res.body.getReader(), got = 0, chunks = [];
+      function read() {
+        return reader.read().then(function (r) {
+          if (r.done) {
+            st.blob = new Blob(chunks, { type: res.headers.get('content-type') || 'application/octet-stream' });
+            st.pct = 100; st.done = true;
+            settleHead(st);
+            return;
+          }
+          chunks.push(r.value); got += r.value.length;
+          if (total > 0) st.pct = Math.min(100, Math.round(got / total * 100));
+          return read();
+        });
+      }
+      return read();
+    }).catch(function () { attempt(i + 1); });
+  }
+  try { attempt(0); } catch (e) { giveUp(); }
+})();
+</script>
 <link rel="stylesheet" href="src/css/style.css">
 </head>
 <body>

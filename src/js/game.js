@@ -295,6 +295,9 @@
   var bootSheetDone = false, bootCabinetDone = false;
   var bootRevealPending = false;
   var framesDrawn = 0, framesAtStage = 0;
+  /* set when the boot's stages are done and one real frame must still be
+     drawn before the loader fades (see frame() and bootMaybeReveal()) */
+  var bootDrawNow = false;
   function pfWarn(msg) {
     if (global.console && global.console.warn) {
       global.console.warn('[playfield] ' + msg);
@@ -1978,6 +1981,23 @@
 
   function frame(now) {
     requestAnimationFrame(frame);
+    if (!revealed && !bootDrawNow) {
+      /* ---- boot: stay off the main thread ----
+         Nothing has started and the loader covers the screen, so there is
+         nothing worth drawing yet -- but drawing anyway is expensive: one
+         frame of this scene costs ~30 ms even on a fast GPU, and many times
+         that under software rendering. Running the loop at full tilt during
+         boot is what used to starve everything else: the bar could not
+         animate (it froze, then snapped to 100), the sheet's decode
+         resolved seconds late, and the first paint was pushed back with it.
+         So while the loader is up the loop stays cheap, and the boot's own
+         stages ask for the single frame that must land before the fade. */
+      syncSize();
+      last = now / 1000;
+      prevT = last;
+      return;
+    }
+    bootDrawNow = false;
     framesDrawn++;
     now /= 1000;
     var raw = now - last;
@@ -2364,37 +2384,73 @@
      happens, then advances when an actual stage lands. The safety timer
      bounds the wait either way. */
   if (D.menu) D.menu.classList.add('above');
-  var ldPct = 0, ldCap = 40, ldTick = 0;
-  /* the bar's milestones are the boot's own stages, in order: scripts
-     evaluated, the sheet's art painted on, the cabinet up */
-  var LD_MSGS = { 40: 'warming up the riddim', 60: 'painting the table',
-                  78: 'laying the artwork', 88: 'raising the cabinet',
-                  100: 'ready' };
+
+  /* ---- the loading bar ----
+     The bar only ever moves FORWARD, and it only reaches 100 when the
+     machine is actually on screen. It has two real drivers:
+
+       bytes   the sprite sheet's own download (assets.progress()) is the one
+               thing a fresh load actually waits on, so between LD_LO and
+               LD_HI the bar IS the sheet's byte count -- no guessing. This
+               is what the old bar could not do: driven off a preload it had
+               no byte signal at all, so it crept to a stage cap, sat there
+               while the sheet finished, and then snapped to 100.
+       stages  the boot's own milestones raise the ceiling under it: the
+               sheet settled (78), the cabinet built (88), the reveal (100).
+
+     `shown` eases toward `target` and never decreases; the fill also carries
+     a CSS transition, so the bar keeps gliding between our updates. */
+  var LD_LO = 6, LD_HI = 60;              /* the byte band */
+  var ldShown = 0, ldTarget = LD_LO, ldTick = 0, ldMsgKey = '';
+  var ldStart = ldClock();
+  function ldClock() {
+    return (global.performance && global.performance.now) ? global.performance.now() / 1000 : 0;
+  }
+  function ldSetTarget(pct) {
+    if (revealed) return;
+    if (pct > ldTarget) { ldTarget = pct; framesAtStage = framesDrawn; }
+  }
   function ldCreep() {
-    /* ease the current bar toward its cap at a perceptible crawl. The floor
-       in that max() is what the bar moves at when its next stage is still
-       far away: the whole boot now fits in about a second on a fast
-       machine, and a bar that has not visibly moved before it snaps to 100
-       reads as broken. */
-    if (ldPct < ldCap) {
-      ldPct = Math.min(ldCap, ldPct + Math.max(0.9, (ldCap - ldPct) * 0.04));
-      if (D.ldFill) D.ldFill.style.width = ldPct.toFixed(1) + '%';
-      var msg = LD_MSGS[ldCap];
-      if (D.ldMsg && msg) D.ldMsg.textContent = msg;
+    if (ldShown < ldTarget) {
+      ldShown = Math.min(ldTarget, ldShown + Math.max(1.5, (ldTarget - ldShown) * 0.18));
+      if (D.ldFill) D.ldFill.style.width = ldShown.toFixed(1) + '%';
     }
+  }
+  function ldSay(msg, key) {
+    if (D.ldMsg && key !== ldMsgKey) { D.ldMsg.textContent = msg; ldMsgKey = key; }
+  }
+  /* The honest ceiling while the sheet is in flight: the byte count when we
+     have one, and a slow expectation under it so a browser that cannot
+     measure the download still shows a bar that is moving rather than
+     frozen. */
+  function ldSheetTarget() {
+    var p = (assets && assets.progress) ? assets.progress() : 0;
+    var expect = LD_LO + (LD_HI - LD_LO) * (1 - Math.exp(-(ldClock() - ldStart) / 4));
+    return Math.max(LD_LO + p * (LD_HI - LD_LO), expect);
   }
   (function ldLoop() {
     if (revealed) return;
+    /* schedule first: whatever else happens below, a throw must not be able
+       to kill the loader and leave the player staring at the bar forever */
+    ldTick = setTimeout(ldLoop, 40);
+    if (!bootSheetDone) {
+      /* a sheet that FAILED never fires its load callback -- its queued
+         consumers are dropped by design -- so notice it here and move the
+         boot on to the procedural-art path instead of waiting for the
+         panic timer. */
+      if (assets.failed) bootSheetDone = true;
+      else { ldSetTarget(ldSheetTarget()); ldSay('loading the artwork', 'sheet'); }
+    }
+    if (bootSheetDone) { ldSetTarget(78); ldSay('painting the table', 'paint'); }
     ldCreep();
-    ldTick = setTimeout(ldLoop, 48);
+    if (bootSheetDone) bootMaybeReveal();
   })();
   function ldStage(cap) {
-    /* raise the milestone: called as real stages land (scripts in, sheet
-       settled, cabinet built). The bar creeps toward this, so a stage
-       landing is what makes it visibly move. */
+    /* raise the milestone: called as real stages land (the sheet settled,
+       the cabinet built). The bar creeps toward this, so a stage landing is
+       what makes it visibly move. */
     if (revealed) return;
-    ldCap = cap;
-    framesAtStage = framesDrawn;
+    ldSetTarget(cap);
   }
   var revealed = false;
   /* ---- the reveal gate ----
@@ -2413,7 +2469,13 @@
      machine came up -- measured on this machine: cabinet done at 0.9 s,
      screen held to 9.3 s. */
   function bootMaybeReveal() {
-    if (bootSheetDone && bootCabinetDone) revealMachine(false);
+    if (!(bootSheetDone && bootCabinetDone)) return;
+    /* One real frame has to land before the loader fades, so the fade
+       uncovers a canvas that has the machine in it. The boot no longer runs
+       the render loop for its own sake (see `frame`), so ask for exactly
+       that one frame and reveal from inside it. */
+    if (framesDrawn <= framesAtStage) { bootDrawNow = true; bootRevealPending = true; return; }
+    revealMachine(false);
   }
   function revealMachine(force) {
     if (revealed) return;
@@ -2421,7 +2483,7 @@
     revealed = true;
     bootRevealPending = false;
     clearTimeout(ldTick);
-    ldCap = 100;
+    ldTarget = ldShown = 100;
     /* snap the fill to 100 first so the bar reads complete as it fades */
     ldCreep();
     if (D.ldFill) D.ldFill.style.width = '100%';
@@ -2434,11 +2496,8 @@
       menuSlide('down');
     }
   }
-  ldStage(60);              /* scripts in: first real milestone */
-  /* the sheet settling is the first half of the gate. On FAILURE the queued
-     consumers -- including the cabinet's -- are dropped by design (the
-     playfield still comes up on its procedural art), so this never fires and
-     the panic timer reveals that case. */
+  /* The tile above LD_LO is the sheet's byte count from the moment the
+     first stage lands, so the bar needs no seed here: ldLoop drives it. */
   assets.load(function () {
     bootSheetDone = true;
     ldStage(78);
