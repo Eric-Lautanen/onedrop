@@ -220,6 +220,7 @@ dev/.venv-playfield/Scripts/python.exe dev/verify-audio.py    # 43 checks agains
 dev/.venv-playfield/Scripts/python.exe dev/_cueone.py         # one cue's gain sweep through the limiters
 dev/.venv-playfield/Scripts/python.exe dev/_kitspread.py      # is a measurement stable enough to pass/fail on?
 dev/.venv-playfield/Scripts/python.exe dev/_flowprobe.py      # just the mission-music checks, in seconds not minutes
+dev/.venv-playfield/Scripts/python.exe dev/_hatclock.py      # does every voice land on the step it was asked for?
 ```
 
 `render-audio.py` writes both the WAVs (`dev/audio/`, 16-bit, the same code
@@ -256,6 +257,24 @@ Three measurement notes worth keeping:
   continuous energy, so taking the kit away barely moves the average. The
   check is now "level **or** peak", and which one moves is a property of the
   break, not noise in the measurement.
+* **A voice's offset is relative, and only a long uptime can tell you that
+  you got it wrong.** Every primitive takes an offset `at` into the future
+  (`organ`, `bassNote`, `melodica` and `horn` are the exception: they take the
+  absolute `when` and subtract the clock themselves). The hi-hat's callers
+  once passed the absolute `when` to a voice that wants the offset, so it
+  landed at `ctx.currentTime + when` -- a whole clock late, further behind
+  with every minute the page stayed open, and one pending buffer source per
+  beat piling up on the render thread. Nothing caught it: the offline renders
+  schedule everything with the clock near zero, where the two conventions are
+  the same number, and the suite's harnesses stubbed `ctx = { currentTime: 0 }`.
+  `dev/_hatclock.py` measures what each voice actually tells the audio clock
+  at 600 s of uptime -- and runs the old arithmetic beside it, because a
+  probe that only ever passes is not evidence.
+* **A stub audio context has to say it is `running`.** `_pump()` returns early
+  while the output is suspended (its watchdog), so a harness stub of
+  `{ currentTime: 0 }` makes the pump a no-op -- and the set-list and mission
+  harnesses recorded nothing while still reporting PASS/FAIL on empty arrays.
+  `dev/_hatclock.py` and the stub comments in `verify-audio.py` are the fix.
 
 ## 8. What this does not do
 

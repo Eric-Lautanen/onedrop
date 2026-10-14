@@ -1,0 +1,91 @@
+{
+  "shift": 600.0,
+  "shipped": [
+    {
+      "song": "ONE DROP",
+      "voices": 1277,
+      "hats": 160,
+      "worstDrift": 0,
+      "worstVoice": null
+    },
+    {
+      "song": "DUB CHAMBER",
+      "voices": 1521,
+      "hats": 288,
+      "worstDrift": 0,
+      "worstVoice": null
+    },
+    {
+      "song": "ROCKERS",
+      "voices": 2337,
+      "hats": 192,
+      "worstDrift": 0,
+      "worstVoice": null
+    },
+    {
+      "song": "SKANK RAIL",
+      "voices": 1501,
+      "hats": 336,
+      "worstDrift": 0,
+      "worstVoice": null
+    },
+    {
+      "song": "NYABINGHI",
+      "voices": 2549,
+      "hats": 0,
+      "worstDrift": 0,
+      "worstVoice": null
+    },
+    {
+      "song": "STEPPERS",
+      "voices": 4717,
+      "hats": 448,
+      "worstDrift": 0,
+      "worstVoice": null
+    }
+  ],
+  "bug": [
+    {
+      "song": "ONE DROP",
+      "voices": 1277,
+      "hats": 160,
+      "worstDrift": 600,
+      "worstVoice": "hat"
+    },
+    {
+      "song": "DUB CHAMBER",
+      "voices": 1521,
+      "hats": 288,
+      "worstDrift": 600,
+      "worstVoice": "hat"
+    },
+    {
+      "song": "ROCKERS",
+      "voices": 2337,
+      "hats": 192,
+      "worstDrift": 600,
+      "worstVoice": "hat"
+    },
+    {
+      "song": "SKANK RAIL",
+      "voices": 1501,
+      "hats": 336,
+      "worstDrift": 600,
+      "worstVoice": "hat"
+    },
+    {
+      "song": "NYABINGHI",
+      "voices": 2549,
+      "hats": 0,
+      "worstDrift": 0,
+      "worstVoice": null
+    },
+    {
+      "song": "STEPPERS",
+      "voices": 4717,
+      "hats": 448,
+      "worstDrift": 600,
+      "worstVoice": "hat"
+    }
+  ]
+}

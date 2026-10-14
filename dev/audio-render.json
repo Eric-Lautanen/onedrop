@@ -2,259 +2,259 @@
   "sfx": {
     "flipper": {
       "seconds": 1.6,
-      "peak": 0.2245,
-      "peakDb": -12.98,
-      "rms": 0.0201,
-      "rmsDb": -33.96,
-      "soundingSeconds": 0.105,
-      "zeroCrossRate": 649.375,
+      "peak": 0.2556,
+      "peakDb": -11.85,
+      "rms": 0.0198,
+      "rmsDb": -34.06,
+      "soundingSeconds": 0.101,
+      "zeroCrossRate": 667.5,
       "bands": {
-        "60": 0.000261,
-        "120": 0.001431,
-        "250": 2.2e-05,
-        "500": 0.0,
-        "1000": 2e-06,
-        "2000": 9e-06,
-        "4000": 2e-06,
+        "60": 0.000222,
+        "120": 0.001578,
+        "250": 3.3e-05,
+        "500": 1.5e-05,
+        "1000": 8e-06,
+        "2000": 6e-06,
+        "4000": 8e-06,
         "8000": 2e-06
       },
       "balance": {
-        "low": 0.991,
-        "mid": 0.001,
-        "high": 0.008
+        "low": 0.979,
+        "mid": 0.012,
+        "high": 0.009
       },
       "profile": [
         {
           "at": 0.0,
-          "peakDb": -23.6,
-          "hiLoDb": -10.6
+          "peakDb": -23.1,
+          "hiLoDb": -14.3
         },
         {
           "at": 0.015,
-          "peakDb": -17.0,
+          "peakDb": -16.7,
           "hiLoDb": -40.0
         },
         {
           "at": 0.045,
-          "peakDb": -13.0,
-          "hiLoDb": -39.4
+          "peakDb": -11.9,
+          "hiLoDb": -40.0
         },
         {
           "at": 0.1,
-          "peakDb": -58.7,
-          "hiLoDb": -25.3
+          "peakDb": -57.4,
+          "hiLoDb": -29.0
         },
         {
           "at": 0.3,
           "peakDb": -84.3,
-          "hiLoDb": -10.4
+          "hiLoDb": -2.4
         }
       ],
       "job": "flipper"
     },
     "flipperReturn": {
       "seconds": 1.6,
-      "peak": 0.1459,
-      "peakDb": -16.72,
+      "peak": 0.1273,
+      "peakDb": -17.9,
       "rms": 0.01,
-      "rmsDb": -39.97,
-      "soundingSeconds": 0.085,
-      "zeroCrossRate": 622.5,
+      "rmsDb": -39.98,
+      "soundingSeconds": 0.087,
+      "zeroCrossRate": 646.25,
       "bands": {
-        "60": 0.000198,
-        "120": 0.000216,
-        "250": 0.000123,
-        "500": 5.3e-05,
-        "1000": 1.3e-05,
+        "60": 0.000197,
+        "120": 0.000106,
+        "250": 0.000128,
+        "500": 5.2e-05,
+        "1000": 1.4e-05,
         "2000": 7e-06,
         "4000": 2e-06,
-        "8000": 2e-06
+        "8000": 4e-06
       },
       "balance": {
-        "low": 0.875,
-        "mid": 0.107,
-        "high": 0.018
+        "low": 0.845,
+        "mid": 0.129,
+        "high": 0.025
       },
       "profile": [
         {
           "at": 0.0,
-          "peakDb": -25.0,
-          "hiLoDb": -19.7
+          "peakDb": -26.4,
+          "hiLoDb": -40.0
         },
         {
           "at": 0.015,
-          "peakDb": -21.7,
-          "hiLoDb": -32.3
+          "peakDb": -22.4,
+          "hiLoDb": -29.1
         },
         {
           "at": 0.045,
-          "peakDb": -16.7,
-          "hiLoDb": -29.1
+          "peakDb": -17.9,
+          "hiLoDb": -27.3
         },
         {
           "at": 0.1,
           "peakDb": -80.8,
-          "hiLoDb": -19.6
+          "hiLoDb": -22.1
         },
         {
           "at": 0.3,
           "peakDb": -84.3,
-          "hiLoDb": -12.8
+          "hiLoDb": 6.2
         }
       ],
       "job": "flipperReturn"
     },
     "bumper": {
       "seconds": 1.6,
-      "peak": 0.2329,
-      "peakDb": -12.66,
+      "peak": 0.2366,
+      "peakDb": -12.52,
       "rms": 0.0228,
       "rmsDb": -32.85,
-      "soundingSeconds": 0.418,
-      "zeroCrossRate": 1892.5,
+      "soundingSeconds": 0.219,
+      "zeroCrossRate": 1951.25,
       "bands": {
         "60": 0.00036,
-        "120": 0.000897,
-        "250": 1.9e-05,
-        "500": 7e-06,
+        "120": 0.000875,
+        "250": 2.7e-05,
+        "500": 8e-06,
         "1000": 4e-06,
-        "2000": 1.8e-05,
-        "4000": 2e-06,
-        "8000": 4e-06
+        "2000": 1.2e-05,
+        "4000": 6e-06,
+        "8000": 7e-06
       },
       "balance": {
-        "low": 0.973,
-        "mid": 0.008,
-        "high": 0.018
+        "low": 0.972,
+        "mid": 0.009,
+        "high": 0.019
       },
       "profile": [
         {
           "at": 0.0,
-          "peakDb": -25.7,
-          "hiLoDb": -34.7
+          "peakDb": -26.5,
+          "hiLoDb": -21.0
         },
         {
           "at": 0.015,
-          "peakDb": -18.2,
-          "hiLoDb": -35.2
+          "peakDb": -17.8,
+          "hiLoDb": -40.0
         },
         {
           "at": 0.045,
-          "peakDb": -12.7,
-          "hiLoDb": -23.7
+          "peakDb": -12.5,
+          "hiLoDb": -26.2
         },
         {
           "at": 0.1,
-          "peakDb": -24.6,
-          "hiLoDb": -29.4
+          "peakDb": -24.9,
+          "hiLoDb": -30.5
         },
         {
           "at": 0.3,
-          "peakDb": -59.3,
-          "hiLoDb": -2.8
+          "peakDb": -61.5,
+          "hiLoDb": -7.6
         }
       ],
       "job": "bumper"
     },
     "sling": {
       "seconds": 1.6,
-      "peak": 0.1689,
-      "peakDb": -15.45,
-      "rms": 0.0129,
-      "rmsDb": -37.77,
-      "soundingSeconds": 0.09,
-      "zeroCrossRate": 675.0,
+      "peak": 0.1548,
+      "peakDb": -16.2,
+      "rms": 0.0125,
+      "rmsDb": -38.06,
+      "soundingSeconds": 0.092,
+      "zeroCrossRate": 641.25,
       "bands": {
-        "60": 7.7e-05,
-        "120": 0.000701,
-        "250": 4.3e-05,
-        "500": 1e-05,
-        "1000": 1.2e-05,
-        "2000": 2e-05,
-        "4000": 1.6e-05,
-        "8000": 6e-06
+        "60": 6e-05,
+        "120": 0.000739,
+        "250": 4.2e-05,
+        "500": 9e-06,
+        "1000": 7e-06,
+        "2000": 2.4e-05,
+        "4000": 1e-05,
+        "8000": 2e-06
       },
       "balance": {
-        "low": 0.928,
-        "mid": 0.025,
-        "high": 0.047
+        "low": 0.942,
+        "mid": 0.018,
+        "high": 0.04
       },
       "profile": [
         {
           "at": 0.0,
-          "peakDb": -24.5,
-          "hiLoDb": -15.1
+          "peakDb": -25.7,
+          "hiLoDb": -17.6
         },
         {
           "at": 0.015,
-          "peakDb": -17.3,
-          "hiLoDb": -22.4
+          "peakDb": -16.9,
+          "hiLoDb": -23.9
         },
         {
           "at": 0.045,
-          "peakDb": -15.4,
+          "peakDb": -16.2,
           "hiLoDb": -40.0
         },
         {
           "at": 0.1,
           "peakDb": -65.7,
-          "hiLoDb": -10.5
+          "hiLoDb": -23.0
         },
         {
           "at": 0.3,
           "peakDb": -84.3,
-          "hiLoDb": -9.4
+          "hiLoDb": -4.0
         }
       ],
       "job": "sling"
     },
     "bash": {
       "seconds": 1.6,
-      "peak": 0.1955,
-      "peakDb": -14.18,
-      "rms": 0.0223,
-      "rmsDb": -33.02,
-      "soundingSeconds": 0.836,
-      "zeroCrossRate": 443.75,
+      "peak": 0.2153,
+      "peakDb": -13.34,
+      "rms": 0.0222,
+      "rmsDb": -33.07,
+      "soundingSeconds": 0.885,
+      "zeroCrossRate": 435.625,
       "bands": {
-        "60": 7.5e-05,
-        "120": 0.002098,
-        "250": 2.8e-05,
+        "60": 8.8e-05,
+        "120": 0.002099,
+        "250": 1.6e-05,
         "500": 5e-06,
-        "1000": 3e-06,
+        "1000": 1e-06,
         "2000": 1e-06,
         "4000": 0.0,
         "8000": 0.0
       },
       "balance": {
-        "low": 0.996,
-        "mid": 0.004,
+        "low": 0.997,
+        "mid": 0.003,
         "high": 0.0
       },
       "profile": [
         {
           "at": 0.0,
-          "peakDb": -34.4,
-          "hiLoDb": -31.7
+          "peakDb": -34.7,
+          "hiLoDb": -30.2
         },
         {
           "at": 0.015,
-          "peakDb": -22.8,
-          "hiLoDb": -40.0
+          "peakDb": -24.0,
+          "hiLoDb": -37.0
         },
         {
           "at": 0.045,
-          "peakDb": -14.2,
+          "peakDb": -14.0,
           "hiLoDb": -40.0
         },
         {
           "at": 0.1,
-          "peakDb": -14.6,
+          "peakDb": -13.3,
           "hiLoDb": -40.0
         },
         {
           "at": 0.3,
-          "peakDb": -49.4,
+          "peakDb": -45.8,
           "hiLoDb": -40.0
         }
       ],
@@ -262,311 +262,311 @@
     },
     "post": {
       "seconds": 1.6,
-      "peak": 0.1364,
-      "peakDb": -17.3,
-      "rms": 0.0088,
-      "rmsDb": -41.11,
-      "soundingSeconds": 0.051,
-      "zeroCrossRate": 698.75,
+      "peak": 0.1344,
+      "peakDb": -17.43,
+      "rms": 0.0087,
+      "rmsDb": -41.22,
+      "soundingSeconds": 0.052,
+      "zeroCrossRate": 665.625,
       "bands": {
-        "60": 4e-05,
-        "120": 0.000148,
-        "250": 0.00018,
-        "500": 2e-06,
-        "1000": 1e-05,
+        "60": 3.9e-05,
+        "120": 0.000128,
+        "250": 0.000182,
+        "500": 5e-06,
+        "1000": 9e-06,
         "2000": 4e-06,
-        "4000": 0.0,
-        "8000": 7e-06
+        "4000": 3e-06,
+        "8000": 5e-06
       },
       "balance": {
-        "low": 0.941,
-        "mid": 0.031,
-        "high": 0.028
+        "low": 0.931,
+        "mid": 0.037,
+        "high": 0.032
       },
       "profile": [
         {
           "at": 0.0,
-          "peakDb": -20.0,
-          "hiLoDb": -11.2
+          "peakDb": -19.0,
+          "hiLoDb": -10.3
         },
         {
           "at": 0.015,
-          "peakDb": -17.3,
+          "peakDb": -17.4,
           "hiLoDb": -40.0
         },
         {
           "at": 0.045,
-          "peakDb": -38.0,
-          "hiLoDb": -34.4
+          "peakDb": -36.9,
+          "hiLoDb": -27.8
         },
         {
           "at": 0.1,
           "peakDb": -84.3,
-          "hiLoDb": -18.0
+          "hiLoDb": -9.4
         },
         {
           "at": 0.3,
           "peakDb": -84.3,
-          "hiLoDb": -18.6
+          "hiLoDb": -5.0
         }
       ],
       "job": "post"
     },
     "target": {
       "seconds": 1.6,
-      "peak": 0.1798,
-      "peakDb": -14.9,
-      "rms": 0.0119,
-      "rmsDb": -38.47,
-      "soundingSeconds": 0.199,
-      "zeroCrossRate": 2426.25,
+      "peak": 0.1997,
+      "peakDb": -13.99,
+      "rms": 0.0121,
+      "rmsDb": -38.37,
+      "soundingSeconds": 0.299,
+      "zeroCrossRate": 2280.0,
       "bands": {
-        "60": 0.000115,
-        "120": 0.000908,
-        "250": 2.4e-05,
-        "500": 2e-06,
+        "60": 0.000141,
+        "120": 0.000903,
+        "250": 1.3e-05,
+        "500": 1e-06,
         "1000": 1.6e-05,
-        "2000": 1e-06,
-        "4000": 8e-06,
+        "2000": 2e-06,
+        "4000": 1e-06,
         "8000": 3e-06
       },
       "balance": {
-        "low": 0.972,
-        "mid": 0.017,
-        "high": 0.011
+        "low": 0.979,
+        "mid": 0.016,
+        "high": 0.006
       },
       "profile": [
         {
           "at": 0.0,
-          "peakDb": -23.5,
-          "hiLoDb": -22.8
+          "peakDb": -25.6,
+          "hiLoDb": -21.5
         },
         {
           "at": 0.015,
-          "peakDb": -19.9,
-          "hiLoDb": -36.5
+          "peakDb": -18.9,
+          "hiLoDb": -40.0
         },
         {
           "at": 0.045,
-          "peakDb": -14.9,
-          "hiLoDb": -39.5
+          "peakDb": -14.0,
+          "hiLoDb": -40.0
         },
         {
           "at": 0.1,
-          "peakDb": -47.2,
-          "hiLoDb": -20.1
+          "peakDb": -47.3,
+          "hiLoDb": -15.1
         },
         {
           "at": 0.3,
-          "peakDb": -60.5,
-          "hiLoDb": 4.6
+          "peakDb": -60.3,
+          "hiLoDb": -3.9
         }
       ],
       "job": "target"
     },
     "standup": {
       "seconds": 1.6,
-      "peak": 0.1454,
-      "peakDb": -16.75,
-      "rms": 0.0094,
-      "rmsDb": -40.57,
-      "soundingSeconds": 0.726,
-      "zeroCrossRate": 3502.5,
+      "peak": 0.1539,
+      "peakDb": -16.25,
+      "rms": 0.0091,
+      "rmsDb": -40.78,
+      "soundingSeconds": 0.773,
+      "zeroCrossRate": 3565.0,
       "bands": {
         "60": 1.3e-05,
         "120": 2.6e-05,
-        "250": 0.000459,
+        "250": 0.000455,
         "500": 3e-06,
-        "1000": 9e-06,
-        "2000": 0.0,
-        "4000": 3e-06,
-        "8000": 1e-06
+        "1000": 7e-06,
+        "2000": 1e-06,
+        "4000": 2e-06,
+        "8000": 4e-06
       },
       "balance": {
-        "low": 0.969,
-        "mid": 0.023,
-        "high": 0.008
+        "low": 0.967,
+        "mid": 0.02,
+        "high": 0.014
       },
       "profile": [
         {
           "at": 0.0,
-          "peakDb": -20.3,
-          "hiLoDb": 13.2
+          "peakDb": -20.5,
+          "hiLoDb": 10.2
         },
         {
           "at": 0.015,
-          "peakDb": -17.3,
-          "hiLoDb": 1.8
+          "peakDb": -16.3,
+          "hiLoDb": -13.4
         },
         {
           "at": 0.045,
-          "peakDb": -16.8,
-          "hiLoDb": -3.6
+          "peakDb": -20.8,
+          "hiLoDb": -17.7
         },
         {
           "at": 0.1,
-          "peakDb": -33.9,
-          "hiLoDb": 39.1
+          "peakDb": -33.7,
+          "hiLoDb": 33.0
         },
         {
           "at": 0.3,
-          "peakDb": -53.7,
-          "hiLoDb": 40.0
+          "peakDb": -51.6,
+          "hiLoDb": 17.0
         }
       ],
       "job": "standup"
     },
     "rollover": {
       "seconds": 1.6,
-      "peak": 0.1226,
-      "peakDb": -18.23,
+      "peak": 0.1258,
+      "peakDb": -18.01,
       "rms": 0.0119,
-      "rmsDb": -38.5,
-      "soundingSeconds": 0.751,
-      "zeroCrossRate": 2190.0,
+      "rmsDb": -38.52,
+      "soundingSeconds": 0.742,
+      "zeroCrossRate": 2255.0,
       "bands": {
         "60": 1e-06,
         "120": 1e-06,
         "250": 1e-06,
         "500": 2e-06,
         "1000": 4e-06,
-        "2000": 1e-06,
+        "2000": 2e-06,
         "4000": 0.0,
         "8000": 0.0
       },
       "balance": {
-        "low": 0.3,
-        "mid": 0.6,
-        "high": 0.1
+        "low": 0.273,
+        "mid": 0.545,
+        "high": 0.182
       },
       "profile": [
         {
           "at": 0.0,
-          "peakDb": -30.4,
-          "hiLoDb": 13.4
+          "peakDb": -30.3,
+          "hiLoDb": 12.8
         },
         {
           "at": 0.015,
           "peakDb": -26.8,
-          "hiLoDb": 26.2
+          "hiLoDb": 27.3
         },
         {
           "at": 0.045,
-          "peakDb": -18.2,
-          "hiLoDb": 0.6
+          "peakDb": -18.0,
+          "hiLoDb": 2.1
         },
         {
           "at": 0.1,
-          "peakDb": -23.1,
-          "hiLoDb": 2.2
+          "peakDb": -23.0,
+          "hiLoDb": 0.4
         },
         {
           "at": 0.3,
-          "peakDb": -54.5,
-          "hiLoDb": 23.0
+          "peakDb": -50.8,
+          "hiLoDb": 33.1
         }
       ],
       "job": "rollover"
     },
     "spinner": {
       "seconds": 1.6,
-      "peak": 0.1754,
-      "peakDb": -15.12,
-      "rms": 0.0113,
-      "rmsDb": -38.91,
+      "peak": 0.1637,
+      "peakDb": -15.72,
+      "rms": 0.0112,
+      "rmsDb": -38.99,
       "soundingSeconds": 0.187,
-      "zeroCrossRate": 1218.75,
+      "zeroCrossRate": 1210.0,
       "bands": {
-        "60": 4e-06,
-        "120": 6e-06,
-        "250": 9e-06,
-        "500": 4.4e-05,
-        "1000": 0.000179,
-        "2000": 4.7e-05,
-        "4000": 4.6e-05,
-        "8000": 2.5e-05
+        "60": 5e-06,
+        "120": 3e-06,
+        "250": 1.4e-05,
+        "500": 2.9e-05,
+        "1000": 4e-05,
+        "2000": 0.000216,
+        "4000": 5.2e-05,
+        "8000": 1e-05
       },
       "balance": {
-        "low": 0.053,
-        "mid": 0.619,
-        "high": 0.328
+        "low": 0.06,
+        "mid": 0.187,
+        "high": 0.753
       },
       "profile": [
         {
           "at": 0.0,
-          "peakDb": -18.3,
-          "hiLoDb": 26.2
+          "peakDb": -16.5,
+          "hiLoDb": 39.5
         },
         {
           "at": 0.015,
-          "peakDb": -18.0,
-          "hiLoDb": 11.3
+          "peakDb": -17.9,
+          "hiLoDb": 11.2
         },
         {
           "at": 0.045,
-          "peakDb": -17.4,
-          "hiLoDb": 19.0
+          "peakDb": -16.8,
+          "hiLoDb": 19.2
         },
         {
           "at": 0.1,
-          "peakDb": -15.1,
-          "hiLoDb": 11.9
+          "peakDb": -15.7,
+          "hiLoDb": 32.1
         },
         {
           "at": 0.3,
           "peakDb": -84.3,
-          "hiLoDb": 3.4
+          "hiLoDb": -8.9
         }
       ],
       "job": "spinner"
     },
     "drain": {
       "seconds": 1.6,
-      "peak": 0.2292,
-      "peakDb": -12.8,
+      "peak": 0.2257,
+      "peakDb": -12.93,
       "rms": 0.0467,
       "rmsDb": -26.62,
-      "soundingSeconds": 1.03,
-      "zeroCrossRate": 658.75,
+      "soundingSeconds": 1.174,
+      "zeroCrossRate": 613.75,
       "bands": {
-        "60": 0.003944,
-        "120": 0.00093,
-        "250": 0.001081,
-        "500": 0.000229,
-        "1000": 0.00014,
-        "2000": 3.5e-05,
-        "4000": 4e-06,
-        "8000": 7e-06
+        "60": 0.00402,
+        "120": 0.000942,
+        "250": 0.001028,
+        "500": 0.000258,
+        "1000": 0.000151,
+        "2000": 3.7e-05,
+        "4000": 9e-06,
+        "8000": 4e-06
       },
       "balance": {
-        "low": 0.935,
-        "mid": 0.058,
-        "high": 0.007
+        "low": 0.929,
+        "mid": 0.063,
+        "high": 0.008
       },
       "profile": [
         {
           "at": 0.0,
-          "peakDb": -53.5,
-          "hiLoDb": -40.0
+          "peakDb": -55.1,
+          "hiLoDb": -35.5
         },
         {
           "at": 0.015,
-          "peakDb": -33.2,
-          "hiLoDb": -10.4
+          "peakDb": -32.6,
+          "hiLoDb": -22.6
         },
         {
           "at": 0.045,
-          "peakDb": -23.7,
-          "hiLoDb": -10.7
+          "peakDb": -24.0,
+          "hiLoDb": -19.5
         },
         {
           "at": 0.1,
-          "peakDb": -15.4,
-          "hiLoDb": -5.6
+          "peakDb": -15.5,
+          "hiLoDb": -21.9
         },
         {
           "at": 0.3,
-          "peakDb": -12.8,
+          "peakDb": -12.9,
           "hiLoDb": -40.0
         }
       ],
@@ -574,78 +574,78 @@
     },
     "rampup": {
       "seconds": 1.6,
-      "peak": 0.2105,
-      "peakDb": -13.53,
+      "peak": 0.201,
+      "peakDb": -13.94,
       "rms": 0.024,
-      "rmsDb": -32.39,
-      "soundingSeconds": 0.515,
-      "zeroCrossRate": 3368.75,
+      "rmsDb": -32.4,
+      "soundingSeconds": 0.514,
+      "zeroCrossRate": 3135.625,
       "bands": {
-        "60": 7e-06,
-        "120": 1.8e-05,
-        "250": 0.000843,
-        "500": 0.000347,
-        "1000": 0.000244,
-        "2000": 5.1e-05,
-        "4000": 4.3e-05,
-        "8000": 2.1e-05
+        "60": 1.6e-05,
+        "120": 2.3e-05,
+        "250": 0.00078,
+        "500": 0.000212,
+        "1000": 0.000318,
+        "2000": 0.0001,
+        "4000": 5.6e-05,
+        "8000": 6e-06
       },
       "balance": {
-        "low": 0.551,
-        "mid": 0.375,
-        "high": 0.073
+        "low": 0.542,
+        "mid": 0.351,
+        "high": 0.107
       },
       "profile": [
         {
           "at": 0.0,
-          "peakDb": -49.0,
-          "hiLoDb": -23.1
+          "peakDb": -50.2,
+          "hiLoDb": -25.8
         },
         {
           "at": 0.015,
-          "peakDb": -28.0,
-          "hiLoDb": -32.5
+          "peakDb": -29.6,
+          "hiLoDb": -30.5
         },
         {
           "at": 0.045,
-          "peakDb": -19.2,
-          "hiLoDb": -23.5
+          "peakDb": -19.8,
+          "hiLoDb": -19.5
         },
         {
           "at": 0.1,
-          "peakDb": -13.5,
-          "hiLoDb": 5.2
+          "peakDb": -13.9,
+          "hiLoDb": -1.3
         },
         {
           "at": 0.3,
-          "peakDb": -17.3,
-          "hiLoDb": 4.7
+          "peakDb": -16.8,
+          "hiLoDb": 7.5
         }
       ],
       "job": "rampup"
     },
     "ramp": {
       "seconds": 1.6,
-      "peak": 0.2222,
-      "peakDb": -13.07,
-      "rms": 0.0168,
-      "rmsDb": -35.51,
-      "soundingSeconds": 0.597,
-      "zeroCrossRate": 3025.0,
+      "peak": 0.2243,
+      "peakDb": -12.98,
+      "rms": 0.017,
+      "rmsDb": -35.41,
+      "soundingSeconds": 0.598,
+      "zeroCrossRate": 2768.75,
       "bands": {
         "60": 2.5e-05,
-        "120": 4.5e-05,
+        "120": 4.6e-05,
         "250": 1.7e-05,
         "500": 2.9e-05,
-        "1000": 4.1e-05,
-        "2000": 1.4e-05,
-        "4000": 0.00011,
+        "1000": 4.2e-05,
+        "2000": 1.8e-05,
+        "4000": 7.1e-05,
         "8000": 1e-06
       },
       "balance": {
-        "low": 0.309,
-        "mid": 0.248,
-        "high": 0.443
+        "low": 0.353,
+        "mid": 0.285,
+        "high": 0.361
       },
       "profile": [
         {
@@ -655,295 +655,295 @@
         },
         {
           "at": 0.015,
-          "peakDb": -26.6,
-          "hiLoDb": -30.5
+          "peakDb": -26.7,
+          "hiLoDb": -30.4
         },
         {
           "at": 0.045,
-          "peakDb": -16.4,
+          "peakDb": -16.1,
           "hiLoDb": -40.0
         },
         {
           "at": 0.1,
-          "peakDb": -13.1,
-          "hiLoDb": -16.0
+          "peakDb": -13.0,
+          "hiLoDb": -15.6
         },
         {
           "at": 0.3,
-          "peakDb": -35.9,
-          "hiLoDb": 3.9
+          "peakDb": -35.2,
+          "hiLoDb": -8.6
         }
       ],
       "job": "ramp"
     },
     "launch": {
       "seconds": 1.6,
-      "peak": 0.2058,
-      "peakDb": -13.73,
-      "rms": 0.0205,
-      "rmsDb": -33.79,
-      "soundingSeconds": 0.26,
-      "zeroCrossRate": 2155.0,
+      "peak": 0.1921,
+      "peakDb": -14.33,
+      "rms": 0.0204,
+      "rmsDb": -33.81,
+      "soundingSeconds": 0.255,
+      "zeroCrossRate": 2087.5,
       "bands": {
         "60": 3.6e-05,
-        "120": 0.000933,
-        "250": 0.000354,
-        "500": 0.000148,
-        "1000": 1.7e-05,
-        "2000": 2.7e-05,
-        "4000": 3e-06,
-        "8000": 5e-06
+        "120": 0.000944,
+        "250": 0.000347,
+        "500": 9.9e-05,
+        "1000": 3.9e-05,
+        "2000": 2.3e-05,
+        "4000": 1.6e-05,
+        "8000": 1.4e-05
       },
       "balance": {
-        "low": 0.869,
-        "mid": 0.108,
-        "high": 0.023
+        "low": 0.874,
+        "mid": 0.091,
+        "high": 0.035
       },
       "profile": [
         {
           "at": 0.0,
-          "peakDb": -56.0,
-          "hiLoDb": -25.8
+          "peakDb": -52.8,
+          "hiLoDb": -28.3
         },
         {
           "at": 0.015,
-          "peakDb": -31.5,
-          "hiLoDb": -28.9
+          "peakDb": -32.1,
+          "hiLoDb": -30.4
         },
         {
           "at": 0.045,
-          "peakDb": -15.4,
-          "hiLoDb": -36.7
+          "peakDb": -16.1,
+          "hiLoDb": -30.6
         },
         {
           "at": 0.1,
-          "peakDb": -13.7,
-          "hiLoDb": -32.1
+          "peakDb": -14.3,
+          "hiLoDb": -38.8
         },
         {
           "at": 0.3,
-          "peakDb": -70.3,
-          "hiLoDb": 1.3
+          "peakDb": -69.9,
+          "hiLoDb": 1.4
         }
       ],
       "job": "launch"
     },
     "kickback": {
       "seconds": 1.6,
-      "peak": 0.2393,
-      "peakDb": -12.42,
+      "peak": 0.2582,
+      "peakDb": -11.76,
       "rms": 0.0279,
       "rmsDb": -31.1,
       "soundingSeconds": 0.238,
-      "zeroCrossRate": 1688.75,
+      "zeroCrossRate": 1866.25,
       "bands": {
-        "60": 0.000642,
-        "120": 0.000815,
-        "250": 1.1e-05,
-        "500": 2.5e-05,
-        "1000": 4e-05,
-        "2000": 1e-05,
-        "4000": 1e-05,
-        "8000": 1e-05
+        "60": 0.000639,
+        "120": 0.000831,
+        "250": 8e-06,
+        "500": 1.3e-05,
+        "1000": 1.4e-05,
+        "2000": 2.6e-05,
+        "4000": 2.4e-05,
+        "8000": 5e-06
       },
       "balance": {
-        "low": 0.939,
-        "mid": 0.042,
-        "high": 0.019
+        "low": 0.947,
+        "mid": 0.017,
+        "high": 0.035
       },
       "profile": [
         {
           "at": 0.0,
-          "peakDb": -35.7,
-          "hiLoDb": -38.3
+          "peakDb": -35.8,
+          "hiLoDb": -38.0
         },
         {
           "at": 0.015,
-          "peakDb": -22.1,
+          "peakDb": -23.1,
           "hiLoDb": -40.0
         },
         {
           "at": 0.045,
-          "peakDb": -14.1,
-          "hiLoDb": -17.7
+          "peakDb": -13.6,
+          "hiLoDb": -13.1
         },
         {
           "at": 0.1,
-          "peakDb": -12.4,
-          "hiLoDb": -19.5
+          "peakDb": -11.8,
+          "hiLoDb": -20.0
         },
         {
           "at": 0.3,
-          "peakDb": -69.1,
-          "hiLoDb": -18.3
+          "peakDb": -69.5,
+          "hiLoDb": -2.2
         }
       ],
       "job": "kickback"
     },
     "ballsave": {
       "seconds": 1.6,
-      "peak": 0.1841,
-      "peakDb": -14.7,
-      "rms": 0.0108,
-      "rmsDb": -39.35,
-      "soundingSeconds": 0.701,
-      "zeroCrossRate": 2378.75,
+      "peak": 0.1701,
+      "peakDb": -15.38,
+      "rms": 0.0107,
+      "rmsDb": -39.38,
+      "soundingSeconds": 0.483,
+      "zeroCrossRate": 2585.0,
       "bands": {
         "60": 8e-06,
-        "120": 8e-06,
-        "250": 9e-06,
+        "120": 9e-06,
+        "250": 1e-05,
         "500": 7e-06,
-        "1000": 8.7e-05,
-        "2000": 2.6e-05,
+        "1000": 9.3e-05,
+        "2000": 2.7e-05,
         "4000": 0.0,
         "8000": 0.0
       },
       "balance": {
-        "low": 0.172,
-        "mid": 0.648,
-        "high": 0.179
+        "low": 0.175,
+        "mid": 0.649,
+        "high": 0.175
       },
       "profile": [
         {
           "at": 0.0,
-          "peakDb": -38.0,
-          "hiLoDb": -4.7
+          "peakDb": -37.9,
+          "hiLoDb": -2.7
         },
         {
           "at": 0.015,
           "peakDb": -30.0,
-          "hiLoDb": -14.3
+          "hiLoDb": -21.6
         },
         {
           "at": 0.045,
           "peakDb": -29.3,
-          "hiLoDb": -17.8
+          "hiLoDb": 6.0
         },
         {
           "at": 0.1,
-          "peakDb": -14.7,
-          "hiLoDb": 15.3
+          "peakDb": -15.4,
+          "hiLoDb": 11.0
         },
         {
           "at": 0.3,
-          "peakDb": -45.1,
-          "hiLoDb": 19.0
+          "peakDb": -46.5,
+          "hiLoDb": 8.8
         }
       ],
       "job": "ballsave"
     },
     "multiball": {
       "seconds": 1.6,
-      "peak": 0.3468,
-      "peakDb": -9.2,
-      "rms": 0.044,
-      "rmsDb": -27.14,
-      "soundingSeconds": 1.272,
-      "zeroCrossRate": 16839.375,
+      "peak": 0.3598,
+      "peakDb": -8.88,
+      "rms": 0.0441,
+      "rmsDb": -27.1,
+      "soundingSeconds": 1.291,
+      "zeroCrossRate": 16698.75,
       "bands": {
-        "60": 1e-05,
-        "120": 1.7e-05,
-        "250": 3.2e-05,
-        "500": 0.000223,
-        "1000": 0.000153,
-        "2000": 0.000174,
-        "4000": 0.000107,
-        "8000": 0.000216
+        "60": 2e-05,
+        "120": 3.2e-05,
+        "250": 3e-05,
+        "500": 0.000114,
+        "1000": 0.000154,
+        "2000": 2.7e-05,
+        "4000": 9.5e-05,
+        "8000": 6.3e-05
       },
       "balance": {
-        "low": 0.063,
-        "mid": 0.403,
-        "high": 0.533
+        "low": 0.153,
+        "mid": 0.501,
+        "high": 0.346
       },
       "profile": [
         {
           "at": 0.0,
-          "peakDb": -38.0,
-          "hiLoDb": -15.2
+          "peakDb": -37.8,
+          "hiLoDb": -12.3
         },
         {
           "at": 0.015,
-          "peakDb": -30.0,
-          "hiLoDb": -29.2
-        },
-        {
-          "at": 0.045,
-          "peakDb": -15.8,
+          "peakDb": -29.1,
           "hiLoDb": -16.0
         },
         {
+          "at": 0.045,
+          "peakDb": -15.6,
+          "hiLoDb": -28.0
+        },
+        {
           "at": 0.1,
-          "peakDb": -9.7,
-          "hiLoDb": -12.9
+          "peakDb": -8.9,
+          "hiLoDb": -8.5
         },
         {
           "at": 0.3,
-          "peakDb": -9.2,
-          "hiLoDb": 5.3
+          "peakDb": -9.8,
+          "hiLoDb": -9.7
         }
       ],
       "job": "multiball"
     },
     "jackpot": {
       "seconds": 1.6,
-      "peak": 0.3251,
-      "peakDb": -9.76,
-      "rms": 0.0497,
-      "rmsDb": -26.08,
-      "soundingSeconds": 1.113,
-      "zeroCrossRate": 11288.75,
+      "peak": 0.3247,
+      "peakDb": -9.77,
+      "rms": 0.0495,
+      "rmsDb": -26.11,
+      "soundingSeconds": 1.157,
+      "zeroCrossRate": 11582.5,
       "bands": {
         "60": 0.000197,
         "120": 0.002394,
-        "250": 3.3e-05,
-        "500": 4.2e-05,
-        "1000": 0.000121,
-        "2000": 4e-05,
-        "4000": 1.3e-05,
-        "8000": 4.1e-05
+        "250": 3.2e-05,
+        "500": 4.4e-05,
+        "1000": 0.000119,
+        "2000": 3.5e-05,
+        "4000": 3.9e-05,
+        "8000": 6e-05
       },
       "balance": {
-        "low": 0.911,
-        "mid": 0.057,
-        "high": 0.033
+        "low": 0.898,
+        "mid": 0.056,
+        "high": 0.046
       },
       "profile": [
         {
           "at": 0.0,
           "peakDb": -41.9,
-          "hiLoDb": -24.9
+          "hiLoDb": -24.7
         },
         {
           "at": 0.015,
           "peakDb": -26.7,
-          "hiLoDb": -37.2
+          "hiLoDb": -37.1
         },
         {
           "at": 0.045,
-          "peakDb": -13.8,
-          "hiLoDb": -38.2
+          "peakDb": -13.9,
+          "hiLoDb": -39.3
         },
         {
           "at": 0.1,
-          "peakDb": -10.1,
-          "hiLoDb": -32.5
+          "peakDb": -9.9,
+          "hiLoDb": -32.4
         },
         {
           "at": 0.3,
           "peakDb": -9.8,
-          "hiLoDb": -11.3
+          "hiLoDb": -11.6
         }
       ],
       "job": "jackpot"
     },
     "bonus": {
       "seconds": 1.6,
-      "peak": 0.1501,
-      "peakDb": -16.47,
+      "peak": 0.1483,
+      "peakDb": -16.58,
       "rms": 0.0051,
       "rmsDb": -45.84,
       "soundingSeconds": 0.069,
-      "zeroCrossRate": 808.75,
+      "zeroCrossRate": 771.25,
       "bands": {
         "60": 0.0,
         "120": 0.0,
@@ -962,52 +962,52 @@
       "profile": [
         {
           "at": 0.0,
-          "peakDb": -16.5,
-          "hiLoDb": 14.7
+          "peakDb": -16.6,
+          "hiLoDb": 14.5
         },
         {
           "at": 0.015,
-          "peakDb": -17.7,
-          "hiLoDb": 9.5
+          "peakDb": -17.8,
+          "hiLoDb": 8.8
         },
         {
           "at": 0.045,
           "peakDb": -39.5,
-          "hiLoDb": 7.3
+          "hiLoDb": 1.8
         },
         {
           "at": 0.1,
-          "peakDb": -76.3,
-          "hiLoDb": -12.8
+          "peakDb": -78.3,
+          "hiLoDb": -13.6
         },
         {
           "at": 0.3,
           "peakDb": -84.3,
-          "hiLoDb": 3.7
+          "hiLoDb": 12.1
         }
       ],
       "job": "bonus"
     },
     "tilt": {
       "seconds": 1.6,
-      "peak": 0.4577,
-      "peakDb": -6.79,
+      "peak": 0.4506,
+      "peakDb": -6.92,
       "rms": 0.098,
       "rmsDb": -20.18,
       "soundingSeconds": 0.762,
-      "zeroCrossRate": 431.875,
+      "zeroCrossRate": 413.75,
       "bands": {
-        "60": 0.000594,
-        "120": 0.009215,
-        "250": 0.001097,
-        "500": 0.000126,
-        "1000": 4.9e-05,
-        "2000": 2e-06,
+        "60": 0.000537,
+        "120": 0.00919,
+        "250": 0.001056,
+        "500": 0.000132,
+        "1000": 4.6e-05,
+        "2000": 3e-06,
         "4000": 0.0,
         "8000": 0.0
       },
       "balance": {
-        "low": 0.984,
+        "low": 0.983,
         "mid": 0.016,
         "high": 0.0
       },
@@ -1019,283 +1019,283 @@
         },
         {
           "at": 0.015,
-          "peakDb": -24.6,
-          "hiLoDb": -34.3
+          "peakDb": -24.4,
+          "hiLoDb": -35.1
         },
         {
           "at": 0.045,
           "peakDb": -10.8,
-          "hiLoDb": -26.7
+          "hiLoDb": -24.2
         },
         {
           "at": 0.1,
-          "peakDb": -6.8,
-          "hiLoDb": -28.1
+          "peakDb": -6.9,
+          "hiLoDb": -29.7
         },
         {
           "at": 0.3,
-          "peakDb": -6.8,
-          "hiLoDb": -28.1
+          "peakDb": -7.0,
+          "hiLoDb": -26.0
         }
       ],
       "job": "tilt"
     },
     "start": {
       "seconds": 1.6,
-      "peak": 0.2292,
-      "peakDb": -12.8,
-      "rms": 0.0273,
-      "rmsDb": -31.26,
-      "soundingSeconds": 0.853,
-      "zeroCrossRate": 1878.125,
+      "peak": 0.2519,
+      "peakDb": -11.98,
+      "rms": 0.0272,
+      "rmsDb": -31.32,
+      "soundingSeconds": 0.749,
+      "zeroCrossRate": 1859.375,
       "bands": {
-        "60": 1.6e-05,
-        "120": 0.000921,
-        "250": 0.000265,
-        "500": 0.000869,
-        "1000": 0.000293,
-        "2000": 0.000123,
-        "4000": 1.7e-05,
-        "8000": 1.4e-05
+        "60": 1.9e-05,
+        "120": 0.000919,
+        "250": 0.000241,
+        "500": 0.00076,
+        "1000": 0.000267,
+        "2000": 6.4e-05,
+        "4000": 2.4e-05,
+        "8000": 7e-06
       },
       "balance": {
-        "low": 0.477,
-        "mid": 0.461,
-        "high": 0.061
+        "low": 0.512,
+        "mid": 0.446,
+        "high": 0.041
       },
       "profile": [
         {
           "at": 0.0,
-          "peakDb": -39.7,
-          "hiLoDb": -30.0
+          "peakDb": -39.1,
+          "hiLoDb": -32.3
         },
         {
           "at": 0.015,
-          "peakDb": -28.5,
-          "hiLoDb": -25.7
+          "peakDb": -28.8,
+          "hiLoDb": -29.1
         },
         {
           "at": 0.045,
-          "peakDb": -21.1,
-          "hiLoDb": -25.7
+          "peakDb": -21.8,
+          "hiLoDb": -28.2
         },
         {
           "at": 0.1,
-          "peakDb": -12.8,
-          "hiLoDb": -5.2
+          "peakDb": -12.0,
+          "hiLoDb": -17.4
         },
         {
           "at": 0.3,
-          "peakDb": -14.3,
-          "hiLoDb": -32.8
+          "peakDb": -14.1,
+          "hiLoDb": -21.1
         }
       ],
       "job": "start"
     },
     "gameover": {
       "seconds": 1.6,
-      "peak": 0.1911,
-      "peakDb": -14.37,
-      "rms": 0.0339,
-      "rmsDb": -29.39,
-      "soundingSeconds": 1.319,
-      "zeroCrossRate": 501.875,
+      "peak": 0.193,
+      "peakDb": -14.29,
+      "rms": 0.0341,
+      "rmsDb": -29.35,
+      "soundingSeconds": 1.397,
+      "zeroCrossRate": 496.25,
       "bands": {
-        "60": 0.000267,
-        "120": 3.2e-05,
-        "250": 0.000408,
-        "500": 5.9e-05,
-        "1000": 0.000148,
+        "60": 0.000265,
+        "120": 3.4e-05,
+        "250": 0.000424,
+        "500": 6.2e-05,
+        "1000": 0.000152,
         "2000": 4e-06,
         "4000": 0.0,
         "8000": 0.0
       },
       "balance": {
-        "low": 0.77,
-        "mid": 0.225,
+        "low": 0.768,
+        "mid": 0.227,
         "high": 0.004
       },
       "profile": [
         {
           "at": 0.0,
-          "peakDb": -41.1,
-          "hiLoDb": -34.1
+          "peakDb": -41.4,
+          "hiLoDb": -35.8
         },
         {
           "at": 0.015,
-          "peakDb": -31.3,
-          "hiLoDb": -27.0
+          "peakDb": -31.2,
+          "hiLoDb": -18.4
         },
         {
           "at": 0.045,
           "peakDb": -24.1,
-          "hiLoDb": -40.0
+          "hiLoDb": -35.0
         },
         {
           "at": 0.1,
-          "peakDb": -15.0,
+          "peakDb": -14.7,
           "hiLoDb": -40.0
         },
         {
           "at": 0.3,
-          "peakDb": -14.4,
-          "hiLoDb": -40.0
+          "peakDb": -14.3,
+          "hiLoDb": -39.9
         }
       ],
       "job": "gameover"
     },
     "nudge": {
       "seconds": 1.6,
-      "peak": 0.1677,
-      "peakDb": -15.51,
-      "rms": 0.017,
-      "rmsDb": -35.41,
+      "peak": 0.1927,
+      "peakDb": -14.3,
+      "rms": 0.0169,
+      "rmsDb": -35.43,
       "soundingSeconds": 0.171,
-      "zeroCrossRate": 553.75,
+      "zeroCrossRate": 556.25,
       "bands": {
-        "60": 0.001338,
-        "120": 6.8e-05,
-        "250": 2e-05,
-        "500": 1.3e-05,
-        "1000": 1e-06,
-        "2000": 1e-06,
+        "60": 0.001508,
+        "120": 0.000176,
+        "250": 4e-05,
+        "500": 1.4e-05,
+        "1000": 4e-06,
+        "2000": 0.0,
         "4000": 0.0,
         "8000": 0.0
       },
       "balance": {
         "low": 0.99,
         "mid": 0.01,
-        "high": 0.001
+        "high": 0.0
       },
       "profile": [
         {
           "at": 0.0,
-          "peakDb": -33.0,
-          "hiLoDb": -35.0
+          "peakDb": -33.3,
+          "hiLoDb": -32.1
         },
         {
           "at": 0.015,
-          "peakDb": -18.7,
+          "peakDb": -18.3,
           "hiLoDb": -40.0
         },
         {
           "at": 0.045,
-          "peakDb": -15.5,
+          "peakDb": -14.3,
           "hiLoDb": -40.0
         },
         {
           "at": 0.1,
-          "peakDb": -27.9,
+          "peakDb": -29.3,
           "hiLoDb": -40.0
         },
         {
           "at": 0.3,
           "peakDb": -84.3,
-          "hiLoDb": -18.8
+          "hiLoDb": -1.0
         }
       ],
       "job": "nudge"
     },
     "coin": {
       "seconds": 1.6,
-      "peak": 0.1555,
-      "peakDb": -16.16,
+      "peak": 0.1607,
+      "peakDb": -15.88,
       "rms": 0.0102,
-      "rmsDb": -39.8,
-      "soundingSeconds": 0.451,
-      "zeroCrossRate": 3186.25,
+      "rmsDb": -39.81,
+      "soundingSeconds": 0.441,
+      "zeroCrossRate": 3201.25,
       "bands": {
-        "60": 1.1e-05,
+        "60": 1.2e-05,
         "120": 5e-06,
         "250": 1.4e-05,
         "500": 1.3e-05,
-        "1000": 0.000181,
-        "2000": 5.4e-05,
-        "4000": 3.1e-05,
-        "8000": 2e-06
+        "1000": 0.000173,
+        "2000": 5.3e-05,
+        "4000": 4.6e-05,
+        "8000": 1e-06
       },
       "balance": {
-        "low": 0.096,
-        "mid": 0.624,
-        "high": 0.28
+        "low": 0.098,
+        "mid": 0.587,
+        "high": 0.315
       },
       "profile": [
         {
           "at": 0.0,
-          "peakDb": -35.4,
-          "hiLoDb": 5.7
+          "peakDb": -35.1,
+          "hiLoDb": 11.7
         },
         {
           "at": 0.015,
-          "peakDb": -34.4,
-          "hiLoDb": 8.2
+          "peakDb": -33.7,
+          "hiLoDb": 7.8
         },
         {
           "at": 0.045,
           "peakDb": -19.8,
-          "hiLoDb": -14.4
+          "hiLoDb": -16.0
         },
         {
           "at": 0.1,
-          "peakDb": -16.2,
-          "hiLoDb": -8.9
+          "peakDb": -15.9,
+          "hiLoDb": -8.5
         },
         {
           "at": 0.3,
-          "peakDb": -41.8,
-          "hiLoDb": -11.5
+          "peakDb": -41.5,
+          "hiLoDb": -3.1
         }
       ],
       "job": "coin"
     },
     "charge": {
       "seconds": 0.5,
-      "peak": 0.0581,
-      "peakDb": -24.72,
-      "rms": 0.0186,
-      "rmsDb": -34.62,
+      "peak": 0.0598,
+      "peakDb": -24.47,
+      "rms": 0.0185,
+      "rmsDb": -34.66,
       "soundingSeconds": 0.5,
-      "zeroCrossRate": 1210.0,
+      "zeroCrossRate": 1262.0,
       "bands": {
-        "60": 5e-06,
-        "120": 5e-06,
-        "250": 1e-05,
-        "500": 0.000409,
-        "1000": 0.000182,
-        "2000": 8.7e-05,
-        "4000": 5e-06,
-        "8000": 6e-06
+        "60": 6e-06,
+        "120": 7e-06,
+        "250": 9e-06,
+        "500": 0.00041,
+        "1000": 0.000183,
+        "2000": 5.9e-05,
+        "4000": 2.3e-05,
+        "8000": 4e-06
       },
       "balance": {
-        "low": 0.028,
-        "mid": 0.834,
-        "high": 0.138
+        "low": 0.031,
+        "mid": 0.846,
+        "high": 0.123
       },
       "profile": [
         {
           "at": 0.0,
           "peakDb": -78.3,
-          "hiLoDb": -25.1
+          "hiLoDb": -17.5
         },
         {
           "at": 0.015,
-          "peakDb": -45.7,
-          "hiLoDb": -24.9
+          "peakDb": -46.0,
+          "hiLoDb": -29.1
         },
         {
           "at": 0.045,
-          "peakDb": -31.3,
-          "hiLoDb": 5.0
+          "peakDb": -30.4,
+          "hiLoDb": 9.5
         },
         {
           "at": 0.1,
-          "peakDb": -25.0,
-          "hiLoDb": 31.3
+          "peakDb": -25.1,
+          "hiLoDb": 38.8
         },
         {
           "at": 0.3,
-          "peakDb": -24.7,
-          "hiLoDb": 16.8
+          "peakDb": -24.5,
+          "hiLoDb": 18.1
         }
       ],
       "job": "charge"
@@ -1304,26 +1304,26 @@
   "songs": {
     "song one-drop": {
       "seconds": 26.0,
-      "peak": 0.1444,
-      "peakDb": -16.81,
-      "rms": 0.0293,
-      "rmsDb": -30.65,
-      "soundingSeconds": 25.792,
-      "zeroCrossRate": 2125.9615384615386,
+      "peak": 0.1499,
+      "peakDb": -16.48,
+      "rms": 0.0295,
+      "rmsDb": -30.59,
+      "soundingSeconds": 25.875,
+      "zeroCrossRate": 2200.8846153846152,
       "bands": {
-        "60": 8e-06,
-        "120": 1.5e-05,
-        "250": 1.3e-05,
-        "500": 0.001205,
-        "1000": 0.000414,
-        "2000": 4.2e-05,
-        "4000": 5e-06,
-        "8000": 7e-06
+        "60": 2.4e-05,
+        "120": 8e-06,
+        "250": 1.9e-05,
+        "500": 0.000139,
+        "1000": 0.00023,
+        "2000": 0.000106,
+        "4000": 7e-06,
+        "8000": 4e-06
       },
       "balance": {
-        "low": 0.021,
-        "mid": 0.947,
-        "high": 0.032
+        "low": 0.095,
+        "mid": 0.687,
+        "high": 0.218
       },
       "profile": [
         {
@@ -1339,42 +1339,250 @@
         {
           "at": 0.045,
           "peakDb": -90.3,
-          "hiLoDb": -21.8
+          "hiLoDb": -3.5
         },
         {
           "at": 0.1,
           "peakDb": -23.8,
-          "hiLoDb": -33.8
+          "hiLoDb": -31.1
         },
         {
           "at": 0.3,
-          "peakDb": -22.6,
-          "hiLoDb": -31.5
+          "peakDb": -22.8,
+          "hiLoDb": -40.0
         }
       ],
       "job": "song one-drop"
     },
     "song-0-break-break": {
-      "seconds": 13.81,
-      "peak": 0.0975,
-      "peakDb": -20.22,
-      "rms": 0.0281,
-      "rmsDb": -31.03,
-      "soundingSeconds": 13.493,
-      "zeroCrossRate": 478.9283128167994,
+      "seconds": 12.41,
+      "peak": 0.0899,
+      "peakDb": -20.93,
+      "rms": 0.0279,
+      "rmsDb": -31.07,
+      "soundingSeconds": 12.357,
+      "zeroCrossRate": 545.8501208702659,
       "bands": {
-        "60": 7e-06,
-        "120": 0.0001,
-        "250": 0.001357,
-        "500": 0.000409,
-        "1000": 7.6e-05,
-        "2000": 1.9e-05,
-        "4000": 5e-06,
+        "60": 9e-06,
+        "120": 9.4e-05,
+        "250": 0.00113,
+        "500": 0.000127,
+        "1000": 7e-06,
+        "2000": 1.7e-05,
+        "4000": 1e-06,
         "8000": 1e-06
       },
       "balance": {
-        "low": 0.742,
-        "mid": 0.246,
+        "low": 0.89,
+        "mid": 0.097,
+        "high": 0.014
+      },
+      "profile": [
+        {
+          "at": 0.0,
+          "peakDb": -180.0,
+          "hiLoDb": 0.0
+        },
+        {
+          "at": 0.015,
+          "peakDb": -180.0,
+          "hiLoDb": 0.0
+        },
+        {
+          "at": 0.045,
+          "peakDb": -90.3,
+          "hiLoDb": -7.4
+        },
+        {
+          "at": 0.1,
+          "peakDb": -23.8,
+          "hiLoDb": -28.7
+        },
+        {
+          "at": 0.3,
+          "peakDb": -22.8,
+          "hiLoDb": -40.0
+        }
+      ],
+      "job": "song-0-break-break"
+    },
+    "song-0-peak-chorus": {
+      "seconds": 12.41,
+      "peak": 0.1553,
+      "peakDb": -16.17,
+      "rms": 0.0304,
+      "rmsDb": -30.33,
+      "soundingSeconds": 11.951,
+      "zeroCrossRate": 2305.0765511684126,
+      "bands": {
+        "60": 5e-06,
+        "120": 8.9e-05,
+        "250": 0.001111,
+        "500": 0.000229,
+        "1000": 1.6e-05,
+        "2000": 1.4e-05,
+        "4000": 2.2e-05,
+        "8000": 9e-06
+      },
+      "balance": {
+        "low": 0.806,
+        "mid": 0.164,
+        "high": 0.03
+      },
+      "profile": [
+        {
+          "at": 0.0,
+          "peakDb": -180.0,
+          "hiLoDb": 0.0
+        },
+        {
+          "at": 0.015,
+          "peakDb": -180.0,
+          "hiLoDb": 0.0
+        },
+        {
+          "at": 0.045,
+          "peakDb": -90.3,
+          "hiLoDb": -31.6
+        },
+        {
+          "at": 0.1,
+          "peakDb": -21.5,
+          "hiLoDb": -25.4
+        },
+        {
+          "at": 0.3,
+          "peakDb": -17.0,
+          "hiLoDb": -40.0
+        }
+      ],
+      "job": "song-0-peak-chorus"
+    },
+    "song dub-chamber": {
+      "seconds": 26.0,
+      "peak": 0.1521,
+      "peakDb": -16.36,
+      "rms": 0.0382,
+      "rmsDb": -28.35,
+      "soundingSeconds": 25.916,
+      "zeroCrossRate": 3446.5,
+      "bands": {
+        "60": 3e-05,
+        "120": 1e-05,
+        "250": 8.7e-05,
+        "500": 6.2e-05,
+        "1000": 0.000451,
+        "2000": 1.6e-05,
+        "4000": 6e-06,
+        "8000": 3.7e-05
+      },
+      "balance": {
+        "low": 0.182,
+        "mid": 0.734,
+        "high": 0.084
+      },
+      "profile": [
+        {
+          "at": 0.0,
+          "peakDb": -180.0,
+          "hiLoDb": 0.0
+        },
+        {
+          "at": 0.015,
+          "peakDb": -180.0,
+          "hiLoDb": 0.0
+        },
+        {
+          "at": 0.045,
+          "peakDb": -90.3,
+          "hiLoDb": -3.3
+        },
+        {
+          "at": 0.1,
+          "peakDb": -18.3,
+          "hiLoDb": -40.0
+        },
+        {
+          "at": 0.3,
+          "peakDb": -16.7,
+          "hiLoDb": -38.9
+        }
+      ],
+      "job": "song dub-chamber"
+    },
+    "song-1-break-break": {
+      "seconds": 10.91,
+      "peak": 0.1497,
+      "peakDb": -16.5,
+      "rms": 0.0345,
+      "rmsDb": -29.25,
+      "soundingSeconds": 10.674,
+      "zeroCrossRate": 654.1704857928506,
+      "bands": {
+        "60": 0.000127,
+        "120": 0.000793,
+        "250": 0.000559,
+        "500": 0.000107,
+        "1000": 2.9e-05,
+        "2000": 1.5e-05,
+        "4000": 6e-06,
+        "8000": 3e-06
+      },
+      "balance": {
+        "low": 0.902,
+        "mid": 0.083,
+        "high": 0.015
+      },
+      "profile": [
+        {
+          "at": 0.0,
+          "peakDb": -180.0,
+          "hiLoDb": 0.0
+        },
+        {
+          "at": 0.015,
+          "peakDb": -180.0,
+          "hiLoDb": 0.0
+        },
+        {
+          "at": 0.045,
+          "peakDb": -90.3,
+          "hiLoDb": -11.1
+        },
+        {
+          "at": 0.1,
+          "peakDb": -23.4,
+          "hiLoDb": -34.6
+        },
+        {
+          "at": 0.3,
+          "peakDb": -23.2,
+          "hiLoDb": -31.6
+        }
+      ],
+      "job": "song-1-break-break"
+    },
+    "song-1-peak-chant-2": {
+      "seconds": 10.91,
+      "peak": 0.1625,
+      "peakDb": -15.79,
+      "rms": 0.0378,
+      "rmsDb": -28.44,
+      "soundingSeconds": 10.579,
+      "zeroCrossRate": 3302.8414298808434,
+      "bands": {
+        "60": 0.000133,
+        "120": 0.000717,
+        "250": 0.000538,
+        "500": 0.000353,
+        "1000": 2.6e-05,
+        "2000": 1e-05,
+        "4000": 1e-05,
+        "8000": 3e-06
+      },
+      "balance": {
+        "low": 0.775,
+        "mid": 0.212,
         "high": 0.013
       },
       "profile": [
@@ -1391,42 +1599,302 @@
         {
           "at": 0.045,
           "peakDb": -90.3,
-          "hiLoDb": -4.4
+          "hiLoDb": -3.3
         },
         {
           "at": 0.1,
-          "peakDb": -23.8,
-          "hiLoDb": -34.0
+          "peakDb": -17.4,
+          "hiLoDb": -40.0
         },
         {
           "at": 0.3,
-          "peakDb": -22.6,
-          "hiLoDb": -32.6
+          "peakDb": -16.6,
+          "hiLoDb": -40.0
         }
       ],
-      "job": "song-0-break-break"
+      "job": "song-1-peak-chant-2"
     },
-    "song-0-peak-chorus": {
-      "seconds": 13.81,
-      "peak": 0.1617,
-      "peakDb": -15.82,
-      "rms": 0.0304,
-      "rmsDb": -30.35,
-      "soundingSeconds": 13.465,
-      "zeroCrossRate": 2129.109341057205,
+    "song rockers": {
+      "seconds": 26.0,
+      "peak": 0.1509,
+      "peakDb": -16.43,
+      "rms": 0.0323,
+      "rmsDb": -29.82,
+      "soundingSeconds": 25.703,
+      "zeroCrossRate": 2117.423076923077,
       "bands": {
-        "60": 1.8e-05,
-        "120": 9.7e-05,
-        "250": 0.00133,
-        "500": 0.000739,
-        "1000": 7.6e-05,
-        "2000": 1.2e-05,
-        "4000": 1.4e-05,
-        "8000": 1.2e-05
+        "60": 0.0001,
+        "120": 8.8e-05,
+        "250": 0.000104,
+        "500": 0.00167,
+        "1000": 0.000353,
+        "2000": 0.000158,
+        "4000": 0.00013,
+        "8000": 4e-05
       },
       "balance": {
-        "low": 0.629,
-        "mid": 0.355,
+        "low": 0.11,
+        "mid": 0.765,
+        "high": 0.124
+      },
+      "profile": [
+        {
+          "at": 0.0,
+          "peakDb": -180.0,
+          "hiLoDb": 0.0
+        },
+        {
+          "at": 0.015,
+          "peakDb": -180.0,
+          "hiLoDb": 0.0
+        },
+        {
+          "at": 0.045,
+          "peakDb": -90.3,
+          "hiLoDb": -9.1
+        },
+        {
+          "at": 0.1,
+          "peakDb": -23.5,
+          "hiLoDb": -34.4
+        },
+        {
+          "at": 0.3,
+          "peakDb": -16.7,
+          "hiLoDb": -33.5
+        }
+      ],
+      "job": "song rockers"
+    },
+    "song-2-break-break": {
+      "seconds": 11.5,
+      "peak": 0.0918,
+      "peakDb": -20.74,
+      "rms": 0.0279,
+      "rmsDb": -31.1,
+      "soundingSeconds": 11.498,
+      "zeroCrossRate": 825.0434782608696,
+      "bands": {
+        "60": 8e-05,
+        "120": 5.8e-05,
+        "250": 0.000196,
+        "500": 0.000157,
+        "1000": 3.9e-05,
+        "2000": 1.7e-05,
+        "4000": 1.6e-05,
+        "8000": 6e-06
+      },
+      "balance": {
+        "low": 0.587,
+        "mid": 0.344,
+        "high": 0.069
+      },
+      "profile": [
+        {
+          "at": 0.0,
+          "peakDb": -180.0,
+          "hiLoDb": 0.0
+        },
+        {
+          "at": 0.015,
+          "peakDb": -180.0,
+          "hiLoDb": 0.0
+        },
+        {
+          "at": 0.045,
+          "peakDb": -90.3,
+          "hiLoDb": 1.1
+        },
+        {
+          "at": 0.1,
+          "peakDb": -23.5,
+          "hiLoDb": -40.0
+        },
+        {
+          "at": 0.3,
+          "peakDb": -22.2,
+          "hiLoDb": -39.2
+        }
+      ],
+      "job": "song-2-break-break"
+    },
+    "song-2-peak-chorus": {
+      "seconds": 11.5,
+      "peak": 0.1533,
+      "peakDb": -16.29,
+      "rms": 0.0319,
+      "rmsDb": -29.91,
+      "soundingSeconds": 11.27,
+      "zeroCrossRate": 1668.3478260869565,
+      "bands": {
+        "60": 8e-05,
+        "120": 6.2e-05,
+        "250": 0.000208,
+        "500": 0.000339,
+        "1000": 4.1e-05,
+        "2000": 3.4e-05,
+        "4000": 2.1e-05,
+        "8000": 1.7e-05
+      },
+      "balance": {
+        "low": 0.436,
+        "mid": 0.474,
+        "high": 0.09
+      },
+      "profile": [
+        {
+          "at": 0.0,
+          "peakDb": -180.0,
+          "hiLoDb": 0.0
+        },
+        {
+          "at": 0.015,
+          "peakDb": -180.0,
+          "hiLoDb": 0.0
+        },
+        {
+          "at": 0.045,
+          "peakDb": -90.3,
+          "hiLoDb": -9.5
+        },
+        {
+          "at": 0.1,
+          "peakDb": -21.5,
+          "hiLoDb": -39.2
+        },
+        {
+          "at": 0.3,
+          "peakDb": -16.9,
+          "hiLoDb": -33.7
+        }
+      ],
+      "job": "song-2-peak-chorus"
+    },
+    "song skank-rail": {
+      "seconds": 26.0,
+      "peak": 0.1411,
+      "peakDb": -17.01,
+      "rms": 0.0361,
+      "rmsDb": -28.86,
+      "soundingSeconds": 25.943,
+      "zeroCrossRate": 1219.423076923077,
+      "bands": {
+        "60": 4e-06,
+        "120": 4e-06,
+        "250": 1.2e-05,
+        "500": 0.000711,
+        "1000": 0.000298,
+        "2000": 0.000131,
+        "4000": 1.5e-05,
+        "8000": 5e-06
+      },
+      "balance": {
+        "low": 0.017,
+        "mid": 0.855,
+        "high": 0.128
+      },
+      "profile": [
+        {
+          "at": 0.0,
+          "peakDb": -180.0,
+          "hiLoDb": 0.0
+        },
+        {
+          "at": 0.015,
+          "peakDb": -180.0,
+          "hiLoDb": 0.0
+        },
+        {
+          "at": 0.045,
+          "peakDb": -90.3,
+          "hiLoDb": 1.2
+        },
+        {
+          "at": 0.1,
+          "peakDb": -18.5,
+          "hiLoDb": -40.0
+        },
+        {
+          "at": 0.3,
+          "peakDb": -17.5,
+          "hiLoDb": -40.0
+        }
+      ],
+      "job": "song skank-rail"
+    },
+    "song-3-break-break": {
+      "seconds": 10.56,
+      "peak": 0.1362,
+      "peakDb": -17.32,
+      "rms": 0.0207,
+      "rmsDb": -33.7,
+      "soundingSeconds": 10.559,
+      "zeroCrossRate": 4358.522727272727,
+      "bands": {
+        "60": 6e-06,
+        "120": 2.6e-05,
+        "250": 0.000463,
+        "500": 0.00029,
+        "1000": 2.5e-05,
+        "2000": 3e-06,
+        "4000": 2e-06,
+        "8000": 5e-06
+      },
+      "balance": {
+        "low": 0.604,
+        "mid": 0.384,
+        "high": 0.012
+      },
+      "profile": [
+        {
+          "at": 0.0,
+          "peakDb": -180.0,
+          "hiLoDb": 0.0
+        },
+        {
+          "at": 0.015,
+          "peakDb": -180.0,
+          "hiLoDb": 0.0
+        },
+        {
+          "at": 0.045,
+          "peakDb": -180.0,
+          "hiLoDb": 0.0
+        },
+        {
+          "at": 0.1,
+          "peakDb": -22.7,
+          "hiLoDb": -40.0
+        },
+        {
+          "at": 0.3,
+          "peakDb": -23.3,
+          "hiLoDb": -37.3
+        }
+      ],
+      "job": "song-3-break-break"
+    },
+    "song-3-peak-chorus": {
+      "seconds": 10.56,
+      "peak": 0.1387,
+      "peakDb": -17.16,
+      "rms": 0.0348,
+      "rmsDb": -29.18,
+      "soundingSeconds": 10.532,
+      "zeroCrossRate": 1701.6098484848485,
+      "bands": {
+        "60": 0.0001,
+        "120": 0.000123,
+        "250": 0.001054,
+        "500": 0.000517,
+        "1000": 9e-06,
+        "2000": 2e-05,
+        "4000": 5e-06,
+        "8000": 6e-06
+      },
+      "balance": {
+        "low": 0.696,
+        "mid": 0.287,
         "high": 0.017
       },
       "profile": [
@@ -1443,484 +1911,16 @@
         {
           "at": 0.045,
           "peakDb": -90.3,
-          "hiLoDb": -5.5
+          "hiLoDb": 0.5
         },
         {
           "at": 0.1,
-          "peakDb": -21.5,
-          "hiLoDb": -32.4
-        },
-        {
-          "at": 0.3,
-          "peakDb": -17.4,
-          "hiLoDb": -40.0
-        }
-      ],
-      "job": "song-0-peak-chorus"
-    },
-    "song dub-chamber": {
-      "seconds": 26.0,
-      "peak": 0.1521,
-      "peakDb": -16.36,
-      "rms": 0.0367,
-      "rmsDb": -28.72,
-      "soundingSeconds": 25.988,
-      "zeroCrossRate": 2785.8076923076924,
-      "bands": {
-        "60": 2.4e-05,
-        "120": 7.7e-05,
-        "250": 0.000246,
-        "500": 0.000259,
-        "1000": 3.1e-05,
-        "2000": 1.5e-05,
-        "4000": 7e-06,
-        "8000": 4e-06
-      },
-      "balance": {
-        "low": 0.523,
-        "mid": 0.437,
-        "high": 0.039
-      },
-      "profile": [
-        {
-          "at": 0.0,
-          "peakDb": -180.0,
-          "hiLoDb": 0.0
-        },
-        {
-          "at": 0.015,
-          "peakDb": -180.0,
-          "hiLoDb": 0.0
-        },
-        {
-          "at": 0.045,
-          "peakDb": -90.3,
-          "hiLoDb": 0.4
-        },
-        {
-          "at": 0.1,
-          "peakDb": -23.4,
-          "hiLoDb": -35.0
-        },
-        {
-          "at": 0.3,
-          "peakDb": -16.6,
-          "hiLoDb": -40.0
-        }
-      ],
-      "job": "song dub-chamber"
-    },
-    "song-1-break-break": {
-      "seconds": 12.66,
-      "peak": 0.0966,
-      "peakDb": -20.3,
-      "rms": 0.0345,
-      "rmsDb": -29.24,
-      "soundingSeconds": 12.646,
-      "zeroCrossRate": 458.60979462875196,
-      "bands": {
-        "60": 8.7e-05,
-        "120": 0.000255,
-        "250": 0.000331,
-        "500": 1.6e-05,
-        "1000": 1.3e-05,
-        "2000": 1.6e-05,
-        "4000": 5e-06,
-        "8000": 0.0
-      },
-      "balance": {
-        "low": 0.931,
-        "mid": 0.04,
-        "high": 0.029
-      },
-      "profile": [
-        {
-          "at": 0.0,
-          "peakDb": -180.0,
-          "hiLoDb": 0.0
-        },
-        {
-          "at": 0.015,
-          "peakDb": -180.0,
-          "hiLoDb": 0.0
-        },
-        {
-          "at": 0.045,
-          "peakDb": -90.3,
-          "hiLoDb": 1.3
-        },
-        {
-          "at": 0.1,
-          "peakDb": -23.4,
-          "hiLoDb": -34.7
-        },
-        {
-          "at": 0.3,
-          "peakDb": -22.3,
-          "hiLoDb": -32.1
-        }
-      ],
-      "job": "song-1-break-break"
-    },
-    "song-1-peak-chant-2": {
-      "seconds": 12.66,
-      "peak": 0.1531,
-      "peakDb": -16.3,
-      "rms": 0.0363,
-      "rmsDb": -28.8,
-      "soundingSeconds": 12.481,
-      "zeroCrossRate": 2552.685624012638,
-      "bands": {
-        "60": 8.3e-05,
-        "120": 0.000265,
-        "250": 0.000332,
-        "500": 0.000167,
-        "1000": 3.4e-05,
-        "2000": 1.2e-05,
-        "4000": 3e-06,
-        "8000": 3e-06
-      },
-      "balance": {
-        "low": 0.756,
-        "mid": 0.224,
-        "high": 0.02
-      },
-      "profile": [
-        {
-          "at": 0.0,
-          "peakDb": -180.0,
-          "hiLoDb": 0.0
-        },
-        {
-          "at": 0.015,
-          "peakDb": -180.0,
-          "hiLoDb": 0.0
-        },
-        {
-          "at": 0.045,
-          "peakDb": -90.3,
-          "hiLoDb": -1.5
-        },
-        {
-          "at": 0.1,
-          "peakDb": -21.2,
-          "hiLoDb": -37.3
-        },
-        {
-          "at": 0.3,
-          "peakDb": -16.3,
-          "hiLoDb": -40.0
-        }
-      ],
-      "job": "song-1-peak-chant-2"
-    },
-    "song rockers": {
-      "seconds": 26.0,
-      "peak": 0.1516,
-      "peakDb": -16.38,
-      "rms": 0.0325,
-      "rmsDb": -29.78,
-      "soundingSeconds": 25.694,
-      "zeroCrossRate": 2174.4615384615386,
-      "bands": {
-        "60": 0.000112,
-        "120": 7.1e-05,
-        "250": 0.000104,
-        "500": 0.001602,
-        "1000": 0.000784,
-        "2000": 0.000195,
-        "4000": 0.000114,
-        "8000": 4.2e-05
-      },
-      "balance": {
-        "low": 0.095,
-        "mid": 0.789,
-        "high": 0.116
-      },
-      "profile": [
-        {
-          "at": 0.0,
-          "peakDb": -180.0,
-          "hiLoDb": 0.0
-        },
-        {
-          "at": 0.015,
-          "peakDb": -180.0,
-          "hiLoDb": 0.0
-        },
-        {
-          "at": 0.045,
-          "peakDb": -90.3,
-          "hiLoDb": 1.7
-        },
-        {
-          "at": 0.1,
-          "peakDb": -23.5,
-          "hiLoDb": -30.2
-        },
-        {
-          "at": 0.3,
-          "peakDb": -17.1,
-          "hiLoDb": -35.5
-        }
-      ],
-      "job": "song rockers"
-    },
-    "song-2-break-break": {
-      "seconds": 11.5,
-      "peak": 0.0914,
-      "peakDb": -20.78,
-      "rms": 0.0279,
-      "rmsDb": -31.1,
-      "soundingSeconds": 11.46,
-      "zeroCrossRate": 799.6521739130435,
-      "bands": {
-        "60": 8e-05,
-        "120": 6.1e-05,
-        "250": 0.000193,
-        "500": 0.000224,
-        "1000": 3.9e-05,
-        "2000": 1.6e-05,
-        "4000": 1.4e-05,
-        "8000": 2e-06
-      },
-      "balance": {
-        "low": 0.531,
-        "mid": 0.418,
-        "high": 0.051
-      },
-      "profile": [
-        {
-          "at": 0.0,
-          "peakDb": -180.0,
-          "hiLoDb": 0.0
-        },
-        {
-          "at": 0.015,
-          "peakDb": -180.0,
-          "hiLoDb": 0.0
-        },
-        {
-          "at": 0.045,
-          "peakDb": -90.3,
-          "hiLoDb": 0.0
-        },
-        {
-          "at": 0.1,
-          "peakDb": -23.5,
-          "hiLoDb": -38.4
-        },
-        {
-          "at": 0.3,
-          "peakDb": -22.2,
-          "hiLoDb": -37.6
-        }
-      ],
-      "job": "song-2-break-break"
-    },
-    "song-2-peak-chorus": {
-      "seconds": 11.5,
-      "peak": 0.1595,
-      "peakDb": -15.94,
-      "rms": 0.0319,
-      "rmsDb": -29.91,
-      "soundingSeconds": 11.27,
-      "zeroCrossRate": 1640.0,
-      "bands": {
-        "60": 7.6e-05,
-        "120": 6.7e-05,
-        "250": 0.000222,
-        "500": 0.000172,
-        "1000": 4.6e-05,
-        "2000": 2.7e-05,
-        "4000": 2.3e-05,
-        "8000": 2.3e-05
-      },
-      "balance": {
-        "low": 0.556,
-        "mid": 0.332,
-        "high": 0.111
-      },
-      "profile": [
-        {
-          "at": 0.0,
-          "peakDb": -180.0,
-          "hiLoDb": 0.0
-        },
-        {
-          "at": 0.015,
-          "peakDb": -180.0,
-          "hiLoDb": 0.0
-        },
-        {
-          "at": 0.045,
-          "peakDb": -90.3,
-          "hiLoDb": -1.4
-        },
-        {
-          "at": 0.1,
-          "peakDb": -21.3,
-          "hiLoDb": -32.7
-        },
-        {
-          "at": 0.3,
-          "peakDb": -16.8,
-          "hiLoDb": -39.8
-        }
-      ],
-      "job": "song-2-peak-chorus"
-    },
-    "song skank-rail": {
-      "seconds": 26.0,
-      "peak": 0.1412,
-      "peakDb": -17.01,
-      "rms": 0.0363,
-      "rmsDb": -28.81,
-      "soundingSeconds": 25.893,
-      "zeroCrossRate": 1204.2307692307693,
-      "bands": {
-        "60": 5e-06,
-        "120": 6e-06,
-        "250": 1.9e-05,
-        "500": 0.000708,
-        "1000": 1.4e-05,
-        "2000": 0.000117,
-        "4000": 1.6e-05,
-        "8000": 5e-06
-      },
-      "balance": {
-        "low": 0.034,
-        "mid": 0.811,
-        "high": 0.155
-      },
-      "profile": [
-        {
-          "at": 0.0,
-          "peakDb": -180.0,
-          "hiLoDb": 0.0
-        },
-        {
-          "at": 0.015,
-          "peakDb": -180.0,
-          "hiLoDb": 0.0
-        },
-        {
-          "at": 0.045,
-          "peakDb": -90.3,
-          "hiLoDb": -0.2
-        },
-        {
-          "at": 0.1,
-          "peakDb": -18.6,
+          "peakDb": -17.8,
           "hiLoDb": -40.0
         },
         {
           "at": 0.3,
-          "peakDb": -17.3,
-          "hiLoDb": -40.0
-        }
-      ],
-      "job": "song skank-rail"
-    },
-    "song-3-break-break": {
-      "seconds": 10.56,
-      "peak": 0.1388,
-      "peakDb": -17.15,
-      "rms": 0.0202,
-      "rmsDb": -33.89,
-      "soundingSeconds": 10.558,
-      "zeroCrossRate": 4403.314393939394,
-      "bands": {
-        "60": 1.3e-05,
-        "120": 4.1e-05,
-        "250": 0.000512,
-        "500": 0.000455,
-        "1000": 2.6e-05,
-        "2000": 5e-06,
-        "4000": 2e-06,
-        "8000": 3e-06
-      },
-      "balance": {
-        "low": 0.535,
-        "mid": 0.455,
-        "high": 0.009
-      },
-      "profile": [
-        {
-          "at": 0.0,
-          "peakDb": -180.0,
-          "hiLoDb": 0.0
-        },
-        {
-          "at": 0.015,
-          "peakDb": -180.0,
-          "hiLoDb": 0.0
-        },
-        {
-          "at": 0.045,
-          "peakDb": -90.3,
-          "hiLoDb": 0.0
-        },
-        {
-          "at": 0.1,
-          "peakDb": -23.6,
-          "hiLoDb": -40.0
-        },
-        {
-          "at": 0.3,
-          "peakDb": -22.9,
-          "hiLoDb": -40.0
-        }
-      ],
-      "job": "song-3-break-break"
-    },
-    "song-3-peak-chorus": {
-      "seconds": 10.56,
-      "peak": 0.1401,
-      "peakDb": -17.07,
-      "rms": 0.0344,
-      "rmsDb": -29.26,
-      "soundingSeconds": 10.536,
-      "zeroCrossRate": 1699.526515151515,
-      "bands": {
-        "60": 9e-05,
-        "120": 0.000135,
-        "250": 0.001076,
-        "500": 0.000204,
-        "1000": 9e-06,
-        "2000": 2.3e-05,
-        "4000": 2e-06,
-        "8000": 5e-06
-      },
-      "balance": {
-        "low": 0.843,
-        "mid": 0.138,
-        "high": 0.019
-      },
-      "profile": [
-        {
-          "at": 0.0,
-          "peakDb": -180.0,
-          "hiLoDb": 0.0
-        },
-        {
-          "at": 0.015,
-          "peakDb": -180.0,
-          "hiLoDb": 0.0
-        },
-        {
-          "at": 0.045,
-          "peakDb": -90.3,
-          "hiLoDb": -5.3
-        },
-        {
-          "at": 0.1,
           "peakDb": -17.5,
-          "hiLoDb": -40.0
-        },
-        {
-          "at": 0.3,
-          "peakDb": -17.4,
           "hiLoDb": -40.0
         }
       ],
@@ -1928,182 +1928,26 @@
     },
     "song nyabinghi": {
       "seconds": 26.0,
-      "peak": 0.1144,
-      "peakDb": -18.83,
+      "peak": 0.1196,
+      "peakDb": -18.45,
       "rms": 0.0307,
-      "rmsDb": -30.25,
-      "soundingSeconds": 26.0,
-      "zeroCrossRate": 1162.8846153846155,
+      "rmsDb": -30.26,
+      "soundingSeconds": 25.978,
+      "zeroCrossRate": 1189.3846153846155,
       "bands": {
-        "60": 2e-05,
-        "120": 3.6e-05,
-        "250": 0.000145,
-        "500": 0.000203,
-        "1000": 6.6e-05,
-        "2000": 1e-05,
-        "4000": 1.3e-05,
-        "8000": 1.1e-05
-      },
-      "balance": {
-        "low": 0.399,
-        "mid": 0.534,
-        "high": 0.067
-      },
-      "profile": [
-        {
-          "at": 0.0,
-          "peakDb": -180.0,
-          "hiLoDb": 0.0
-        },
-        {
-          "at": 0.015,
-          "peakDb": -180.0,
-          "hiLoDb": 0.0
-        },
-        {
-          "at": 0.045,
-          "peakDb": -90.3,
-          "hiLoDb": -2.7
-        },
-        {
-          "at": 0.1,
-          "peakDb": -22.9,
-          "hiLoDb": -40.0
-        },
-        {
-          "at": 0.3,
-          "peakDb": -20.2,
-          "hiLoDb": -40.0
-        }
-      ],
-      "job": "song nyabinghi"
-    },
-    "song-4-break-break": {
-      "seconds": 9.64,
-      "peak": 0.0914,
-      "peakDb": -20.79,
-      "rms": 0.0144,
-      "rmsDb": -36.83,
-      "soundingSeconds": 9.639,
-      "zeroCrossRate": 900.311203319502,
-      "bands": {
-        "60": 7.5e-05,
-        "120": 0.000248,
-        "250": 6.9e-05,
-        "500": 2.6e-05,
-        "1000": 1e-05,
-        "2000": 2e-06,
-        "4000": 6e-06,
-        "8000": 2e-06
-      },
-      "balance": {
-        "low": 0.895,
-        "mid": 0.082,
-        "high": 0.023
-      },
-      "profile": [
-        {
-          "at": 0.0,
-          "peakDb": -180.0,
-          "hiLoDb": 0.0
-        },
-        {
-          "at": 0.015,
-          "peakDb": -180.0,
-          "hiLoDb": 0.0
-        },
-        {
-          "at": 0.045,
-          "peakDb": -90.3,
-          "hiLoDb": -5.0
-        },
-        {
-          "at": 0.1,
-          "peakDb": -27.4,
-          "hiLoDb": -33.6
-        },
-        {
-          "at": 0.3,
-          "peakDb": -26.6,
-          "hiLoDb": -34.0
-        }
-      ],
-      "job": "song-4-break-break"
-    },
-    "song-4-peak-fire": {
-      "seconds": 9.64,
-      "peak": 0.107,
-      "peakDb": -19.42,
-      "rms": 0.0284,
-      "rmsDb": -30.93,
-      "soundingSeconds": 9.344,
-      "zeroCrossRate": 1116.804979253112,
-      "bands": {
-        "60": 0.000226,
-        "120": 0.000388,
-        "250": 7e-06,
-        "500": 3.5e-05,
-        "1000": 4.8e-05,
+        "60": 2.1e-05,
+        "120": 2.6e-05,
+        "250": 0.00016,
+        "500": 0.000225,
+        "1000": 5.9e-05,
         "2000": 1.4e-05,
-        "4000": 1.1e-05,
-        "8000": 1e-06
+        "4000": 9e-06,
+        "8000": 8e-06
       },
       "balance": {
-        "low": 0.851,
-        "mid": 0.114,
-        "high": 0.036
-      },
-      "profile": [
-        {
-          "at": 0.0,
-          "peakDb": -180.0,
-          "hiLoDb": 0.0
-        },
-        {
-          "at": 0.015,
-          "peakDb": -180.0,
-          "hiLoDb": 0.0
-        },
-        {
-          "at": 0.045,
-          "peakDb": -90.3,
-          "hiLoDb": -5.4
-        },
-        {
-          "at": 0.1,
-          "peakDb": -21.7,
-          "hiLoDb": -31.4
-        },
-        {
-          "at": 0.3,
-          "peakDb": -19.4,
-          "hiLoDb": -34.1
-        }
-      ],
-      "job": "song-4-peak-fire"
-    },
-    "song steppers": {
-      "seconds": 26.0,
-      "peak": 0.1501,
-      "peakDb": -16.47,
-      "rms": 0.0415,
-      "rmsDb": -27.64,
-      "soundingSeconds": 26.0,
-      "zeroCrossRate": 3067.1153846153848,
-      "bands": {
-        "60": 1.4e-05,
-        "120": 4e-06,
-        "250": 9.8e-05,
-        "500": 0.00013,
-        "1000": 0.000123,
-        "2000": 0.000251,
-        "4000": 1.7e-05,
-        "8000": 1.4e-05
-      },
-      "balance": {
-        "low": 0.178,
-        "mid": 0.389,
-        "high": 0.433
+        "low": 0.397,
+        "mid": 0.544,
+        "high": 0.059
       },
       "profile": [
         {
@@ -2123,39 +1967,39 @@
         },
         {
           "at": 0.1,
-          "peakDb": -18.0,
-          "hiLoDb": -40.0
+          "peakDb": -23.5,
+          "hiLoDb": -37.0
         },
         {
           "at": 0.3,
-          "peakDb": -17.1,
-          "hiLoDb": -40.0
+          "peakDb": -20.1,
+          "hiLoDb": -18.4
         }
       ],
-      "job": "song steppers"
+      "job": "song nyabinghi"
     },
-    "song-5-break-break": {
-      "seconds": 15.41,
-      "peak": 0.1398,
-      "peakDb": -17.09,
-      "rms": 0.0286,
-      "rmsDb": -30.86,
-      "soundingSeconds": 15.289,
-      "zeroCrossRate": 3553.3419857235563,
+    "song-4-break-break": {
+      "seconds": 9.64,
+      "peak": 0.1047,
+      "peakDb": -19.6,
+      "rms": 0.0143,
+      "rmsDb": -36.87,
+      "soundingSeconds": 9.639,
+      "zeroCrossRate": 870.7468879668049,
       "bands": {
-        "60": 5e-06,
-        "120": 1e-05,
-        "250": 8.1e-05,
-        "500": 0.000151,
-        "1000": 4.9e-05,
-        "2000": 5.9e-05,
-        "4000": 9e-06,
-        "8000": 5e-06
+        "60": 6.5e-05,
+        "120": 0.000237,
+        "250": 2.8e-05,
+        "500": 2.4e-05,
+        "1000": 9e-06,
+        "2000": 4e-06,
+        "4000": 5e-06,
+        "8000": 1e-06
       },
       "balance": {
-        "low": 0.26,
-        "mid": 0.542,
-        "high": 0.198
+        "low": 0.885,
+        "mid": 0.088,
+        "high": 0.027
       },
       "profile": [
         {
@@ -2171,43 +2015,43 @@
         {
           "at": 0.045,
           "peakDb": -90.3,
-          "hiLoDb": -11.4
+          "hiLoDb": -1.0
         },
         {
           "at": 0.1,
-          "peakDb": -23.0,
-          "hiLoDb": -40.0
+          "peakDb": -27.1,
+          "hiLoDb": -22.7
         },
         {
           "at": 0.3,
-          "peakDb": -21.8,
-          "hiLoDb": -40.0
+          "peakDb": -26.2,
+          "hiLoDb": -23.1
         }
       ],
-      "job": "song-5-break-break"
+      "job": "song-4-break-break"
     },
-    "song-5-peak-chorus": {
-      "seconds": 15.41,
-      "peak": 0.1467,
-      "peakDb": -16.67,
-      "rms": 0.0409,
-      "rmsDb": -27.78,
-      "soundingSeconds": 15.281,
-      "zeroCrossRate": 2550.2271252433484,
+    "song-4-peak-fire": {
+      "seconds": 9.64,
+      "peak": 0.1094,
+      "peakDb": -19.22,
+      "rms": 0.0284,
+      "rmsDb": -30.93,
+      "soundingSeconds": 9.344,
+      "zeroCrossRate": 1080.1867219917012,
       "bands": {
-        "60": 2.6e-05,
-        "120": 1.6e-05,
-        "250": 0.000194,
-        "500": 0.000742,
-        "1000": 4e-05,
-        "2000": 0.000128,
-        "4000": 3.8e-05,
-        "8000": 3e-06
+        "60": 0.000217,
+        "120": 0.000449,
+        "250": 7.8e-05,
+        "500": 5.6e-05,
+        "1000": 3.2e-05,
+        "2000": 2.5e-05,
+        "4000": 9e-06,
+        "8000": 1e-06
       },
       "balance": {
-        "low": 0.199,
-        "mid": 0.659,
-        "high": 0.142
+        "low": 0.858,
+        "mid": 0.101,
+        "high": 0.04
       },
       "profile": [
         {
@@ -2222,18 +2066,174 @@
         },
         {
           "at": 0.045,
+          "peakDb": -90.3,
+          "hiLoDb": 10.5
+        },
+        {
+          "at": 0.1,
+          "peakDb": -21.7,
+          "hiLoDb": -35.1
+        },
+        {
+          "at": 0.3,
+          "peakDb": -19.4,
+          "hiLoDb": -35.4
+        }
+      ],
+      "job": "song-4-peak-fire"
+    },
+    "song steppers": {
+      "seconds": 26.0,
+      "peak": 0.147,
+      "peakDb": -16.65,
+      "rms": 0.0419,
+      "rmsDb": -27.55,
+      "soundingSeconds": 25.994,
+      "zeroCrossRate": 2967.423076923077,
+      "bands": {
+        "60": 1.8e-05,
+        "120": 3e-06,
+        "250": 9.8e-05,
+        "500": 0.000166,
+        "1000": 0.000692,
+        "2000": 0.000249,
+        "4000": 2.5e-05,
+        "8000": 9e-06
+      },
+      "balance": {
+        "low": 0.094,
+        "mid": 0.681,
+        "high": 0.225
+      },
+      "profile": [
+        {
+          "at": 0.0,
           "peakDb": -180.0,
           "hiLoDb": 0.0
         },
         {
+          "at": 0.015,
+          "peakDb": -180.0,
+          "hiLoDb": 0.0
+        },
+        {
+          "at": 0.045,
+          "peakDb": -90.3,
+          "hiLoDb": -2.8
+        },
+        {
           "at": 0.1,
-          "peakDb": -18.2,
+          "peakDb": -18.3,
           "hiLoDb": -40.0
         },
         {
           "at": 0.3,
-          "peakDb": -17.9,
-          "hiLoDb": -37.8
+          "peakDb": -17.8,
+          "hiLoDb": -40.0
+        }
+      ],
+      "job": "song steppers"
+    },
+    "song-5-break-break": {
+      "seconds": 15.41,
+      "peak": 0.1502,
+      "peakDb": -16.47,
+      "rms": 0.0287,
+      "rmsDb": -30.84,
+      "soundingSeconds": 15.289,
+      "zeroCrossRate": 3598.118105126541,
+      "bands": {
+        "60": 1e-05,
+        "120": 1.5e-05,
+        "250": 6.4e-05,
+        "500": 0.000581,
+        "1000": 8.3e-05,
+        "2000": 7.8e-05,
+        "4000": 5e-06,
+        "8000": 2e-06
+      },
+      "balance": {
+        "low": 0.106,
+        "mid": 0.792,
+        "high": 0.101
+      },
+      "profile": [
+        {
+          "at": 0.0,
+          "peakDb": -180.0,
+          "hiLoDb": 0.0
+        },
+        {
+          "at": 0.015,
+          "peakDb": -180.0,
+          "hiLoDb": 0.0
+        },
+        {
+          "at": 0.045,
+          "peakDb": -90.3,
+          "hiLoDb": 2.8
+        },
+        {
+          "at": 0.1,
+          "peakDb": -22.9,
+          "hiLoDb": -40.0
+        },
+        {
+          "at": 0.3,
+          "peakDb": -21.9,
+          "hiLoDb": -40.0
+        }
+      ],
+      "job": "song-5-break-break"
+    },
+    "song-5-peak-chorus": {
+      "seconds": 15.41,
+      "peak": 0.1466,
+      "peakDb": -16.68,
+      "rms": 0.0404,
+      "rmsDb": -27.86,
+      "soundingSeconds": 15.283,
+      "zeroCrossRate": 2533.290071382219,
+      "bands": {
+        "60": 2.6e-05,
+        "120": 1.4e-05,
+        "250": 0.000196,
+        "500": 0.000587,
+        "1000": 9.8e-05,
+        "2000": 0.000128,
+        "4000": 4.4e-05,
+        "8000": 0.0
+      },
+      "balance": {
+        "low": 0.216,
+        "mid": 0.627,
+        "high": 0.157
+      },
+      "profile": [
+        {
+          "at": 0.0,
+          "peakDb": -180.0,
+          "hiLoDb": 0.0
+        },
+        {
+          "at": 0.015,
+          "peakDb": -180.0,
+          "hiLoDb": 0.0
+        },
+        {
+          "at": 0.045,
+          "peakDb": -90.3,
+          "hiLoDb": -17.5
+        },
+        {
+          "at": 0.1,
+          "peakDb": -18.1,
+          "hiLoDb": -40.0
+        },
+        {
+          "at": 0.3,
+          "peakDb": -17.8,
+          "hiLoDb": -40.0
         }
       ],
       "job": "song-5-peak-chorus"
@@ -2242,26 +2242,26 @@
   "inserts": {
     "insert-skank-riot": {
       "seconds": 15.545,
-      "peak": 0.1371,
-      "peakDb": -17.26,
-      "rms": 0.0361,
-      "rmsDb": -28.86,
-      "soundingSeconds": 14.934,
-      "zeroCrossRate": 1672.5142123503383,
+      "peak": 0.1392,
+      "peakDb": -17.13,
+      "rms": 0.0362,
+      "rmsDb": -28.82,
+      "soundingSeconds": 14.997,
+      "zeroCrossRate": 1661.5785425003553,
       "bands": {
-        "60": 7e-06,
-        "120": 0.000153,
-        "250": 0.000399,
-        "500": 0.000191,
-        "1000": 0.00014,
-        "2000": 3.9e-05,
-        "4000": 8e-06,
-        "8000": 2e-06
+        "60": 4e-06,
+        "120": 0.000133,
+        "250": 0.000387,
+        "500": 0.000897,
+        "1000": 0.000139,
+        "2000": 2.8e-05,
+        "4000": 6e-06,
+        "8000": 1e-06
       },
       "balance": {
-        "low": 0.595,
-        "mid": 0.353,
-        "high": 0.052
+        "low": 0.329,
+        "mid": 0.65,
+        "high": 0.022
       },
       "profile": [
         {
@@ -2276,44 +2276,44 @@
         },
         {
           "at": 0.045,
-          "peakDb": -90.3,
-          "hiLoDb": -9.2
+          "peakDb": -180.0,
+          "hiLoDb": 0.0
         },
         {
           "at": 0.1,
-          "peakDb": -17.9,
+          "peakDb": -18.6,
           "hiLoDb": -40.0
         },
         {
           "at": 0.3,
-          "peakDb": -18.0,
-          "hiLoDb": -31.2
+          "peakDb": -18.3,
+          "hiLoDb": -18.2
         }
       ],
       "job": "insert-skank-riot"
     },
     "insert-irie-master": {
       "seconds": 20.2,
-      "peak": 0.1544,
-      "peakDb": -16.23,
+      "peak": 0.1485,
+      "peakDb": -16.57,
       "rms": 0.0343,
-      "rmsDb": -29.3,
-      "soundingSeconds": 19.616,
-      "zeroCrossRate": 1833.7623762376238,
+      "rmsDb": -29.29,
+      "soundingSeconds": 19.685,
+      "zeroCrossRate": 1887.1287128712872,
       "bands": {
-        "60": 7.4e-05,
-        "120": 0.000587,
-        "250": 0.000603,
-        "500": 0.000376,
-        "1000": 0.00043,
-        "2000": 0.000118,
-        "4000": 3e-05,
-        "8000": 2.4e-05
+        "60": 8.5e-05,
+        "120": 0.000579,
+        "250": 0.000612,
+        "500": 0.000357,
+        "1000": 0.000323,
+        "2000": 0.000132,
+        "4000": 2.7e-05,
+        "8000": 8.1e-05
       },
       "balance": {
-        "low": 0.564,
-        "mid": 0.36,
-        "high": 0.077
+        "low": 0.581,
+        "mid": 0.31,
+        "high": 0.109
       },
       "profile": [
         {
@@ -2329,43 +2329,43 @@
         {
           "at": 0.045,
           "peakDb": -90.3,
-          "hiLoDb": 16.7
+          "hiLoDb": 5.5
         },
         {
           "at": 0.1,
-          "peakDb": -23.6,
-          "hiLoDb": -40.0
+          "peakDb": -23.2,
+          "hiLoDb": -31.9
         },
         {
           "at": 0.3,
-          "peakDb": -17.1,
-          "hiLoDb": -36.1
+          "peakDb": -16.6,
+          "hiLoDb": -25.8
         }
       ],
       "job": "insert-irie-master"
     },
     "insert-mission-vamp": {
       "seconds": 9.571,
-      "peak": 0.1453,
-      "peakDb": -16.76,
-      "rms": 0.0284,
-      "rmsDb": -30.94,
-      "soundingSeconds": 8.854,
-      "zeroCrossRate": 4379.906362027647,
+      "peak": 0.1512,
+      "peakDb": -16.41,
+      "rms": 0.0283,
+      "rmsDb": -30.98,
+      "soundingSeconds": 8.9,
+      "zeroCrossRate": 4320.563133803047,
       "bands": {
-        "60": 2.4e-05,
-        "120": 0.000141,
-        "250": 0.000837,
-        "500": 0.000188,
-        "1000": 6e-06,
-        "2000": 1.5e-05,
-        "4000": 7e-06,
+        "60": 2.7e-05,
+        "120": 0.000168,
+        "250": 0.000667,
+        "500": 0.000138,
+        "1000": 1.9e-05,
+        "2000": 1.3e-05,
+        "4000": 6e-06,
         "8000": 6e-06
       },
       "balance": {
-        "low": 0.819,
-        "mid": 0.158,
-        "high": 0.023
+        "low": 0.826,
+        "mid": 0.15,
+        "high": 0.024
       },
       "profile": [
         {
@@ -2381,7 +2381,7 @@
         {
           "at": 0.045,
           "peakDb": -90.3,
-          "hiLoDb": -8.1
+          "hiLoDb": -10.6
         },
         {
           "at": 0.1,
@@ -2390,7 +2390,7 @@
         },
         {
           "at": 0.3,
-          "peakDb": -16.8,
+          "peakDb": -17.1,
           "hiLoDb": -40.0
         }
       ],
@@ -2400,10 +2400,10 @@
   "songsMeta": [
     {
       "name": "ONE DROP",
-      "bpm": 78,
+      "bpm": 88,
       "run": 448,
       "secBars": 4,
-      "stepDur": 0.19230769230769232,
+      "stepDur": 0.17045454545454544,
       "flags": [
         {
           "name": "intro",
@@ -2437,14 +2437,14 @@
     },
     {
       "name": "DUB CHAMBER",
-      "bpm": 86,
+      "bpm": 102,
       "run": 448,
       "secBars": 4,
-      "stepDur": 0.1744186046511628,
+      "stepDur": 0.14705882352941177,
       "flags": [
         {
           "name": "intro",
-          "w": 3
+          "w": 4
         },
         {
           "name": "verse",

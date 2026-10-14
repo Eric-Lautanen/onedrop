@@ -884,6 +884,12 @@ import './vibrance.js';
     this.tone({ type: 'triangle', f0: 200, f1: 128, dur: 0.12, gain: g * 0.45, bus: this.musicBus, at: at, pan: pan });
     this.tone({ type: 'sine', f0: 92, f1: 70, dur: 0.09, gain: g * 0.3, bus: this.musicBus, at: at, pan: pan });
   };
+  /* `at` here is a RELATIVE offset into the future, exactly like snare()'s
+     and kick()'s -- the sequencer hands every one of these
+     `when - ctx.currentTime`. A caller that passes the absolute `when`
+     instead does not sound wrong at boot, it sounds worse the longer the
+     page is open: the hit lands a whole audio clock late, so its distance
+     from its own step grows with uptime (dev/_hatclock.py is the check). */
   AudioEngine.prototype.hat = function (at, open) {
     this.noise({
       f0: human(8200, 0.06), f1: 6800, filter: 'highpass',
@@ -1060,8 +1066,8 @@ import './vibrance.js';
     if (sec.d) {
       if (k === 8) { this.kick(rel, 1.0); this.snare(rel, 0.4, -0.1, 0.09); }
       if (k === 14) this.snare(rel, 0.22, 0.1, 0.06);
-      if (k % 2 === 0) this.hat(when, k === 6 || k === 14);
-      if (this.intensity > 0.5 && k % 2 === 1) this.hat(when, false);
+      if (k % 2 === 0) this.hat(rel, k === 6 || k === 14);
+      if (this.intensity > 0.5 && k % 2 === 1) this.hat(rel, false);
     }
     if (sec.k && k % 4 === 2) {
       var ai = Math.floor(k / 4) % 4;
@@ -1082,8 +1088,8 @@ import './vibrance.js';
       if (k === 9) this.snare(rel, 0.18, 0.22, 0.07);        /* the answer */
       if (k === 12) this.snare(rel, 0.2, 0.3, 0.08);
       if (k === 15) this.kick(rel, 0.5);
-      if (k % 2 === 0) this.hat(when, k === 4 || k === 12);
-      if (this.intensity > 0.5 && k % 2 === 1) this.hat(when, false);
+      if (k % 2 === 0) this.hat(rel, k === 4 || k === 12);
+      if (this.intensity > 0.5 && k % 2 === 1) this.hat(rel, false);
     }
     if (sec.k && k % 4 === 2) this.riddimGuitar(ch.chord, rel, (Math.random() * 2 - 1) * 0.25, 0.9);
     if (sec.o && k % 2 === 1) this.organ(ch.chord, when, 0.03, (Math.random() * 2 - 1) * 0.25);
@@ -1115,8 +1121,8 @@ import './vibrance.js';
       if (k % 4 === 0) this.kick(rel, 0.95);
       if (k === 8) this.snare(rel, 0.34, 0.05, 0.07);
       if (k === 14) this.snare(rel, 0.18, 0.25, 0.06);
-      if (k % 2 === 0) this.hat(when, k === 6 || k === 14);
-      if (this.intensity > 0.5 && k % 2 === 1) this.hat(when, false);
+      if (k % 2 === 0) this.hat(rel, k === 6 || k === 14);
+      if (this.intensity > 0.5 && k % 2 === 1) this.hat(rel, false);
       if (k === 4 || k === 12) {
         this.noise({
           f0: 3200, f1: 2600, filter: 'bandpass', dur: 0.09, gain: 0.14,
@@ -1144,8 +1150,8 @@ import './vibrance.js';
       if (k === 8) { this.kick(rel, 1.0); this.snare(rel, 0.42, -0.15, 0.3); }
       if (k === 4) this.snare(rel, 0.16, 0.2, 0.2);            /* drenched */
       if (k === 14) this.snare(rel, 0.1, 0.3, 0.16);
-      if (k % 2 === 0) this.hat(when, k === 6 || k === 14);    /* eighths */
-      if (k % 4 === 2) this.hat(when, true);                   /* open */
+      if (k % 2 === 0) this.hat(rel, k === 6 || k === 14);    /* eighths */
+      if (k % 4 === 2) this.hat(rel, true);                   /* open */
       this.shaker(when - this.ctx.currentTime, k % 2 ? 0.045 : 0.03, (k % 4 - 1.5) * 0.3);
     }
     /* one chop a bar, ALTERNATING SIDES BAR TO BAR: two pulse anchors per
@@ -1164,8 +1170,8 @@ import './vibrance.js';
     if (sec.d) {
       if (k === 0 || k === 8) this.kick(rel, 0.9);
       if (k === 4 || k === 12) this.snare(rel, 0.3, k === 4 ? -0.12 : 0.12, 0.08);
-      if (k % 4 === 0) this.hat(when, false);
-      if (k % 2 === 1) this.hat(when, false);
+      if (k % 4 === 0) this.hat(rel, false);
+      if (k % 2 === 1) this.hat(rel, false);
     }
     if (sec.k && k % 4 === 2) this.riddimGuitar(ch.chord, rel, (Math.random() * 2 - 1) * 0.3, 1.0);
     if (sec.b) this._bassLine(song, ch, k, when, { open: true });

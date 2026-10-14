@@ -332,7 +332,13 @@ TOOLS = r"""
   window.__insertFlow = () => {
     const e = new PBx.AudioEngine();
     e.init = function () { };
-    e.ctx = { currentTime: 0 };
+    /* A stub context has to SAY IT IS RUNNING. `_pump()` returns early while
+       the output is suspended -- that is its watchdog, and it is right -- so
+       a stub without `state` makes the pump a no-op and this harness records
+       nothing at all. It did exactly that (the checks went on passing and
+       failing on empty arrays), which is how the whole set-list half of the
+       suite stopped exercising the scheduler without anyone noticing. */
+    e.ctx = { currentTime: 0, state: 'running' };
     e.ready = true; e.musicOn = true;
     e._songIdx = 2; e._local = 40; e.nextNoteTime = 0.5; e._step = 0;
 
@@ -384,7 +390,7 @@ TOOLS = r"""
   window.__insertCut = () => {
     const e = new PBx.AudioEngine();
     e.init = function () { };
-    e.ctx = { currentTime: 0 };
+    e.ctx = { currentTime: 0, state: 'running' };   /* see __insertFlow: _pump() no-ops while the output is not running */
     e.ready = true; e.musicOn = true;
     e._songIdx = 2; e._local = 40; e.nextNoteTime = 0.5; e._step = 0;
     const done = [], retimes = [];
@@ -444,7 +450,7 @@ TOOLS = r"""
     const e = new PBx.AudioEngine();
     e.init = function () { };
     const clock = { t: 0 };
-    e.ctx = { currentTime: 0 };
+    e.ctx = { currentTime: 0, state: 'running' };   /* see __insertFlow: _pump() no-ops while the output is not running */
     const seq = [], notes = [], retimes = [];
     e._scheduleSongStep = function (song, local, when) { notes.push([song.name, local, when]); };
     e.delay = {
@@ -512,9 +518,19 @@ def check(name, ok, detail):
 
 def main():
     with sync_playwright() as p:
+        # The three live checks (11/12/13) time the sequencer against wall
+        # clock, and a renderer Chromium decides is occluded throttles rAF and
+        # its timers -- measured on one run as 6 scheduler steps in 4 s instead
+        # of 23, with an analyser sampler that never got pulled (peak 0.0000),
+        # on physics that the same two checks pass with in isolation (24 and 26
+        # steps, peak 0.078). Hold the page foreground: this is a harness
+        # assumption, not a weakened assertion.
         browser = p.chromium.launch(channel='msedge', args=[
             '--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader',
-            '--autoplay-policy=no-user-gesture-required'])
+            '--autoplay-policy=no-user-gesture-required',
+            '--disable-background-timer-throttling',
+            '--disable-backgrounding-occluded-windows',
+            '--disable-renderer-backgrounding'])
         page = browser.new_page(viewport={'width': 1000, 'height': 800})
         errors = []
         page.on('pageerror', lambda e: errors.append('PAGEERROR: ' + str(e)))
