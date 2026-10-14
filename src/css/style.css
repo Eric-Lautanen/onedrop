@@ -229,7 +229,7 @@ html, body {
 }
 #resetGameBtn:hover { background: rgba(215,38,61,.4); color: #fff; }
 #resetGameBtn:active { transform: translateY(1px); }
-#resetGameBtn.armed { color: #fff; background: rgba(215,38,61,.75); border-color: #ff8a80; }
+
 /* the M / P / F row, as tappable buttons -- touch players have no keys,
    so sound, pause and fullscreen live here too */
 .m-quick { display: flex; gap: 6px; margin-bottom: 6px; }

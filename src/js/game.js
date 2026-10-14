@@ -675,6 +675,75 @@ import './guard.js';
     camFly.on = true;
   }
 
+  /* ---- the hero pose --------------------------------------------------
+     Where the camera sits while the machine waits: HERO_YAW out from the
+     centre line, CAM_PITCH above it, aimed at the middle of the machine,
+     with the slow drift and the hit shake layered on. updateCamera draws it
+     every frame and the reset tweens onto it, so the two cannot drift
+     apart; with the drift clock and the shake at rest this IS the default
+     view the machine boots into. */
+  var heroAim = { pos: new THREE.Vector3(), look: new THREE.Vector3() };
+  function heroPose() {
+    var driftP = state === 'attract' ? Math.sin(swayT * 0.23) * 0.075 : 0;
+    var pitch = CAM_PITCH + driftP + shakeY * 0.004;
+    var a = camDist * (1 - camZoom * 0.05) * (1 - shake * 0.004);
+    var horiz = a * Math.cos(pitch);
+    heroAim.pos.set(
+      machineCenter.x + Math.sin(HERO_YAW) * horiz + Math.sin(swayT * 0.13) * 1.6 + shakeX * 0.30,
+      machineCenter.y + Math.sin(pitch) * a,
+      Math.cos(HERO_YAW) * horiz
+    );
+    heroAim.look.set(machineCenter.x + shakeX * 0.18, machineCenter.y + camLook, 0);
+    return heroAim;
+  }
+
+  /* ---- back to the hero pose -----------------------------------------
+     A reset puts the machine back the way it boots: no orbit held, no
+     player pose left from the last fly-in, the drift phase restarted and
+     any shake dropped. heroView() does that in one step; flyToHero() does
+     the same and TWEENS there on the fly-in's own rig -- same shape, same
+     easing, mirrored -- because a reset that snapped the camera back read
+     as a glitch rather than as the machine squaring up. */
+  function heroView() {
+    orbit.on = false;
+    orbit.drag = false;
+    camFly.on = false;
+    playerPose = null;
+    /* the zoom is a GAMEPLAY pull-in (play/ready drive it to 1, attract to
+       0) and heroPose() reads it, so a reset that clears every OTHER input
+       to the pose has to clear this one too. Without it the tween aims at
+       the zoomed pose -- camZoom is still ~1 from the game that was just
+       cleared -- while the frame the tween lands on computes the pose with
+       camZoom already decaying to 0: the view stepped ~5 u sideways on the
+       final frame, the pop this fixes. */
+    camZoom = 0;
+    swayT = 0;
+    lastUC = -1;
+    wobbleAmp = 0;
+    shake = 0;
+    shakeX = 0;
+    shakeY = 0;
+  }
+  function flyToHero(dur) {
+    if (!fitCorners.length) { heroView(); return; }   /* boot not done yet */
+    /* remember where the view IS (the player pose, an orbit, a fly-in half
+       done) before clearing everything that would hold it elsewhere */
+    var fromPos = camera.position.clone();
+    var fromQuat = camera.quaternion.clone();
+    heroView();
+    var aim = heroPose();     /* drift at 0, shake cleared: the default pose */
+    camFly.fromPos = fromPos;
+    camFly.fromQuat = fromQuat;
+    camFly.toPos = aim.pos.clone();
+    /* the tween slerps an ORIENTATION, so build it the way lookAt would:
+       eye at the hero position, aimed at the hero target point */
+    camFly.toQuat = new THREE.Quaternion().setFromRotationMatrix(
+      new THREE.Matrix4().lookAt(aim.pos, aim.look, new THREE.Vector3(0, 1, 0)));
+    camFly.t = 0;
+    camFly.dur = dur || 1.15;
+    camFly.on = true;
+  }
+
   function flyTick(raw) {
     if (!camFly.on) return false;
     camFly.t = Math.min(camFly.dur, camFly.t + raw);
@@ -790,6 +859,7 @@ import './guard.js';
     fitCamera();
   }
 
+
   (function bindOrbit() {
     var dom = renderer.domElement;
     dom.style.touchAction = 'none';
@@ -866,16 +936,9 @@ import './guard.js';
       if (shakeX || shakeY) camera.rotateZ(shakeX * 0.004);
       return;
     }
-    var driftP = state === 'attract' ? Math.sin(swayT * 0.23) * 0.075 : 0;
-    var pitch = CAM_PITCH + driftP + shakeY * 0.004;
-    var a = camDist * (1 - camZoom * 0.05) * (1 - shake * 0.004);
-    var horiz = a * Math.cos(pitch);
-    camera.position.set(
-      machineCenter.x + Math.sin(HERO_YAW) * horiz + Math.sin(swayT * 0.13) * 1.6 + shakeX * 0.30,
-      machineCenter.y + Math.sin(pitch) * a,
-      Math.cos(HERO_YAW) * horiz
-    );
-    camera.lookAt(machineCenter.x + shakeX * 0.18, machineCenter.y + camLook, 0);
+    var aim = heroPose();
+    camera.position.copy(aim.pos);
+    camera.lookAt(aim.look);
   }
 
   /* ==========================================================
@@ -1845,20 +1908,12 @@ import './guard.js';
     refreshKeycaps();
   })();
 
-  /* ---- reset game: two-step, because it throws away a live ball ----
-     Both the button and the keyboard binding go through the same arm /
-     fire gate: the first press arms it for 3 s, the second fires. */
-  var resetArmed = false, resetArmTimer = null;
-  function disarmReset() {
-    resetArmed = false;
-    if (resetArmTimer) { clearTimeout(resetArmTimer); resetArmTimer = null; }
-    if (D.resetGameBtn) {
-      D.resetGameBtn.classList.remove('armed');
-      D.resetGameBtn.textContent = 'RESET GAME';
-    }
-  }
+  /* ---- reset game: ONE press, and it puts the camera back ----
+     It used to take two (the first armed it for 3 s), which read as the
+     button being broken. And the reset now returns the view to the attract
+     screen's hero pose: a reset that left the camera wherever the player
+     had dragged it gave back a machine nobody recognised. */
   function doResetGame() {
-    disarmReset();
     audio.stopMusic();
     audio.setIntensity(0);
     world.balls.forEach(removeBallMesh);
@@ -1887,22 +1942,21 @@ import './guard.js';
        behind a PAUSED flag nobody can see */
     paused = false;
     if (D.pauseBtn) D.pauseBtn.textContent = 'PAUSE';
+    flyToHero();          /* the camera squares up to the hero pose as it clears */
     showOverlay(true);
     bigMessage('ONE DROP', 'GAME RESET');
     setMessage('GAME RESET', false, 1.6);
     audio.sfx('gameover');
   }
   function requestReset() {
-    if (state === 'attract') { setMessage('NOTHING TO RESET', false, 1.4); return; }
-    if (resetArmed) { doResetGame(); return; }
-    resetArmed = true;
-    if (D.resetGameBtn) {
-      D.resetGameBtn.classList.add('armed');
-      D.resetGameBtn.textContent = 'SURE? AGAIN';
+    /* one press, no confirming. From the attract screen there is no game to
+       clear, so it only puts the camera back where it belongs. */
+    if (state === 'attract') {
+      flyToHero();
+      setMessage('VIEW RESET', false, 1.4);
+      return;
     }
-    setMessage('RESET GAME?  PRESS AGAIN TO CONFIRM', false, 2.6, 'red');
-    if (resetArmTimer) clearTimeout(resetArmTimer);
-    resetArmTimer = setTimeout(disarmReset, 3000);
+    doResetGame();
   }
   if (D.resetGameBtn) {
     D.resetGameBtn.addEventListener('click', function () {

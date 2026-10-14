@@ -53,7 +53,7 @@ the physics layout and the artwork can never drift apart.
 | `/` / right arrow        | Right flipper                         |
 | `Space` (hold to the stop, release) | Plunge (the draw must be full) |
 | `A` / `D`                | Nudge left / right                    |
-| `R`                      | Reset game                            |
+| `R`                      | Reset game (one press)                |
 | `M`                      | Sound on/off                          |
 | `P`                      | Pause                                 |
 | `F`                      | Fullscreen                            |
@@ -62,6 +62,12 @@ the physics layout and the artwork can never drift apart.
 The plunger has to come **all the way back**: let go early and the spring simply  
 returns, the ball stays in the lane and the panel says so. The same is true of  
 the knob on the cabinet — drag it down its full travel.
+
+**RESET GAME takes one press** — no arming, no confirm — and it puts the view  
+back to the hero pose the machine boots in, whether the camera was down at  
+the flippers or out on an orbit you dragged to. The camera *tweens* there on  
+the same rig the game-start fly-in uses, so the machine squares up rather  
+than jumping.
 
 Keys are rebindable from the side menu — click a keycap, then press the key  
 you want. The menu also has volume, FX, fullscreen and reset controls. Opening  
